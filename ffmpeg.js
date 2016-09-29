@@ -114,6 +114,12 @@ function FFMPEG(hap, ffmpegOpt) {
   this._createStreamControllers(numberOfStreams, options); 
 }
 
+FFMPEG.prototype.handleCloseConnection = function(connectionID) {
+  this.streamControllers.forEach(function(controller) {
+    controller.handleCloseConnection(connectionID);
+  });
+}
+
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   let resolution = request.width + 'x' + request.height;
   let ffmpeg = spawn('ffmpeg', (this.ffmpegSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
@@ -235,7 +241,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
     } else if (requestType == "stop") {
       var ffmpegProcess = this.ongoingSessions[sessionIdentifier];
       if (ffmpegProcess) {
-        ffmpegProcess.kill();
+        ffmpegProcess.kill('SIGKILL');
       }
 
       delete this.ongoingSessions[sessionIdentifier];
