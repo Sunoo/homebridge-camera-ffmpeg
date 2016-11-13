@@ -20,6 +20,7 @@ function FFMPEG(hap, ffmpegOpt) {
   }
 
   this.ffmpegSource = ffmpegOpt.source;
+  this.ffmpegImageSource = ffmpegOpt.stillImageSource;
 
   this.services = [];
   this.streamControllers = [];
@@ -122,7 +123,8 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   let resolution = request.width + 'x' + request.height;
-  let ffmpeg = spawn('ffmpeg', (this.ffmpegSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
+  var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
+  let ffmpeg = spawn('ffmpeg', (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer(0);
 
   ffmpeg.stdout.on('data', function(data) {
