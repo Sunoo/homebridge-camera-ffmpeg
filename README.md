@@ -1,10 +1,12 @@
-# homebridge-camera-ffmpeg
+# homebridge-camera-ffmpeg-omx
 
-ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
+ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge). Optimized for Rapsberry Pi via GPU encoding
 
 ## Installation
 
-1. Install ffmpeg on your Mac
+1. Install ffmpeg on your Raspberry Pi.
+    a. Download this package: sudo wget https://github.com/legotheboss/YouTube-files/raw/master/ffmpeg_3.1.4-1_armhf.deb 
+    b. Install this package: sudo dpkg -i ffmpeg_3.1.4-1_armhf.deb 
 2. Install this plugin using: npm install -g homebridge-camera-ffmpeg
 3. Edit ``config.json`` and add the camera.
 3. Run Homebridge
