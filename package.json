@@ -1,6 +1,6 @@
 {
-  "name": "homebridge-camera-ffmpeg",
-  "version": "0.0.3",
+  "name": "homebridge-camera-ffmpeg-omx",
+  "version": "0.0.1",
   "description": "ffmpeg plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
@@ -8,10 +8,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/KhaosT/homebridge-camera-ffmpeg.git"
+    "url": "git://github.com/legotheboss/homebridge-camera-ffmpeg-omx.git"
   },
   "bugs": {
-    "url": "http://github.com/KhaosT/homebridge-camera-ffmpeg/issues"
+    "url": "http://github.com/legotheboss/homebridge-camera-ffmpeg-omx/issues"
   },
   "engines": {
     "node": ">=5.0.0",
