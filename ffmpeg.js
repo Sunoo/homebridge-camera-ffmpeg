@@ -35,15 +35,15 @@ function FFMPEG(hap, ffmpegOpt) {
   var maxHeight = ffmpegOpt.maxHeight;
   var maxFPS = (ffmpegOpt.maxFPS > 30) ? 30 : ffmpegOpt.maxFPS;
 
-  if (maxWidth <= 320) {
-    if (maxHeight <= 240) {
+  if (maxWidth >= 320) {
+    if (maxHeight >= 240) {
       videoResolutions.push([320, 240, maxFPS]);
       if (maxFPS > 15) {
         videoResolutions.push([320, 240, 15]);
       }
     }
 
-    if (maxHeight <= 180) {
+    if (maxHeight >= 180) {
       videoResolutions.push([320, 180, maxFPS]);
       if (maxFPS > 15) {
         videoResolutions.push([320, 180, 15]);
@@ -51,38 +51,38 @@ function FFMPEG(hap, ffmpegOpt) {
     }
   }
 
-  if (maxWidth <= 480) {
-    if (maxHeight <= 360) {
+  if (maxWidth >= 480) {
+    if (maxHeight >= 360) {
       videoResolutions.push([480, 360, maxFPS]);
     }
 
-    if (maxHeight <= 270) {
+    if (maxHeight >= 270) {
       videoResolutions.push([480, 270, maxFPS]);
     }
   }
 
-  if (maxWidth <= 640) {
-    if (maxHeight <= 480) {
+  if (maxWidth >= 640) {
+    if (maxHeight >= 480) {
       videoResolutions.push([640, 480, maxFPS]);
     }
 
-    if (maxHeight <= 360) {
+    if (maxHeight >= 360) {
       videoResolutions.push([640, 360, maxFPS]);
     }
   }
 
-  if (maxWidth <= 1280) {
-    if (maxHeight <= 960) {
+  if (maxWidth >= 1280) {
+    if (maxHeight >= 960) {
       videoResolutions.push([1280, 960, maxFPS]);
     }
 
-    if (maxHeight <= 720) {
+    if (maxHeight >= 720) {
       videoResolutions.push([1280, 720, maxFPS]);
     }
   }
 
-  if (maxWidth <= 1920) {
-    if (maxHeight <= 1080) {
+  if (maxWidth >= 1920) {
+    if (maxHeight >= 1080) {
       videoResolutions.push([1920, 1080, maxFPS]);
     }
   }
