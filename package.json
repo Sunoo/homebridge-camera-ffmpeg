@@ -1,6 +1,6 @@
 {
   "name": "homebridge-camera-ffmpeg-omx",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "ffmpeg plugin for homebridge: https://github.com/nfarina/homebridge",
   "license": "ISC",
   "keywords": [
