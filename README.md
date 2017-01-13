@@ -9,6 +9,8 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge). Optimized
     a. Download this package: `sudo wget goo.gl/gMGA81 -O ffmpeg.deb`
     
     b. Install this package: `sudo dpkg -i ffmpeg.deb`
+    
+    c. Ensure that the user you are running homebridge as has access to /dev/vchiq.  ie `sudo usermod -aG video login` where login is the user you are running homebridge as. 
 
 2. Install this plugin using: npm install -g homebridge-camera-ffmpeg-omx
 3. Edit ``config.json`` and add the camera.
