@@ -224,7 +224,6 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         var height = 720;
         var fps = 30;
         var bitrate = 300;
-        console.log(this);
         var vcodec = this.vcodec || 'libx264';
 
         let videoInfo = request["video"];

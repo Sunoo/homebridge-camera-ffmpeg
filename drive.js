@@ -23,7 +23,7 @@ function drive() {
     // Load client secrets from a local file.
     fs.readFile(SECRET_PATH, function processClientSecrets(err, content) {
         if (err) {
-            console.log('Error loading client secret file: ' + err);
+            console.log('Error loading client secret file, please follow the instructions in the README!!!' + err);
             return;
         }
         // Authorize a client with the loaded credentials, then call the
@@ -59,7 +59,7 @@ function getPictureFolder(cb) {
         auth: auth
     }, function(err, res) {
         if (err) {
-            callback(err);
+            cb(err);
         } else {
             if (res.files.length > 0) {
                 res.files.forEach(function(file) {
