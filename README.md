@@ -31,23 +31,23 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 
 * Optional camera videoConfig vcodec, if your running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option.
 ``
+{
+  "platform": "Camera-ffmpeg",
+  "cameras": [
     {
-      "platform": "Camera-ffmpeg",
-      "cameras": [
-        {
-          "name": "Camera Name",
-          "videoConfig": {
-          	"source": "-re -i rtsp://myfancy_rtsp_stream",
-            "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
-          	"maxStreams": 2,
-          	"maxWidth": 1280,
-          	"maxHeight": 720,
-          	"maxFPS": 30,
-          	"vcodec": "h264_omx"            
-          }
-        }
-      ]
+      "name": "Camera Name",
+      "videoConfig": {
+      	"source": "-re -i rtsp://myfancy_rtsp_stream",
+        "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
+      	"maxStreams": 2,
+      	"maxWidth": 1280,
+      	"maxHeight": 720,
+      	"maxFPS": 30,
+      	"vcodec": "h264_omx"            
+      }
     }
+  ]
+}
 ``
 
 ## Google Drive configuration for storage of snapshots
