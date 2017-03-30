@@ -53,16 +53,16 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 
 ## Google Drive configuration for storage of snapshots
 
-* For the setup of Google Drive, please for the Google Drive Quickstart for Node.js instructions from here except for these changes.
+* For the setup of Google Drive, please follow the Google Drive Quickstart for Node.js instructions from here except for these changes.
 
 https://developers.google.com/drive/v3/web/quickstart/nodejs
 
-* In Step 1-h the working directory should be .homebridge directory
+* In Step 1-h the working directory should be the .homebridge directory
 * Skip Step 2 and 3
 * And in step 4, use the quickstart.js included in the plugin itself.  And to do this you need to run the command from the plugin directory.  Then just follow steps a to c
 
 ## Tested configurations
 
-We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).  Also if you a working configuration that you would like to share, please add it to the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).
+We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).  Also if you have a working configuration that you would like to share, please add it to the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).
 
 https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki
