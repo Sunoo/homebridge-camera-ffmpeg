@@ -30,10 +30,14 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
     }
 
 * Optional camera videoConfig vcodec, if your running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option.
+<<<<<<< HEAD
 ``
 {
   "platform": "Camera-ffmpeg",
   "cameras": [
+=======
+```
+>>>>>>> origin/master
     {
       "name": "Camera Name",
       "videoConfig": {
@@ -46,9 +50,13 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       	"vcodec": "h264_omx"            
       }
     }
+<<<<<<< HEAD
   ]
 }
 ``
+=======
+```
+>>>>>>> origin/master
 
 ## Google Drive configuration for storage of snapshots
 
