@@ -49,7 +49,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
 
       var uuid = UUIDGen.generate(cameraName);
       var cameraAccessory = new Accessory(cameraName, uuid, hap.Accessory.Categories.CAMERA);
-      var cameraSource = new FFMPEG(hap, videoConfig);
+      var cameraSource = new FFMPEG(hap, cameraConfig);
       cameraAccessory.configureCameraSource(cameraSource);
       configuredAccessories.push(cameraAccessory);
     });

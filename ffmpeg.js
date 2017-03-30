@@ -4,16 +4,21 @@ var uuid, Service, Characteristic, StreamController;
 var fs = require('fs');
 var ip = require('ip');
 var spawn = require('child_process').spawn;
+var drive = require('./drive').drive;
 
 module.exports = {
   FFMPEG: FFMPEG
 };
 
-function FFMPEG(hap, ffmpegOpt) {
+function FFMPEG(hap, cameraConfig) {
   uuid = hap.uuid;
   Service = hap.Service;
   Characteristic = hap.Characteristic;
   StreamController = hap.StreamController;
+
+  var ffmpegOpt = cameraConfig.videoConfig;
+  this.name = cameraConfig.name;
+  this.vcodec = ffmpegOpt.vcodec;
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -28,9 +33,11 @@ function FFMPEG(hap, ffmpegOpt) {
   this.pendingSessions = {};
   this.ongoingSessions = {};
 
+  this.uploader = new drive();
+
   var numberOfStreams = ffmpegOpt.maxStreams || 2;
   var videoResolutions = [];
-  
+
   var maxWidth = ffmpegOpt.maxWidth;
   var maxHeight = ffmpegOpt.maxHeight;
   var maxFPS = (ffmpegOpt.maxFPS > 30) ? 30 : ffmpegOpt.maxFPS;
@@ -112,7 +119,7 @@ function FFMPEG(hap, ffmpegOpt) {
   }
 
   this.createCameraControlService();
-  this._createStreamControllers(numberOfStreams, options); 
+  this._createStreamControllers(numberOfStreams, options);
 }
 
 FFMPEG.prototype.handleCloseConnection = function(connectionID) {
@@ -126,13 +133,15 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
   let ffmpeg = spawn('ffmpeg', (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer(0);
+  console.log("Snapshot",imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
 
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
   ffmpeg.on('close', function(code) {
+    this.uploader.storePicture(this.name,imageBuffer);
     callback(undefined, imageBuffer);
-  });
+  }.bind(this));
 }
 
 FFMPEG.prototype.prepareStream = function(request, callback) {
@@ -162,7 +171,7 @@ FFMPEG.prototype.prepareStream = function(request, callback) {
 
     sessionInfo["video_port"] = targetPort;
     sessionInfo["video_srtp"] = Buffer.concat([srtp_key, srtp_salt]);
-    sessionInfo["video_ssrc"] = 1; 
+    sessionInfo["video_ssrc"] = 1;
   }
 
   let audioInfo = request["audio"];
@@ -182,7 +191,7 @@ FFMPEG.prototype.prepareStream = function(request, callback) {
 
     sessionInfo["audio_port"] = targetPort;
     sessionInfo["audio_srtp"] = Buffer.concat([srtp_key, srtp_salt]);
-    sessionInfo["audio_ssrc"] = 1; 
+    sessionInfo["audio_ssrc"] = 1;
   }
 
   let currentAddress = ip.address();
@@ -215,6 +224,8 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         var height = 720;
         var fps = 30;
         var bitrate = 300;
+        console.log(this);
+        var vcodec = this.vcodec || 'libx264';
 
         let videoInfo = request["video"];
         if (videoInfo) {
@@ -233,7 +244,11 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let targetVideoPort = sessionInfo["video_port"];
         let videoKey = sessionInfo["video_srtp"];
 
-        let ffmpegCommand = this.ffmpegSource + ' -threads 0 -vcodec libx264 -an -pix_fmt yuv420p -r '+ fps +' -f rawvideo -tune zerolatency -vf scale='+ width +':'+ height +' -b:v '+ bitrate +'k -bufsize '+ bitrate +'k -payload_type 99 -ssrc 1 -f rtp -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params '+videoKey.toString('base64')+' srtp://'+targetAddress+':'+targetVideoPort+'?rtcpport='+targetVideoPort+'&localrtcpport='+targetVideoPort+'&pkt_size=1378';
+        let ffmpegCommand = this.ffmpegSource + ' -threads 0 -vcodec '+vcodec+' -an -pix_fmt yuv420p -r '+
+        fps +' -f rawvideo -tune zerolatency -vf scale='+ width +':'+ height +' -b:v '+ bitrate +'k -bufsize '+
+         bitrate +'k -payload_type 99 -ssrc 1 -f rtp -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params '+
+         videoKey.toString('base64')+' srtp://'+targetAddress+':'+targetVideoPort+'?rtcpport='+targetVideoPort+
+         '&localrtcpport='+targetVideoPort+'&pkt_size=1378';
         console.log(ffmpegCommand);
         let ffmpeg = spawn('ffmpeg', ffmpegCommand.split(' '), {env: process.env});
         this.ongoingSessions[sessionIdentifier] = ffmpeg;
