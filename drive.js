@@ -39,13 +39,15 @@ function drive() {
 
 }
 
-drive.prototype.storePicture = function(prefix,picture) {
+drive.prototype.storePicture = function(prefix, picture) {
     // get folder ID
     debug("getFolder");
-    getPictureFolder(function(err, folder) {
-        debug("upload");
-        uploadPicture(folder, prefix, picture);
-    })
+    if (auth) {
+        getPictureFolder(function(err, folder) {
+            debug("upload");
+            uploadPicture(folder, prefix, picture);
+        })
+    }
 }
 
 function getPictureFolder(cb) {
@@ -93,7 +95,7 @@ function uploadPicture(folder, prefix, picture) {
     var drive = google.drive('v3');
     var d = new Date();
     var parsedUrl = url.parse(prefix.substr(prefix.search('http')), true, true);
-    var name = prefix.replace(/ /g,"_")+"_"+d.toLocaleString().replace(/ /g,"_")+".jpeg";
+    var name = prefix.replace(/ /g, "_") + "_" + d.toLocaleString().replace(/ /g, "_") + ".jpeg";
 
     debug("upload picture", folder, name);
 
