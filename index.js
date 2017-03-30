@@ -7,7 +7,7 @@ module.exports = function(homebridge) {
   hap = homebridge.hap;
   UUIDGen = homebridge.hap.uuid;
 
-  homebridge.registerPlatform("homebridge-camera-ffmpeg", "Camera-ffmpeg", ffmpegPlatform, true);
+  homebridge.registerPlatform("homebridge-camera-ffmpeg-omx", "Camera-ffmpeg-omx", ffmpegPlatform, true);
 }
 
 function ffmpegPlatform(log, config, api) {
@@ -54,6 +54,6 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       configuredAccessories.push(cameraAccessory);
     });
 
-    self.api.publishCameraAccessories("Camera-ffmpeg", configuredAccessories);
+    self.api.publishCameraAccessories("Camera-ffmpeg-omx", configuredAccessories);
   }
 }

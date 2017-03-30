@@ -1,6 +1,6 @@
 # homebridge-camera-ffmpeg-omx
 
-ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge). Optimized for Rapsberry Pi via GPU encoding
+ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge). Optimized for Rapsberry Pi via GPU encoding.
 
 ## Installation
 
@@ -20,7 +20,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge). Optimized
 ### Config.json Example
 
     {
-      "platform": "Camera-ffmpeg",
+      "platform": "Camera-ffmpeg-omx",
       "cameras": [
         {
           "name": "Camera Name",
