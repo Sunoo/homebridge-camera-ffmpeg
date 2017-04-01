@@ -29,7 +29,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       ]
     }
 
-* Optional camera videoConfig vcodec, if your running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option.
+* Optional parameter vcodec, if your running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option.
 
 ```
 {
