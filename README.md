@@ -53,7 +53,9 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 
 ## Uploading to Google Drive of Still Images ( Snapshots )
 
-This feature will automatically load every snapshot taken to Google Drive, so you look at these later.  This is very useful if you have motion sensor in the same room as the camera, as it will take a snapshot of whatever caused the motion sensor to trigger, and store the image on Google Drive and create a Picture Notification on your iOS device.
+This is an optional feature that will automatically store every snapshot taken to your Google Drive account as a photo.  This is very useful if you have motion sensor in the same room as the camera, as it will take a snapshot of whatever caused the motion sensor to trigger, and store the image on Google Drive and create a Picture Notification on your iOS device.
+
+The snaphots are stored in a folder called "Camera Pictures", and are named with camera name, date and time of the image.
 
 To enable this feature, please add a new config option "uploader", and follow the steps below.
 
@@ -79,6 +81,8 @@ To enable this feature, please add a new config option "uploader", and follow th
   ]
 }
 ```
+
+If the option is missing, it defaults to false, and does not enable the uploader.
 
 * For the setup of Google Drive, please follow the Google Drive Quickstart for Node.js instructions from here except for these changes.
 
