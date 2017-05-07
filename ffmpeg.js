@@ -33,24 +33,26 @@ function FFMPEG(hap, cameraConfig) {
   this.pendingSessions = {};
   this.ongoingSessions = {};
 
-  this.uploader = new drive();
+  this.uploader = cameraConfig.uploader || false;
+  if ( this.uploader )
+    { this.drive = new drive(); }
 
   var numberOfStreams = ffmpegOpt.maxStreams || 2;
   var videoResolutions = [];
 
-  var maxWidth = ffmpegOpt.maxWidth;
-  var maxHeight = ffmpegOpt.maxHeight;
+  this.maxWidth = ffmpegOpt.maxWidth;
+  this.maxHeight = ffmpegOpt.maxHeight;
   var maxFPS = (ffmpegOpt.maxFPS > 30) ? 30 : ffmpegOpt.maxFPS;
 
-  if (maxWidth >= 320) {
-    if (maxHeight >= 240) {
+  if (this.maxWidth >= 320) {
+    if (this.maxHeight >= 240) {
       videoResolutions.push([320, 240, maxFPS]);
       if (maxFPS > 15) {
         videoResolutions.push([320, 240, 15]);
       }
     }
 
-    if (maxHeight >= 180) {
+    if (this.maxHeight >= 180) {
       videoResolutions.push([320, 180, maxFPS]);
       if (maxFPS > 15) {
         videoResolutions.push([320, 180, 15]);
@@ -58,38 +60,38 @@ function FFMPEG(hap, cameraConfig) {
     }
   }
 
-  if (maxWidth >= 480) {
-    if (maxHeight >= 360) {
+  if (this.maxWidth >= 480) {
+    if (this.maxHeight >= 360) {
       videoResolutions.push([480, 360, maxFPS]);
     }
 
-    if (maxHeight >= 270) {
+    if (this.maxHeight >= 270) {
       videoResolutions.push([480, 270, maxFPS]);
     }
   }
 
-  if (maxWidth >= 640) {
-    if (maxHeight >= 480) {
+  if (this.maxWidth >= 640) {
+    if (this.maxHeight >= 480) {
       videoResolutions.push([640, 480, maxFPS]);
     }
 
-    if (maxHeight >= 360) {
+    if (this.maxHeight >= 360) {
       videoResolutions.push([640, 360, maxFPS]);
     }
   }
 
-  if (maxWidth >= 1280) {
-    if (maxHeight >= 960) {
+  if (this.maxWidth >= 1280) {
+    if (this.maxHeight >= 960) {
       videoResolutions.push([1280, 960, maxFPS]);
     }
 
-    if (maxHeight >= 720) {
+    if (this.maxHeight >= 720) {
       videoResolutions.push([1280, 720, maxFPS]);
     }
   }
 
-  if (maxWidth >= 1920) {
-    if (maxHeight >= 1080) {
+  if (this.maxWidth >= 1920) {
+    if (this.maxHeight >= 1080) {
       videoResolutions.push([1920, 1080, maxFPS]);
     }
   }
@@ -130,16 +132,18 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   let resolution = request.width + 'x' + request.height;
+  if ( this.uploader )
+    { resolution = this.maxWidth + 'x' + this.maxHeight; }
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
   let ffmpeg = spawn('ffmpeg', (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer(0);
   console.log("Snapshot",imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
-
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
   ffmpeg.on('close', function(code) {
-    this.uploader.storePicture(this.name,imageBuffer);
+    if ( this.uploader )
+      { this.drive.storePicture(this.name,imageBuffer); }
     callback(undefined, imageBuffer);
   }.bind(this));
 }
