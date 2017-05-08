@@ -4,16 +4,21 @@ var uuid, Service, Characteristic, StreamController;
 var fs = require('fs');
 var ip = require('ip');
 var spawn = require('child_process').spawn;
+var drive = require('./drive').drive;
 
 module.exports = {
   FFMPEG: FFMPEG
 };
 
-function FFMPEG(hap, ffmpegOpt) {
+function FFMPEG(hap, cameraConfig) {
   uuid = hap.uuid;
   Service = hap.Service;
   Characteristic = hap.Characteristic;
   StreamController = hap.StreamController;
+
+  var ffmpegOpt = cameraConfig.videoConfig;
+  this.name = cameraConfig.name;
+  this.vcodec = ffmpegOpt.vcodec;
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -28,22 +33,26 @@ function FFMPEG(hap, ffmpegOpt) {
   this.pendingSessions = {};
   this.ongoingSessions = {};
 
+  this.uploader = cameraConfig.uploader || false;
+  if ( this.uploader )
+    { this.drive = new drive(); }
+
   var numberOfStreams = ffmpegOpt.maxStreams || 2;
   var videoResolutions = [];
-  
-  var maxWidth = ffmpegOpt.maxWidth;
-  var maxHeight = ffmpegOpt.maxHeight;
+
+  this.maxWidth = ffmpegOpt.maxWidth;
+  this.maxHeight = ffmpegOpt.maxHeight;
   var maxFPS = (ffmpegOpt.maxFPS > 30) ? 30 : ffmpegOpt.maxFPS;
 
-  if (maxWidth >= 320) {
-    if (maxHeight >= 240) {
+  if (this.maxWidth >= 320) {
+    if (this.maxHeight >= 240) {
       videoResolutions.push([320, 240, maxFPS]);
       if (maxFPS > 15) {
         videoResolutions.push([320, 240, 15]);
       }
     }
 
-    if (maxHeight >= 180) {
+    if (this.maxHeight >= 180) {
       videoResolutions.push([320, 180, maxFPS]);
       if (maxFPS > 15) {
         videoResolutions.push([320, 180, 15]);
@@ -51,38 +60,38 @@ function FFMPEG(hap, ffmpegOpt) {
     }
   }
 
-  if (maxWidth >= 480) {
-    if (maxHeight >= 360) {
+  if (this.maxWidth >= 480) {
+    if (this.maxHeight >= 360) {
       videoResolutions.push([480, 360, maxFPS]);
     }
 
-    if (maxHeight >= 270) {
+    if (this.maxHeight >= 270) {
       videoResolutions.push([480, 270, maxFPS]);
     }
   }
 
-  if (maxWidth >= 640) {
-    if (maxHeight >= 480) {
+  if (this.maxWidth >= 640) {
+    if (this.maxHeight >= 480) {
       videoResolutions.push([640, 480, maxFPS]);
     }
 
-    if (maxHeight >= 360) {
+    if (this.maxHeight >= 360) {
       videoResolutions.push([640, 360, maxFPS]);
     }
   }
 
-  if (maxWidth >= 1280) {
-    if (maxHeight >= 960) {
+  if (this.maxWidth >= 1280) {
+    if (this.maxHeight >= 960) {
       videoResolutions.push([1280, 960, maxFPS]);
     }
 
-    if (maxHeight >= 720) {
+    if (this.maxHeight >= 720) {
       videoResolutions.push([1280, 720, maxFPS]);
     }
   }
 
-  if (maxWidth >= 1920) {
-    if (maxHeight >= 1080) {
+  if (this.maxWidth >= 1920) {
+    if (this.maxHeight >= 1080) {
       videoResolutions.push([1920, 1080, maxFPS]);
     }
   }
@@ -112,7 +121,7 @@ function FFMPEG(hap, ffmpegOpt) {
   }
 
   this.createCameraControlService();
-  this._createStreamControllers(numberOfStreams, options); 
+  this._createStreamControllers(numberOfStreams, options);
 }
 
 FFMPEG.prototype.handleCloseConnection = function(connectionID) {
@@ -126,13 +135,15 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
   let ffmpeg = spawn('ffmpeg', (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer(0);
-
+  console.log("Snapshot",imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
   ffmpeg.on('close', function(code) {
+    if ( this.uploader )
+      { this.drive.storePicture(this.name,imageBuffer); }
     callback(undefined, imageBuffer);
-  });
+  }.bind(this));
 }
 
 FFMPEG.prototype.prepareStream = function(request, callback) {
@@ -162,7 +173,7 @@ FFMPEG.prototype.prepareStream = function(request, callback) {
 
     sessionInfo["video_port"] = targetPort;
     sessionInfo["video_srtp"] = Buffer.concat([srtp_key, srtp_salt]);
-    sessionInfo["video_ssrc"] = 1; 
+    sessionInfo["video_ssrc"] = 1;
   }
 
   let audioInfo = request["audio"];
@@ -182,7 +193,7 @@ FFMPEG.prototype.prepareStream = function(request, callback) {
 
     sessionInfo["audio_port"] = targetPort;
     sessionInfo["audio_srtp"] = Buffer.concat([srtp_key, srtp_salt]);
-    sessionInfo["audio_ssrc"] = 1; 
+    sessionInfo["audio_ssrc"] = 1;
   }
 
   let currentAddress = ip.address();
@@ -215,6 +226,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         var height = 720;
         var fps = 30;
         var bitrate = 300;
+        var vcodec = this.vcodec || 'libx264';
 
         let videoInfo = request["video"];
         if (videoInfo) {
@@ -233,7 +245,11 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let targetVideoPort = sessionInfo["video_port"];
         let videoKey = sessionInfo["video_srtp"];
 
-        let ffmpegCommand = this.ffmpegSource + ' -threads 0 -vcodec libx264 -an -pix_fmt yuv420p -r '+ fps +' -f rawvideo -tune zerolatency -vf scale='+ width +':'+ height +' -b:v '+ bitrate +'k -bufsize '+ bitrate +'k -payload_type 99 -ssrc 1 -f rtp -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params '+videoKey.toString('base64')+' srtp://'+targetAddress+':'+targetVideoPort+'?rtcpport='+targetVideoPort+'&localrtcpport='+targetVideoPort+'&pkt_size=1378';
+        let ffmpegCommand = this.ffmpegSource + ' -threads 0 -vcodec '+vcodec+' -an -pix_fmt yuv420p -r '+
+        fps +' -f rawvideo -tune zerolatency -vf scale='+ width +':'+ height +' -b:v '+ bitrate +'k -bufsize '+
+         bitrate +'k -payload_type 99 -ssrc 1 -f rtp -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params '+
+         videoKey.toString('base64')+' srtp://'+targetAddress+':'+targetVideoPort+'?rtcpport='+targetVideoPort+
+         '&localrtcpport='+targetVideoPort+'&pkt_size=1378';
         console.log(ffmpegCommand);
         let ffmpeg = spawn('ffmpeg', ffmpegCommand.split(' '), {env: process.env});
         this.ongoingSessions[sessionIdentifier] = ffmpeg;
