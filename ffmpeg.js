@@ -132,8 +132,6 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   let resolution = request.width + 'x' + request.height;
-  if ( this.uploader )
-    { resolution = this.maxWidth + 'x' + this.maxHeight; }
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
   let ffmpeg = spawn('ffmpeg', (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer(0);
