@@ -7,10 +7,10 @@ module.exports = function(homebridge) {
   hap = homebridge.hap;
   UUIDGen = homebridge.hap.uuid;
 
-  homebridge.registerPlatform("homebridge-camera-ffmpeg", "Camera-ffmpeg", ffmpegPlatform, true);
+  homebridge.registerPlatform("homebridge-camera-ffmpeg-ufv", "camera-ffmpeg-ufv", ffmpegUfvPlatform, true);
 }
 
-function ffmpegPlatform(log, config, api) {
+function ffmpegUfvPlatform(log, config, api) {
   var self = this;
 
   self.log = log;
@@ -27,11 +27,11 @@ function ffmpegPlatform(log, config, api) {
   }
 }
 
-ffmpegPlatform.prototype.configureAccessory = function(accessory) {
   // Won't be invoked
+ffmpegUfvPlatform.prototype.configureAccessory = function(accessory) {
 }
 
-ffmpegPlatform.prototype.didFinishLaunching = function() {
+ffmpegUfvPlatform.prototype.didFinishLaunching = function() {
   var self = this;
 
   if (self.config.cameras) {
@@ -54,6 +54,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       configuredAccessories.push(cameraAccessory);
     });
 
-    self.api.publishCameraAccessories("Camera-ffmpeg", configuredAccessories);
+    // Publish the cameras we found to homebridge:
+    self.api.publishCameraAccessories("Camera-ffmpeg-ufv", configuredAccessories);
   }
 }
