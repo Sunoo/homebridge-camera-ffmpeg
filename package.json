@@ -1,6 +1,6 @@
 {
   "name": "homebridge-camera-ffmpeg-ufv",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "UniFi video plugin for homebridge: https://github.com/gozoinks/homebridge-camera-ffmpeg-ufv",
   "author": "John Burwell <john@gozoinks.com>",
   "license": "ISC",
