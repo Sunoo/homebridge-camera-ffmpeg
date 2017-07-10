@@ -56,7 +56,7 @@ Start or restart homebridge to update the configuration.
 
 ## Add cameras to your HomeKit home
 
-HomeKit ultimately requires you to add each camera individually. Use the code displayed on the console by homebridge when it starts up.
+HomeKit requires you to add each camera individually. Use the code displayed on the console by homebridge when it starts up.
 
 1. On your iOS device, in the Home app, tap the plus sign in the top right corner, then tap "Add Accessory…"
 2. Tap on one of the discovered cameras.
@@ -66,13 +66,13 @@ HomeKit ultimately requires you to add each camera individually. Use the code di
 
 ## Known issues
 
-HTTPS is supported, but we ignore the error caused by NVR's built-in self-signed certificate. This is insecure, and we should handle it better once the NVR supports real certificates.
+HTTPS is supported, but we ignore the error caused by NVR's built-in self-signed certificate. This is not secure, and we should handle it better once the NVR supports real certificates.
 
 Raspberry Pi users require a different build of ffmpeg with omx enabled for best results.
 
 This plugin recognizes only the first server configured for an NVR. The UniFi Video API can describe multiple servers per NVR, but it does not seem to identify the server that corresponds to a given camera. The UniFi Video NVR software does not officially support multiple servers. If you're using the unsupported configuration for this, let's talk.
 
-Lag is a minor issue, both for the still snapshot and for the live stream. Right now, the snapshot is delayed by the time it takes for ffmpeg to connect to the stream and grab a frame. It's possible to grab a still frame directly. This is preferable, and this should be sorted out soon as well. The live stream is delayed by about 10 seconds while ffmpeg starts the stream client, starts transcoding, and sets up the encryption HomeKit requires. Can this be optimized? Probably.
+The live stream is delayed by a few seconds while ffmpeg starts the stream client, starts transcoding, and sets up the encryption HomeKit requires. Can this be optimized? Probably.
 
 Weirdly, when homebridge starts up, it will report the same name for each camera that it publishes.
 
