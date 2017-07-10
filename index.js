@@ -6,7 +6,7 @@ var http = require('http');
 var https = require('https');
 
 var debug = require('debug')('camera-ffmpeg-ufv');
-var FFMPEG = require('./ffmpeg').FFMPEG;
+var UFV = require('./ufv.js').UFV;
 
 const apiEndpoint = '/api/2.0';
 
@@ -135,7 +135,7 @@ ffmpegUfvPlatform.prototype.didFinishLaunching = function() {
                       debug('Discovered RTSP enabled camera ' + discoveredCamera.uuid);
 
                       // We should know have everything we need and can push it to
-                      // FFMPEG:
+                      // UFV:
 
                       var videoConfig = {
                         "source": ('-re -i rtsp://' + streamingHost + ':' + streamingPort + '/' + rtspAlias + '?apiKey=' + nvrConfig.apiKey),
@@ -154,7 +154,7 @@ ffmpegUfvPlatform.prototype.didFinishLaunching = function() {
 
                       debug(JSON.stringify(cameraConfig));
 
-                      var cameraSource = new FFMPEG(hap, cameraConfig);
+                      var cameraSource = new UFV(hap, cameraConfig);
                       cameraAccessory.configureCameraSource(cameraSource);
                       configuredAccessories.push(cameraAccessory);
 

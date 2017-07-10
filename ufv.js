@@ -13,10 +13,10 @@ var ip = require('ip');
 var spawn = require('child_process').spawn;
 
 module.exports = {
-  FFMPEG: FFMPEG
+  UFV: UFV
 };
 
-function FFMPEG(hap, cameraConfig) {
+function UFV(hap, cameraConfig) {
   uuid = hap.uuid;
   Service = hap.Service;
   Characteristic = hap.Characteristic;
@@ -126,13 +126,13 @@ function FFMPEG(hap, cameraConfig) {
   this._createStreamControllers(numberOfStreams, options);
 }
 
-FFMPEG.prototype.handleCloseConnection = function(connectionID) {
+UFV.prototype.handleCloseConnection = function(connectionID) {
   this.streamControllers.forEach(function(controller) {
     controller.handleCloseConnection(connectionID);
   });
 }
 
-FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
+UFV.prototype.handleSnapshotRequest = function(request, callback) {
 
   if( this.ffmpegImageSource == undefined ) {
 
@@ -169,7 +169,7 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   }
 }
 
-FFMPEG.prototype.prepareStream = function(request, callback) {
+UFV.prototype.prepareStream = function(request, callback) {
   var sessionInfo = {};
 
   let sessionID = request["sessionID"];
@@ -236,7 +236,7 @@ FFMPEG.prototype.prepareStream = function(request, callback) {
   callback(response);
 }
 
-FFMPEG.prototype.handleStreamRequest = function(request) {
+UFV.prototype.handleStreamRequest = function(request) {
   var sessionID = request["sessionID"];
   var requestType = request["type"];
   if (sessionID) {
@@ -290,7 +290,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
   }
 }
 
-FFMPEG.prototype.createCameraControlService = function() {
+UFV.prototype.createCameraControlService = function() {
   var controlService = new Service.CameraControl();
 
   this.services.push(controlService);
@@ -298,7 +298,7 @@ FFMPEG.prototype.createCameraControlService = function() {
 
 // Private
 
-FFMPEG.prototype._createStreamControllers = function(maxStreams, options) {
+UFV.prototype._createStreamControllers = function(maxStreams, options) {
   let self = this;
 
   for (var i = 0; i < maxStreams; i++) {
