@@ -3,6 +3,8 @@
 var Accessory, hap, UUIDGen;
 
 var http = require('http');
+var https = require('https');
+
 var debug = require('debug')('camera-ffmpeg-ufv');
 var FFMPEG = require('./ffmpeg').FFMPEG;
 
@@ -52,14 +54,15 @@ ffmpegUfvPlatform.prototype.didFinishLaunching = function() {
       var options = {
         host: nvrConfig.apiHost,
         port: nvrConfig.apiPort,
-        path: '/api/2.0/bootstrap?apiKey=' + nvrConfig.apiKey
+        path: '/api/2.0/bootstrap?apiKey=' + nvrConfig.apiKey,
+        rejectUnauthorized: false // bypass the self-signed certificate error. Bleh
       };
 
 
       // Fetch the "bootstrap" file from the NVR,
       // which contains all the config info we need:
 
-      http.get(options, function (res) {
+      (nvrConfig.apiProtocol == 'https' ? https : http ).get(options, function (res) {
 
         var json = '';
 

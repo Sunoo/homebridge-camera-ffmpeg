@@ -13,7 +13,7 @@ The NVR API is undocumented and unsupported. It is subject to change at any time
 - The UniFi Video NVR is required. This plugin was developed and tested against UFV NVR version 3.7.1.
 - Cameras must have at least one "RTSP Service" enabled. The plugin uses the highest-quality stream enabled for the camera.
 - At least one user must have an API key, and "API Usage" must be turned on.
-- The API port and the RTSP port must be open on the NVR system's firewall, if applicable. The API port is probably 7080, and your RTSP port is probably 7447. You can confirm these in your UniFi NVR configuration.
+- The API port and the RTSP port must be open on the NVR system's firewall, if applicable. The API port is probably 7080 (http) or 7443 (https), and your RTSP port is probably 7447. You can confirm these in your UniFi NVR configuration.
 - Homebridge is required. This guide assumes you have homebridge working.
 - The system running homebridge must have ffmpeg and the node ffmpeg module installed.
 
@@ -40,12 +40,17 @@ On your homebridge system, edit config.json to add a platform block like this:
   "nvrs": [
     {
       "apiHost": "nvr-ip-or-hostname.example.com",
-      "apiPort": 7080,
+      "apiPort": 7443,
+      "apiProtocol": "https",
       "apiKey": "<api key from NVR user settings>"
     }
   ]
 }
 ```
+- apiHost is the IP address or hostname of your NVR.
+- apiPort is the port your admin portal is listening on, usually 7080 or 7443.
+- apiProtocol is either http or https.
+- apiKey is the API key you noted earlier.
 
 Start or restart homebridge to update the configuration.
 
@@ -61,7 +66,7 @@ HomeKit ultimately requires you to add each camera individually. Use the code di
 
 ## Known issues
 
-HTTPS is not supported. This should be sorted out soon.
+HTTPS is supported, but we ignore the error caused by NVR's built-in self-signed certificate. This is insecure, and we should handle it better once the NVR supports real certificates.
 
 Raspberry Pi users require a different build of ffmpeg with omx enabled for best results.
 
