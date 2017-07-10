@@ -1,25 +1,24 @@
 {
-  "name": "homebridge-camera-ffmpeg",
+  "name": "homebridge-camera-ffmpeg-ufv",
   "version": "0.1.0",
-  "description": "ffmpeg plugin for homebridge: https://github.com/nfarina/homebridge",
+  "description": "UniFi video plugin for homebridge: https://github.com/gozoinks/homebridge-camera-ffmpeg-ufv",
+  "author": "John Burwell <john@gozoinks.com>",
   "license": "ISC",
   "keywords": [
     "homebridge-plugin"
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/KhaosT/homebridge-camera-ffmpeg.git"
+    "url": "git://github.com/gozoinks/homebridge-camera-ffmpeg-ufv.git"
   },
   "bugs": {
-    "url": "http://github.com/KhaosT/homebridge-camera-ffmpeg/issues"
+    "url": "http://github.com/gozoinks/homebridge-camera-ffmpeg-ufv/issues"
   },
   "engines": {
     "node": ">=5.0.0",
     "homebridge": ">=0.4.5"
   },
   "dependencies": {
-    "google-auth-library": "^0.10.0",
-    "googleapis": "^18.0.0",
     "ip": "^1.1.3",
     "debug": "^2.2.0"
   }
