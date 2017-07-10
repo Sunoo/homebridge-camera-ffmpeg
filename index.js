@@ -8,6 +8,8 @@ var https = require('https');
 var debug = require('debug')('camera-ffmpeg-ufv');
 var FFMPEG = require('./ffmpeg').FFMPEG;
 
+const apiEndpoint = '/api/2.0';
+
 module.exports = function(homebridge) {
   Accessory = homebridge.platformAccessory;
   hap = homebridge.hap;
@@ -54,7 +56,7 @@ ffmpegUfvPlatform.prototype.didFinishLaunching = function() {
       var options = {
         host: nvrConfig.apiHost,
         port: nvrConfig.apiPort,
-        path: '/api/2.0/bootstrap?apiKey=' + nvrConfig.apiKey,
+        path: apiEndpoint + '/bootstrap?apiKey=' + nvrConfig.apiKey,
         rejectUnauthorized: false // bypass the self-signed certificate error. Bleh
       };
 
@@ -136,7 +138,8 @@ ffmpegUfvPlatform.prototype.didFinishLaunching = function() {
                       // FFMPEG:
 
                       var videoConfig = {
-                        "source": ("-re -i rtsp://" + streamingHost + ":" + streamingPort + "/" + rtspAlias + "?apiKey=" + nvrConfig.apiKey),
+                        "source": ('-re -i rtsp://' + streamingHost + ':' + streamingPort + '/' + rtspAlias + '?apiKey=' + nvrConfig.apiKey),
+                        "stillImageSource": ((nvrConfig.apiProtocol == 'https' ? 'https' : 'http') + '://' + nvrConfig.apiHost + ':' + nvrConfig.apiPort + apiEndpoint + '/snapshot/camera/' + discoveredCamera._id + '?force=true&apiKey=' + nvrConfig.apiKey),
                         "maxStreams": 2,
                         "maxWidth": discoveredChannel.width, // or however we end up getting to this!
                         "maxHeight": discoveredChannel.height,
