@@ -138,7 +138,7 @@ ffmpegUfvPlatform.prototype.didFinishLaunching = function() {
                       // UFV:
 
                       var videoConfig = {
-                        "source": ('-re -i rtsp://' + streamingHost + ':' + streamingPort + '/' + rtspAlias + '?apiKey=' + nvrConfig.apiKey),
+                        "source": ('-rtsp_transport http -re -i rtsp://' + streamingHost + ':' + streamingPort + '/' + rtspAlias + '?apiKey=' + nvrConfig.apiKey),
                         "stillImageSource": ((nvrConfig.apiProtocol == 'https' ? 'https' : 'http') + '://' + nvrConfig.apiHost + ':' + nvrConfig.apiPort + apiEndpoint + '/snapshot/camera/' + discoveredCamera._id + '?force=true&apiKey=' + nvrConfig.apiKey),
                         "maxStreams": 2,
                         "maxWidth": discoveredChannel.width, // or however we end up getting to this!
