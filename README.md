@@ -91,3 +91,10 @@ $ DEBUG=camera-ffmpeg-ufv homebridge # Show debugging output for this module onl
 ## Notes
 
 I'm calling it camera-ffmpeg-ufv. 'ffmpeg' is in the name because, while there may be many approaches to this, this one uses ffmpeg. 'ufv' is in the name because 'homebridge-camera-ffmpeg-unifi-video' starts getting lengthy, and besides, I don't want to use 'unifi' in the name and have anyone thinking UBNT is officially providing this plugin. This is not a Ubiquiti product.
+
+## Wish list
+
+- Two-way audio
+- Security system service for motion detection
+- Camera details (manufacturer, model, serial number)
+- Refactor the ufv class to make better use of methods and promises
