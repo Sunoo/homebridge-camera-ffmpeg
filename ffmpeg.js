@@ -260,7 +260,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
     } else if (requestType == "stop") {
       var ffmpegProcess = this.ongoingSessions[sessionIdentifier];
       if (ffmpegProcess) {
-        ffmpegProcess.kill('SIGKILL');
+        ffmpegProcess.kill('SIGTERM');
       }
 
       delete this.ongoingSessions[sessionIdentifier];
