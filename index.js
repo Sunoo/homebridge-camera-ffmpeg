@@ -47,9 +47,10 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
         return;
       }
 
+      var VideoProcessor = self.config.VideoProcessor || 'ffmpeg';
       var uuid = UUIDGen.generate(cameraName);
       var cameraAccessory = new Accessory(cameraName, uuid, hap.Accessory.Categories.CAMERA);
-      var cameraSource = new FFMPEG(hap, cameraConfig, self.config.VideoProcessor);
+      var cameraSource = new FFMPEG(hap, cameraConfig, VideoProcessor);
       cameraAccessory.configureCameraSource(cameraSource);
       configuredAccessories.push(cameraAccessory);
     });
