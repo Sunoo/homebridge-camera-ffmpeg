@@ -92,7 +92,9 @@ ffmpegUfvPlatform.prototype.didFinishLaunching = function() {
               discoveredNvrs.forEach(function(discoveredNvr) {
                 debug("Discovered NVR " + discoveredNvr.nvrName);
 
-                // The NVR knows the rtsp port:
+                // In the old API, the NVR knows the rtsp port.
+                // If this is not defined, we'll look for it in the
+                // channel definition later:
                 streamingPort = discoveredNvr.systemInfo.rtspPort;
 
                 // Within each NVR we should have one or more servers:
@@ -134,11 +136,19 @@ ffmpegUfvPlatform.prototype.didFinishLaunching = function() {
 
                       debug('Discovered RTSP enabled camera ' + discoveredCamera.uuid);
 
+                      // Set the RTSP URI. Let's first try the new way (>=3.9.0), then try the old way.
+
+                      if ( discoveredChannel.hasOwnProperty('rtspUris') ) {
+                        var rtspUri = discoveredChannel.rtspUris[0];
+                      } else {
+                        var rtspUri = 'rtsp://' + streamingHost + ':' + streamingPort + '/' + rtspAlias;
+                      }
+
                       // We should know have everything we need and can push it to
                       // UFV:
 
                       var videoConfig = {
-                        "source": ('-rtsp_transport http -re -i rtsp://' + streamingHost + ':' + streamingPort + '/' + rtspAlias + '?apiKey=' + nvrConfig.apiKey),
+                        "source": ('-rtsp_transport http -re -i ' + rtspUri + '?apiKey=' + nvrConfig.apiKey),
                         "stillImageSource": ((nvrConfig.apiProtocol == 'https' ? 'https' : 'http') + '://' + nvrConfig.apiHost + ':' + nvrConfig.apiPort + apiEndpoint + '/snapshot/camera/' + discoveredCamera._id + '?force=true&apiKey=' + nvrConfig.apiKey),
                         "maxStreams": 2,
                         "maxWidth": discoveredChannel.width, // or however we end up getting to this!
