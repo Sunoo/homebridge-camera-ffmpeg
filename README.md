@@ -28,6 +28,7 @@ The NVR API is undocumented and unsupported. It is subject to change at any time
 1. Log in to your NVR's web GUI.
 2. Under Cameras > (camera) > Video > RTSP service, turn on RTSP for each camera you want to make available to HomeKit. This plugin will use the highest quality stream that you enable. Note that whatever you choose will be converted to at least 720p at 15 fps, as required by HomeKit.
 3. Under Users > (user) > API Access, turn on "Allow API Usage" and make note of your API key.
+4. On the main settings page, scroll to the "Streaming Ports" section and make sure RTSP is turned on. 
 
 ## Configure Homebridge
 
@@ -73,8 +74,6 @@ Raspberry Pi users require a different build of ffmpeg with omx enabled for best
 This plugin recognizes only the first server configured for an NVR. The UniFi Video API can describe multiple servers per NVR, but it does not seem to identify the server that corresponds to a given camera. The UniFi Video NVR software does not officially support multiple servers. If you're using the unsupported configuration for this, let's talk.
 
 The live stream is delayed by a few seconds while ffmpeg starts the stream client, starts transcoding, and sets up the encryption HomeKit requires. Can this be optimized? Probably.
-
-Weirdly, when homebridge starts up, it will report the same name for each camera that it publishes.
 
 It doesn't strictly use the highest-quality stream available; rather, it uses the first channel in the array returned by the API. So far, they appear to come back in descending order of quality, so the first one in the array should be the best stream.
 
