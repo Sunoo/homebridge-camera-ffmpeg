@@ -1,99 +1,99 @@
-# homebridge-camera-ffmpeg
+# homebridge-camera-ffmpeg-ufv
 
-ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
+[UniFi Video](https://www.ubnt.com/unifi-video/unifi-nvr/) plugin for [Homebridge](https://github.com/nfarina/homebridge), based on [homebridge-camera-ffmpeg](https://github.com/KhaosT/homebridge-camera-ffmpeg)
 
-## Installation
+This plugin connects your UniFi Video cameras to HomeKit via your UniFi Video NVR.
 
-1. Install ffmpeg on your Mac
-2. Install this plugin using: npm install -g homebridge-camera-ffmpeg
-3. Edit ``config.json`` and add the camera.
-3. Run Homebridge
-4. Add extra camera accessories in Home app. The setup code is the same as homebridge.
+It automatically finds the RTSP-enabled cameras on the NVR. It then uses ffmpeg to convert the video streams from the NVR into the format HomeKit requires.
 
-### Config.json Example
+The NVR API is undocumented and unsupported. It is subject to change at any time. Use at your own risk.
 
-    {
-      "platform": "Camera-ffmpeg",
-      "cameras": [
-        {
-          "name": "Camera Name",
-          "videoConfig": {
-          	"source": "-re -i rtsp://myfancy_rtsp_stream",
-            "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
-          	"maxStreams": 2,
-          	"maxWidth": 1280,
-          	"maxHeight": 720,
-          	"maxFPS": 30
-          }
-        }
-      ]
-    }
+## Requirements
 
-* Optional parameter vcodec, if your running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option.
+- The UniFi Video NVR is required. This plugin was developed and tested against UFV NVR version 3.7.1.
+- Cameras must have at least one "RTSP Service" enabled. The plugin uses the highest-quality stream enabled for the camera.
+- At least one user must have an API key, and "API Usage" must be turned on.
+- The API port and the RTSP port must be open on the NVR system's firewall, if applicable. The API port is probably 7080 (http) or 7443 (https), and your RTSP port is probably 7447. You can confirm these in your UniFi NVR configuration.
+- Homebridge is required. This guide assumes you have homebridge working.
+- The system running homebridge must have ffmpeg and the node ffmpeg module installed.
+
+## Install
+
+1. Install ffmpeg on your homebridge system, if necessary, as via your system's package manager.
+2. Install the ffmpeg npm module on your homebridge system, if necessary: `sudo npm install -g ffmpeg`
+3. Install this plugin: `sudo npm install -g homebridge-camera-ffmpeg-ufv`
+
+## Configure UniFi Video
+
+1. Log in to your NVR's web GUI.
+2. Under Cameras > (camera) > Video > RTSP service, turn on RTSP for each camera you want to make available to HomeKit. This plugin will use the highest quality stream that you enable. Note that whatever you choose will be converted to at least 720p at 15 fps, as required by HomeKit.
+3. Under Users > (user) > API Access, turn on "Allow API Usage" and make note of your API key.
+4. On the main settings page, scroll to the "Streaming Ports" section and make sure RTSP is turned on. 
+
+## Configure Homebridge
+
+On your homebridge system, edit config.json to add a platform block like this:
 
 ```
 {
-  "platform": "Camera-ffmpeg",
-  "cameras": [
+  "platform": "camera-ffmpeg-ufv",
+  "name": "UniFi Video (ffmpeg)",
+  "nvrs": [
     {
-      "name": "Camera Name",
-      "videoConfig": {
-      	"source": "-re -i rtsp://myfancy_rtsp_stream",
-        "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
-      	"maxStreams": 2,
-      	"maxWidth": 1280,
-      	"maxHeight": 720,
-      	"maxFPS": 30,
-      	"vcodec": "h264_omx"            
-      }
+      "apiHost": "nvr-ip-or-hostname.example.com",
+      "apiPort": 7443,
+      "apiProtocol": "https",
+      "apiKey": "<api key from NVR user settings>"
     }
   ]
 }
 ```
+- apiHost is the IP address or hostname of your NVR.
+- apiPort is the port your admin portal is listening on, usually 7080 or 7443.
+- apiProtocol is either http or https.
+- apiKey is the API key you noted earlier.
 
-## Uploading to Google Drive of Still Images ( Snapshots )
+Start or restart homebridge to update the configuration.
 
-This is an optional feature that will automatically store every snapshot taken to your Google Drive account as a photo.  This is very useful if you have motion sensor in the same room as the camera, as it will take a snapshot of whatever caused the motion sensor to trigger, and store the image on Google Drive and create a Picture Notification on your iOS device.
+## Add cameras to your HomeKit home
 
-The snaphots are stored in a folder called "Camera Pictures", and are named with camera name, date and time of the image.
+HomeKit requires you to add each camera individually. Use the code displayed on the console by homebridge when it starts up.
 
-To enable this feature, please add a new config option "uploader", and follow the steps below.
+1. On your iOS device, in the Home app, tap the plus sign in the top right corner, then tap "Add Accessory…"
+2. Tap on one of the discovered cameras.
+3. Acknowledge the warning that this accessory is unsupported.
+4. Tap "Enter code manually" and enter the code from the homebridge console.
+5. Set your preferences for this camera, then tap "Done."
 
-* Add the option "uploader" to your config.json i.e.
+## Known issues
 
+HTTPS is supported, but we ignore the error caused by NVR's built-in self-signed certificate. This is not secure, and we should handle it better once the NVR supports real certificates.
+
+Raspberry Pi users require a different build of ffmpeg with omx enabled for best results.
+
+This plugin recognizes only the first server configured for an NVR. The UniFi Video API can describe multiple servers per NVR, but it does not seem to identify the server that corresponds to a given camera. The UniFi Video NVR software does not officially support multiple servers. If you're using the unsupported configuration for this, let's talk.
+
+The live stream is delayed by a few seconds while ffmpeg starts the stream client, starts transcoding, and sets up the encryption HomeKit requires. Can this be optimized? Probably.
+
+It doesn't strictly use the highest-quality stream available; rather, it uses the first channel in the array returned by the API. So far, they appear to come back in descending order of quality, so the first one in the array should be the best stream.
+
+Cameras are discovered only when Homebridge starts up. If you add or remove cameras, you will need to restart Homebridge.
+
+## Debugging
+
+This plugin uses the debug module. To see debugging output, run homebridge with a DEBUG env var set:
 ```
-{
-  "platform": "Camera-ffmpeg",
-  "cameras": [
-    {
-      "name": "Camera Name",
-      "uploader": true,
-      "videoConfig": {
-      	"source": "-re -i rtsp://myfancy_rtsp_stream",
-        "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
-      	"maxStreams": 2,
-      	"maxWidth": 1280,
-      	"maxHeight": 720,
-      	"maxFPS": 30,
-      	"vcodec": "h264_omx"            
-      }
-    }
-  ]
-}
+$ DEBUG=* homebridge # Show debugging output for all modules
+$ DEBUG=camera-ffmpeg-ufv homebridge # Show debugging output for this module only
 ```
 
-If the option is missing, it defaults to false, and does not enable the uploader.
+## Notes
 
-* For the setup of Google Drive, please follow the Google Drive Quickstart for Node.js instructions from here except for these changes.
+I'm calling it camera-ffmpeg-ufv. 'ffmpeg' is in the name because, while there may be many approaches to this, this one uses ffmpeg. 'ufv' is in the name because 'homebridge-camera-ffmpeg-unifi-video' starts getting lengthy, and besides, I don't want to use 'unifi' in the name and have anyone thinking UBNT is officially providing this plugin. This is not a Ubiquiti product.
 
-https://developers.google.com/drive/v3/web/quickstart/nodejs
+## Wish list
 
-* In Step 1-h the working directory should be the .homebridge directory
-* Skip Step 2 and 3
-* And in step 4, use the quickstart.js included in the plugin itself.  And to do this you need to run the command from the plugin directory.  Then just follow steps a to c
-
-## Tested configurations
-
-We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).  Also if you have a working configuration that you would like to share, please add it to the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).
-
-https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki
+- Two-way audio
+- Security system service for motion detection
+- Camera details (manufacturer, model, serial number)
+- Refactor the ufv class to make better use of methods and promises
