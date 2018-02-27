@@ -273,6 +273,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
 
         let ffmpegCommand = this.ffmpegSource + ' -map 0:0' +
           ' -vcodec ' + vcodec +
+          ' -pix_fmt yuv420p' +
           ' -r ' + fps +
           ' -vf scale=' + width + ':' + height +
           ' -b:v ' + vbitrate + 'k' +
