@@ -29,7 +29,11 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       ]
     }
 
-* Optional parameter vcodec, if your running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option.
+#### Optional Parameters
+
+* `vcodec`, if your running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option.
+* `audio`, can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see http://praveen.life/2016/06/26/compile-ffmpeg-for-raspberry-pi-3/
+* `packetSize`, can be set to a multiple of 188, default 1316. If audio or video is choppy try a smaller value.
 
 ```
 {
@@ -44,7 +48,9 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       	"maxWidth": 1280,
       	"maxHeight": 720,
       	"maxFPS": 30,
-      	"vcodec": "h264_omx"            
+      	"vcodec": "h264_omx",
+        "audio": true,
+        "packetSize": 188
       }
     }
   ]
@@ -55,7 +61,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 
 This is an optional feature that will automatically store every snapshot taken to your Google Drive account as a photo.  This is very useful if you have motion sensor in the same room as the camera, as it will take a snapshot of whatever caused the motion sensor to trigger, and store the image on Google Drive and create a Picture Notification on your iOS device.
 
-The snaphots are stored in a folder called "Camera Pictures", and are named with camera name, date and time of the image.
+The snapshots are stored in a folder called "Camera Pictures", and are named with camera name, date and time of the image.
 
 To enable this feature, please add a new config option "uploader", and follow the steps below.
 
