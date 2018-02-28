@@ -49,8 +49,8 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       	"maxHeight": 720,
       	"maxFPS": 30,
       	"vcodec": "h264_omx",
-        "audio": true,
-        "packetSize": 188
+      	"audio": true,
+      	"packetSize": 188
       }
     }
   ]
