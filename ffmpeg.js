@@ -22,6 +22,7 @@ function FFMPEG(hap, cameraConfig) {
   this.vcodec = ffmpegOpt.vcodec;
   this.audio = ffmpegOpt.audio;
   this.packetsize = ffmpegOpt.packetSize
+  this.fps = ffmpegOpt.maxFPS;
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -237,7 +238,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
       if (sessionInfo) {
         var width = 1280;
         var height = 720;
-        var fps = 30;
+        var fps = this.fps || 30;
         var vbitrate = 300;
         var abitrate = 32;
         var asamplerate = 16;
