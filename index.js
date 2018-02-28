@@ -51,6 +51,10 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       var cameraAccessory = new Accessory(cameraName, uuid, hap.Accessory.Categories.CAMERA);
       var cameraSource = new FFMPEG(hap, cameraConfig);
       cameraAccessory.configureCameraSource(cameraSource);
+      if(videoConfig.audio){
+        var microphoneService = new Service.Microphone("Microphone");
+        cameraAccessory.addService(microphoneService);
+      }
       configuredAccessories.push(cameraAccessory);
     });
 

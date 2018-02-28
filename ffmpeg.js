@@ -20,6 +20,10 @@ function FFMPEG(hap, cameraConfig) {
   var ffmpegOpt = cameraConfig.videoConfig;
   this.name = cameraConfig.name;
   this.vcodec = ffmpegOpt.vcodec;
+  this.audio = ffmpegOpt.audio;
+  this.acodec = ffmpegOpt.acodec;
+  this.packetsize = ffmpegOpt.packetSize
+  this.fps = ffmpegOpt.maxFPS;
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -235,9 +239,13 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
       if (sessionInfo) {
         var width = 1280;
         var height = 720;
-        var fps = 30;
-        var bitrate = 300;
+        var fps = this.fps || 30;
+        var vbitrate = 300;
+        var abitrate = 32;
+        var asamplerate = 16;
         var vcodec = this.vcodec || 'libx264';
+        var acodec = this.acodec || 'libfdk_aac';
+        var packetsize = this.packetsize || 1316; // 188 376
 
         let videoInfo = request["video"];
         if (videoInfo) {
@@ -249,22 +257,64 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
             fps = expectedFPS;
           }
 
-          bitrate = videoInfo["max_bit_rate"];
+          vbitrate = videoInfo["max_bit_rate"];
+        }
+
+        let audioInfo = request["audio"];
+        if (audioInfo) {
+          abitrate = audioInfo["max_bit_rate"];
+          asamplerate = audioInfo["sample_rate"];
         }
 
         let targetAddress = sessionInfo["address"];
         let targetVideoPort = sessionInfo["video_port"];
         let videoKey = sessionInfo["video_srtp"];
         let videoSsrc = sessionInfo["video_ssrc"];
+        let targetAudioPort = sessionInfo["audio_port"];
+        let audioKey = sessionInfo["audio_srtp"];
+        let audioSsrc = sessionInfo["audio_ssrc"];
 
-        let ffmpegCommand = this.ffmpegSource + ' -threads 0 -vcodec '+vcodec+' -an -pix_fmt yuv420p -r '+
-        fps +' -f rawvideo -tune zerolatency -vf scale='+ width +':'+ height +' -b:v '+ bitrate +'k -bufsize '+
-         bitrate +'k -payload_type 99 -ssrc '+ videoSsrc +' -f rtp -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params '+
-         videoKey.toString('base64')+' srtp://'+targetAddress+':'+targetVideoPort+'?rtcpport='+targetVideoPort+
-         '&localrtcpport='+targetVideoPort+'&pkt_size=1378';
-        console.log(ffmpegCommand);
+        let ffmpegCommand = this.ffmpegSource + ' -map 0:0' +
+          ' -vcodec ' + vcodec +
+          ' -pix_fmt yuv420p' +
+          ' -r ' + fps +
+          ' -vf scale=' + width + ':' + height +
+          ' -b:v ' + vbitrate + 'k' +
+          ' -bufsize ' + vbitrate + 'k' +
+          ' -payload_type 99' +
+          ' -ssrc ' + videoSsrc +
+          ' -f rtp' +
+          ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+          ' -srtp_out_params ' + videoKey.toString('base64') +
+          ' srtp://' + targetAddress + ':' + targetVideoPort +
+          '?rtcpport=' + targetVideoPort +
+          '&localrtcpport=' + targetVideoPort +
+          '&pkt_size=' + packetsize;
+
+        if(this.audio){
+          ffmpegCommand+= ' -map 0:1' +
+            ' -acodec ' + acodec +
+            ' -profile:a aac_eld' +
+            ' -flags +global_header' +
+            ' -f null' +
+            ' -ar ' + asamplerate + 'k' +
+            ' -b:a ' + abitrate + 'k' +
+            ' -bufsize ' + abitrate + 'k' +
+            ' -ac 1' +
+            ' -payload_type 110' +
+            ' -ssrc ' + audioSsrc +
+            ' -f rtp' +
+            ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+            ' -srtp_out_params ' + audioKey.toString('base64') +
+            ' srtp://' + targetAddress + ':' + targetAudioPort +
+            '?rtcpport=' + targetAudioPort +
+            '&localrtcpport=' + targetAudioPort +
+            '&pkt_size=' + packetsize;
+        }
+
         let ffmpeg = spawn('ffmpeg', ffmpegCommand.split(' '), {env: process.env});
         this.ongoingSessions[sessionIdentifier] = ffmpeg;
+        console.log("ffmpeg " + ffmpegCommand);
       }
 
       delete this.pendingSessions[sessionIdentifier];
@@ -272,6 +322,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
       var ffmpegProcess = this.ongoingSessions[sessionIdentifier];
       if (ffmpegProcess) {
         ffmpegProcess.kill('SIGKILL');
+        console.log("Stopped ffmpeg");
       }
 
       delete this.ongoingSessions[sessionIdentifier];
