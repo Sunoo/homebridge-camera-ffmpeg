@@ -21,6 +21,7 @@ function FFMPEG(hap, cameraConfig) {
   this.name = cameraConfig.name;
   this.vcodec = ffmpegOpt.vcodec;
   this.audio = ffmpegOpt.audio;
+  this.acodec = ffmpegOpt.acodec;
   this.packetsize = ffmpegOpt.packetSize
   this.fps = ffmpegOpt.maxFPS;
 
@@ -243,6 +244,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         var abitrate = 32;
         var asamplerate = 16;
         var vcodec = this.vcodec || 'libx264';
+        var acodec = this.acodec || 'libfdk_aac';
         var packetsize = this.packetsize || 1316; // 188 376
 
         let videoInfo = request["video"];
@@ -291,7 +293,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
 
         if(this.audio){
           ffmpegCommand+= ' -map 0:1' +
-            ' -acodec libfdk_aac' +
+            ' -acodec ' + acodec +
             ' -profile:a aac_eld' +
             ' -flags +global_header' +
             ' -f null' +
