@@ -5,6 +5,7 @@ var debug = require('debug')('ffmpeg');
 var http = require('http');
 var https = require('https');
 var url = require('url');
+var crypto = require('crypto');
 
 var uuid, Service, Characteristic, StreamController;
 
@@ -184,10 +185,16 @@ UFV.prototype.prepareStream = function(request, callback) {
     let targetPort = videoInfo["port"];
     let srtp_key = videoInfo["srtp_key"];
     let srtp_salt = videoInfo["srtp_salt"];
+    
+    // SSRC is a 32 bit integer that is unique per stream
+
+    let ssrcSource = crypto.randomBytes(4);
+    ssrcSource[0] = 0;
+    let ssrc = ssrcSource.readInt32BE(0, true);
 
     let videoResp = {
       port: targetPort,
-      ssrc: 1,
+      ssrc: ssrc,
       srtp_key: srtp_key,
       srtp_salt: srtp_salt
     };
@@ -196,7 +203,7 @@ UFV.prototype.prepareStream = function(request, callback) {
 
     sessionInfo["video_port"] = targetPort;
     sessionInfo["video_srtp"] = Buffer.concat([srtp_key, srtp_salt]);
-    sessionInfo["video_ssrc"] = 1;
+    sessionInfo["video_ssrc"] = ssrc;
   }
 
   let audioInfo = request["audio"];
@@ -204,10 +211,15 @@ UFV.prototype.prepareStream = function(request, callback) {
     let targetPort = audioInfo["port"];
     let srtp_key = audioInfo["srtp_key"];
     let srtp_salt = audioInfo["srtp_salt"];
+    
+    // SSRC is a 32 bit integer that is unique per stream
+    let ssrcSource = crypto.randomBytes(4);
+    ssrcSource[0] = 0;
+    let ssrc = ssrcSource.readInt32BE(0, true);
 
     let audioResp = {
       port: targetPort,
-      ssrc: 1,
+      ssrc: ssrc,
       srtp_key: srtp_key,
       srtp_salt: srtp_salt
     };
@@ -216,7 +228,7 @@ UFV.prototype.prepareStream = function(request, callback) {
 
     sessionInfo["audio_port"] = targetPort;
     sessionInfo["audio_srtp"] = Buffer.concat([srtp_key, srtp_salt]);
-    sessionInfo["audio_ssrc"] = 1;
+    sessionInfo["audio_ssrc"] = ssrc;
   }
 
   let currentAddress = ip.address();
@@ -267,10 +279,11 @@ UFV.prototype.handleStreamRequest = function(request) {
         let targetAddress = sessionInfo["address"];
         let targetVideoPort = sessionInfo["video_port"];
         let videoKey = sessionInfo["video_srtp"];
+        let videoSsrc = sessionInfo["video_ssrc"];
 
         let ffmpegCommand = this.ffmpegSource + ' -threads 0 -vcodec '+vcodec+' -an -pix_fmt yuv420p -r '+
         fps +' -f rawvideo -tune zerolatency -vf scale='+ width +':'+ height +' -b:v '+ bitrate +'k -bufsize '+
-         bitrate +'k -payload_type 99 -ssrc 1 -f rtp -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params '+
+         bitrate +'k -payload_type 99 -ssrc '+ videoSsrc +' -f rtp -srtp_out_suite AES_CM_128_HMAC_SHA1_80 -srtp_out_params '+
          videoKey.toString('base64')+' srtp://'+targetAddress+':'+targetVideoPort+'?rtcpport='+targetVideoPort+
          '&localrtcpport='+targetVideoPort+'&pkt_size=1378';
         console.log(ffmpegCommand);
