@@ -45,9 +45,9 @@ function FFMPEG(hap, cameraConfig) {
   var numberOfStreams = ffmpegOpt.maxStreams || 2;
   var videoResolutions = [];
 
-  this.maxWidth = ffmpegOpt.maxWidth;
-  this.maxHeight = ffmpegOpt.maxHeight;
-  var maxFPS = (ffmpegOpt.maxFPS > 30) ? 30 : ffmpegOpt.maxFPS;
+  this.maxWidth = ffmpegOpt.maxWidth || 1280;
+  this.maxHeight = ffmpegOpt.maxHeight || 720;
+  var maxFPS = (ffmpegOpt.maxFPS > 30) ? 30 : ffmpegOpt.maxFPS || 10;
 
   if (this.maxWidth >= 320) {
     if (this.maxHeight >= 240) {
