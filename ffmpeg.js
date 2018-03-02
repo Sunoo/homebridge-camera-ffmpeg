@@ -23,7 +23,7 @@ function FFMPEG(hap, cameraConfig) {
   this.audio = ffmpegOpt.audio;
   this.acodec = ffmpegOpt.acodec;
   this.packetsize = ffmpegOpt.packetSize
-  this.fps = ffmpegOpt.maxFPS;
+  this.fps = ffmpegOpt.maxFPS || 10;
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -47,7 +47,7 @@ function FFMPEG(hap, cameraConfig) {
 
   this.maxWidth = ffmpegOpt.maxWidth || 1280;
   this.maxHeight = ffmpegOpt.maxHeight || 720;
-  var maxFPS = (ffmpegOpt.maxFPS > 30) ? 30 : ffmpegOpt.maxFPS || 10;
+  var maxFPS = (this.fps > 30) ? 30 : this.fps;
 
   if (this.maxWidth >= 320) {
     if (this.maxHeight >= 240) {
