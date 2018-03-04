@@ -25,6 +25,7 @@ function FFMPEG(hap, cameraConfig, log) {
   this.acodec = ffmpegOpt.acodec;
   this.packetsize = ffmpegOpt.packetSize
   this.fps = ffmpegOpt.maxFPS || 10;
+  this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
 
   if (!ffmpegOpt.source) {
@@ -243,7 +244,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         var width = 1280;
         var height = 720;
         var fps = this.fps || 30;
-        var vbitrate = 300;
+        var vbitrate = this.maxBitrate;
         var abitrate = 32;
         var asamplerate = 16;
         var vcodec = this.vcodec || 'libx264';
@@ -259,8 +260,9 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           if (expectedFPS < fps) {
             fps = expectedFPS;
           }
-
-          vbitrate = videoInfo["max_bit_rate"];
+          if(videoInfo["max_bit_rate"] < vbitrate) {
+            vbitrate = videoInfo["max_bit_rate"];
+          }
         }
 
         let audioInfo = request["audio"];
