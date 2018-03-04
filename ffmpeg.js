@@ -11,11 +11,12 @@ module.exports = {
   FFMPEG: FFMPEG
 };
 
-function FFMPEG(hap, cameraConfig) {
+function FFMPEG(hap, cameraConfig, log) {
   uuid = hap.uuid;
   Service = hap.Service;
   Characteristic = hap.Characteristic;
   StreamController = hap.StreamController;
+  this.log = log;
 
   var ffmpegOpt = cameraConfig.videoConfig;
   this.name = cameraConfig.name;
@@ -24,6 +25,7 @@ function FFMPEG(hap, cameraConfig) {
   this.acodec = ffmpegOpt.acodec;
   this.packetsize = ffmpegOpt.packetSize
   this.fps = ffmpegOpt.maxFPS || 10;
+  this.debug = ffmpegOpt.debug;
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -140,7 +142,8 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
   let ffmpeg = spawn('ffmpeg', (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer(0);
-  console.log("Snapshot",imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
+  this.log("Snapshot from " + this.name + " at " + resolution);
+  if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
@@ -313,8 +316,14 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         }
 
         let ffmpeg = spawn('ffmpeg', ffmpegCommand.split(' '), {env: process.env});
+        this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
+        if(this.debug){
+          console.log("ffmpeg " + ffmpegCommand);
+          ffmpeg.stderr.on('data', function(data) {
+            console.log(data.toString());
+          });
+        }
         this.ongoingSessions[sessionIdentifier] = ffmpeg;
-        console.log("ffmpeg " + ffmpegCommand);
       }
 
       delete this.pendingSessions[sessionIdentifier];
@@ -322,7 +331,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
       var ffmpegProcess = this.ongoingSessions[sessionIdentifier];
       if (ffmpegProcess) {
         ffmpegProcess.kill('SIGKILL');
-        console.log("Stopped ffmpeg");
+        this.log("Stopped ffmpeg");
       }
 
       delete this.ongoingSessions[sessionIdentifier];
