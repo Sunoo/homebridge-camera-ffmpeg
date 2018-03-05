@@ -326,13 +326,14 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
             console.log(data.toString());
           });
         }
+        var self = this;
         ffmpeg.on('close', (code) => {
           if(code == null || code == 0 || code == 255){
-            this.log("Stopped streaming");
+            self.log("Stopped streaming");
           } else {
-            this.log("ERROR: FFmpeg exited with code " + code);
-            for(var i=0; i < this.streamControllers.length; i++){
-              var controller = this.streamControllers[i];
+            self.log("ERROR: FFmpeg exited with code " + code);
+            for(var i=0; i < self.streamControllers.length; i++){
+              var controller = self.streamControllers[i];
               if(controller.sessionIdentifier === sessionID){
                 controller.forceStop();
               }
