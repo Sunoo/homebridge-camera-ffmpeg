@@ -326,6 +326,20 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
             console.log(data.toString());
           });
         }
+        let self = this;
+        ffmpeg.on('close', (code) => {
+          if(code == null || code == 0 || code == 255){
+            self.log("Stopped streaming");
+          } else {
+            self.log("ERROR: FFmpeg exited with code " + code);
+            for(var i=0; i < self.streamControllers.length; i++){
+              var controller = self.streamControllers[i];
+              if(controller.sessionIdentifier === sessionID){
+                controller.forceStop();
+              }
+            }
+          }
+        });
         this.ongoingSessions[sessionIdentifier] = ffmpeg;
       }
 
@@ -333,10 +347,8 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
     } else if (requestType == "stop") {
       var ffmpegProcess = this.ongoingSessions[sessionIdentifier];
       if (ffmpegProcess) {
-        ffmpegProcess.kill('SIGKILL');
-        this.log("Stopped ffmpeg");
+        ffmpegProcess.kill('SIGTERM');
       }
-
       delete this.ongoingSessions[sessionIdentifier];
     }
   }
