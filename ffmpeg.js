@@ -326,7 +326,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
             console.log(data.toString());
           });
         }
-        var self = this;
+        let self = this;
         ffmpeg.on('close', (code) => {
           if(code == null || code == 0 || code == 255){
             self.log("Stopped streaming");
