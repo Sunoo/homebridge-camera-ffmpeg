@@ -331,6 +331,12 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
             this.log("Stopped streaming");
           } else {
             this.log("ERROR: FFmpeg exited with code " + code);
+            for(var i=0; i < this.streamControllers.length; i++){
+              var controller = this.streamControllers[i];
+              if(controller.sessionIdentifier != null && sessionID.equals(controller.sessionIdentifier)){
+                controller.forceStop();
+              }
+            }
           }
         });
         this.ongoingSessions[sessionIdentifier] = ffmpeg;
