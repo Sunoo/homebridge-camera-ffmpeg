@@ -23,7 +23,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
           	"maxStreams": 2,
           	"maxWidth": 1280,
           	"maxHeight": 720,
-          	"maxFPS": 30,
+          	"maxFPS": 30
           }
         }
       ]
