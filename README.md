@@ -4,7 +4,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 
 ## Installation
 
-1. Install ffmpeg on your Mac
+1. Install ffmpeg on your computer
 2. Install this plugin using: npm install -g homebridge-camera-ffmpeg
 3. Edit ``config.json`` and add the camera.
 3. Run Homebridge
@@ -19,7 +19,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
           "name": "Camera Name",
           "videoConfig": {
           	"source": "-re -i rtsp://myfancy_rtsp_stream",
-            "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
+          	"stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg"
           	"maxStreams": 2,
           	"maxWidth": 1280,
           	"maxHeight": 720,
@@ -29,7 +29,17 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       ]
     }
 
-* Optional parameter vcodec, if your running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option.
+#### Optional Parameters
+
+* `maxStreams` is the maximum number of streams that will be generated for this camera, default 2
+* `maxWidth` is the maximum width reported to HomeKit, default 1280
+* `maxHeight` is the maximum height reported to HomeKit, default 720
+* `maxFPS` is the maximum frame rate of the stream, default 10
+* `maxBitrate` is the maximum bit rate of the stream in kbit/s, default 300
+* `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default "libx264"
+* `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default false
+* `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default 1316
+* `debug` Show the output of ffmpeg in the log, default false
 
 ```
 {
@@ -44,7 +54,11 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       	"maxWidth": 1280,
       	"maxHeight": 720,
       	"maxFPS": 30,
-      	"vcodec": "h264_omx"            
+      	"maxBitrate": 200,
+      	"vcodec": "h264_omx",
+      	"audio": true,
+      	"packetSize": 188,
+      	"debug": true
       }
     }
   ]
@@ -55,7 +69,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 
 This is an optional feature that will automatically store every snapshot taken to your Google Drive account as a photo.  This is very useful if you have motion sensor in the same room as the camera, as it will take a snapshot of whatever caused the motion sensor to trigger, and store the image on Google Drive and create a Picture Notification on your iOS device.
 
-The snaphots are stored in a folder called "Camera Pictures", and are named with camera name, date and time of the image.
+The snapshots are stored in a folder called "Camera Pictures", and are named with camera name, date and time of the image.
 
 To enable this feature, please add a new config option "uploader", and follow the steps below.
 
