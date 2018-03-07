@@ -47,10 +47,10 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
         self.log("Missing parameters.");
         return;
       }
-      
+
       var uuid = UUIDGen.generate(cameraName);
       var cameraAccessory = new Accessory(cameraName, uuid, hap.Accessory.Categories.CAMERA);
-      var cameraSource = new FFMPEG(hap, cameraConfig, videoProcessor);
+      var cameraSource = new FFMPEG(hap, cameraConfig, self.log, videoProcessor);
       cameraAccessory.configureCameraSource(cameraSource);
       configuredAccessories.push(cameraAccessory);
     });
