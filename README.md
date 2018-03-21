@@ -65,6 +65,30 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 }
 ```
 
+#### Using another Video Processor
+
+* `videoProcessor` is the video processor used to manage videos. eg: ffmpeg (by default) or avconv or /a/path/to/another/ffmpeg. Need to use the same parameters than ffmpeg.
+
+```
+{
+  "platform": "Camera-ffmpeg",
+  "videoProcessor": "avconv",
+  "cameras": [
+    ...
+  ]
+}
+```
+
+```
+{
+  "platform": "Camera-ffmpeg",
+  "videoProcessor": "/my/own/compiled/ffmpeg",
+  "cameras": [
+    ...
+  ]
+}
+```
+
 ## Uploading to Google Drive of Still Images ( Snapshots )
 
 This is an optional feature that will automatically store every snapshot taken to your Google Drive account as a photo.  This is very useful if you have motion sensor in the same room as the camera, as it will take a snapshot of whatever caused the motion sensor to trigger, and store the image on Google Drive and create a Picture Notification on your iOS device.
