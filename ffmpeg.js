@@ -289,7 +289,8 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           ' ' + additionalCommandline +
           ' -vf scale=' + width + ':' + height +
           ' -b:v ' + vbitrate + 'k' +
-          ' -bufsize ' + vbitrate + 'k' +
+          ' -bufsize ' + vbitrate+ 'k' +
+          ' -maxrate '+ vbitrate + 'k' +
           ' -payload_type 99' +
           ' -ssrc ' + videoSsrc +
           ' -f rtp' +
