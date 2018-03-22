@@ -28,6 +28,7 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.fps = ffmpegOpt.maxFPS || 10;
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
+  this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -251,6 +252,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         var vcodec = this.vcodec || 'libx264';
         var acodec = this.acodec || 'libfdk_aac';
         var packetsize = this.packetsize || 1316; // 188 376
+        var additionalCommandline = this.additionalCommandline ;
 
         let videoInfo = request["video"];
         if (videoInfo) {
@@ -284,10 +286,12 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +
           ' -r ' + fps +
-          ' -f rawvideo -tune zerolatency' +
+          ' -f rawvideo' +
+          ' ' + additionalCommandline +
           ' -vf scale=' + width + ':' + height +
           ' -b:v ' + vbitrate + 'k' +
-          ' -bufsize ' + vbitrate + 'k' +
+          ' -bufsize ' + vbitrate+ 'k' +
+          ' -maxrate '+ vbitrate + 'k' +
           ' -payload_type 99' +
           ' -ssrc ' + videoSsrc +
           ' -f rtp' +
@@ -323,10 +327,16 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
         if(this.debug){
           console.log("ffmpeg " + ffmpegCommand);
-          ffmpeg.stderr.on('data', function(data) {
-            console.log(data.toString());
-          });
         }
+
+        // Always setup hook on stderr. 
+        // Without this streaming stops within one to two minutes.
+        ffmpeg.stderr.on('data', function(data) {
+          // Do not log to the console if debugging is turned off
+          if(this.debug){
+            console.log(data.toString());
+          }
+        });
         let self = this;
         ffmpeg.on('close', (code) => {
           if(code == null || code == 0 || code == 255){
