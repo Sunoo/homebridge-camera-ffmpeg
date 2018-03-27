@@ -231,7 +231,26 @@ FFMPEG.prototype.prepareStream = function(request, callback) {
   response["address"] = addressResp;
   this.pendingSessions[uuid.unparse(sessionID)] = sessionInfo;
 
-  callback(response);
+  var sourcePar = this.ffmpegSource.split(' ');
+  var videoSource = '/dev/video0'
+  for(var i=0;i<sourcePar.length;i++) {
+	  if(sourcePar[i]=='-i') {
+		  videoSource = sourcePar[i+1];
+	  }
+  }
+  const killffmpeg = spawn('fuser', [videoSource,'-u','-k']);
+  killffmpeg.stdout.on('data', (data) => {
+	   //console.log(`stdout: ${data}`);
+  });
+
+  killffmpeg.stderr.on('data', (data) => {
+	   //console.log(`stderr: ${data}`);
+  });
+
+  killffmpeg.on('close', (code) => {
+	   //console.log(`child process exited with code ${code}`);
+        callback(response);
+  });
 }
 
 FFMPEG.prototype.handleStreamRequest = function(request) {
@@ -329,7 +348,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           console.log("ffmpeg " + ffmpegCommand);
         }
 
-        // Always setup hook on stderr. 
+        // Always setup hook on stderr.
         // Without this streaming stops within one to two minutes.
         ffmpeg.stderr.on('data', function(data) {
           // Do not log to the console if debugging is turned off
