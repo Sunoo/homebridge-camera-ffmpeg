@@ -236,7 +236,26 @@ FFMPEG.prototype.prepareStream = function(request, callback) {
   response["address"] = addressResp;
   this.pendingSessions[uuid.unparse(sessionID)] = sessionInfo;
 
-  callback(response);
+  var sourcePar = this.ffmpegSource.split(' ');
+  var videoSource = '/dev/video0'
+  for(var i=0;i<sourcePar.length;i++) {
+	  if(sourcePar[i]=='-i') {
+		  videoSource = sourcePar[i+1];
+	  }
+  }
+  const killffmpeg = spawn('fuser', [videoSource,'-u','-k']);
+  killffmpeg.stdout.on('data', (data) => {
+	   //console.log(`stdout: ${data}`);
+  });
+
+  killffmpeg.stderr.on('data', (data) => {
+	   //console.log(`stderr: ${data}`);
+  });
+
+  killffmpeg.on('close', (code) => {
+	   //console.log(`child process exited with code ${code}`);
+        callback(response);
+  });
 }
 
 FFMPEG.prototype.handleStreamRequest = function(request) {
