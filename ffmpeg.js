@@ -150,6 +150,11 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
+  let self = this;
+  ffmpeg.on('error', function(error){
+    self.log("An error occurs while making snapshot request");
+    self.debug ? self.log(error) : null;
+  });
   ffmpeg.on('close', function(code) {
     if ( this.uploader )
       { this.drive.storePicture(this.name,imageBuffer); }
@@ -329,7 +334,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           console.log("ffmpeg " + ffmpegCommand);
         }
 
-        // Always setup hook on stderr. 
+        // Always setup hook on stderr.
         // Without this streaming stops within one to two minutes.
         ffmpeg.stderr.on('data', function(data) {
           // Do not log to the console if debugging is turned off
@@ -338,6 +343,10 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           }
         });
         let self = this;
+        ffmpeg.on('error', function(error){
+            self.log("An error occurs while making stream request");
+            self.debug ? self.log(error) : null;
+        });
         ffmpeg.on('close', (code) => {
           if(code == null || code == 0 || code == 255){
             self.log("Stopped streaming");
