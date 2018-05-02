@@ -36,6 +36,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 * `maxHeight` is the maximum height reported to HomeKit, default 720
 * `maxFPS` is the maximum frame rate of the stream, default 10
 * `maxBitrate` is the maximum bit rate of the stream in kbit/s, default 300
+* `stillImageUsesCurl` can be set to `true` to fetch the stillImageSource via curl before piping it into the videoprocessor. This is useful if ffmpeg has trouble fetching the url, such as when using currentpic.cgi from https://github.com/EliasKotlyar/Xiaomi-Dafang-Hacks. Requires curl to be installed. Default false.
 * `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default "libx264"
 * `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default false
 * `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default 1316

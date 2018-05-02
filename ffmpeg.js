@@ -36,6 +36,7 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
 
   this.ffmpegSource = ffmpegOpt.source;
   this.ffmpegImageSource = ffmpegOpt.stillImageSource;
+  this.ffmpegImageUsesCurl = ffmpegOpt.stillImageUsesCurl;
 
   this.services = [];
   this.streamControllers = [];
@@ -143,7 +144,19 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   let resolution = request.width + 'x' + request.height;
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
-  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
+  
+  var ffmpeg = null;
+  
+  if (this.ffmpegImageUsesCurl && this.ffmpegImageSource !== undefined) {
+     // extract http:// url from the still image source
+     let url = this.ffmpegImageSource.match(/http:\/\/[^\s]+/);
+     url = (url && url.length > 0) ? url[0] : this.ffmpegImageSource;
+     var fullCmd = 'curl -s \"' + url + '\" | ffmpeg -f mjpeg -i pipe: -s ' + resolution + ' -f image2 -';     
+     ffmpeg = spawn('/bin/sh', ['-c', fullCmd], {env: process.env});
+  } else {
+     ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
+  }
+  
   var imageBuffer = Buffer(0);
   this.log("Snapshot from " + this.name + " at " + resolution);
   if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
