@@ -29,6 +29,8 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
+  this.pollingInterval = parseInt(cameraConfig.pollingInterval || 0) * 1000; // Polling interval in seconds`
+  this.lastImageBuffer = null;
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -132,6 +134,14 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
 
   this.createCameraControlService();
   this._createStreamControllers(numberOfStreams, options);
+
+  if (this.pollingInterval > 0 && this.uploader) {
+    this.log("Starting Polling background service for "+ this.name);
+    var that = this;
+    setTimeout(function() {
+      that.backgroundPolling();
+    }, this.pollingInterval);
+  }
 }
 
 FFMPEG.prototype.handleCloseConnection = function(connectionID) {
@@ -141,6 +151,13 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 }
 
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
+  if (this.pollingInterval && this.lastImageBuffer != null) {
+    this.log("Snapshot from " + this.name + " served from cache");
+    // Serve image from local cache
+    callback(undefined, this.lastImageBuffer);
+    return;
+  }
+
   let resolution = request.width + 'x' + request.height;
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
   let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
@@ -154,11 +171,41 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   ffmpeg.on('error', function(error){
     self.log("An error occurs while making snapshot request");
     self.debug ? self.log(error) : null;
+    if (self.pollingInterval) { 
+      // Reset polling on error
+      setTimeout(function() {
+        self.backgroundPolling();
+      }, self.pollingInterval);
+    }
   });
   ffmpeg.on('close', function(code) {
-    if ( this.uploader )
+    if ( this.uploader && !this.pollingInterval )
       { this.drive.storePicture(this.name,imageBuffer); }
     callback(undefined, imageBuffer);
+  }.bind(this));
+}
+
+FFMPEG.prototype.backgroundPolling = function() {
+  this.log("Polling image from "+ this.name +"...");
+  this.lastImageBuffer = null;
+  this.handleSnapshotRequest({width: this.maxWidth, height: this.maxHeight}, function(foo, imageBuffer) {
+    let pollingInterval = this.pollingInterval;
+
+    if (imageBuffer.byteLength) { // Check if buffer is valid
+      this.drive.storePicture(this.name, imageBuffer);
+      if (this.pollingInterval <= 60) { // Store imageBuffer only when interval is lower than 1 minute
+        this.lastImageBuffer = imageBuffer;
+      }
+    } else {
+      pollingInterval = 2*60*1000; // Wait 2 minutes (should be enought to cool down broken camera)
+      this.log("Unable to get image for "+ this.name);
+    }
+
+    // Reinitialize timer
+    var that = this;
+    setTimeout(function() {
+      that.backgroundPolling();
+    }, pollingInterval);
   }.bind(this));
 }
 

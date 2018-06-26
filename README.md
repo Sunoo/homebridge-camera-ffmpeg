@@ -130,6 +130,8 @@ https://developers.google.com/drive/v3/web/quickstart/nodejs
 * Skip Step 2 and 3
 * And in step 4, use the quickstart.js included in the plugin itself.  And to do this you need to run the command from the plugin directory.  Then just follow steps a to c
 
+* Add the option "pollingInterval", if you're willing to receive static image from camera every `n` seconds (use this, if you don't want to use any motion detection to enable camera)
+
 ## Tested configurations
 
 We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).  Also if you have a working configuration that you would like to share, please add it to the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).
