@@ -19,7 +19,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
           "name": "Camera Name",
           "videoConfig": {
           	"source": "-re -i rtsp://myfancy_rtsp_stream",
-          	"stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg"
+          	"stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
           	"maxStreams": 2,
           	"maxWidth": 1280,
           	"maxHeight": 720,
