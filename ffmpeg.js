@@ -144,11 +144,20 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   let resolution = request.width + 'x' + request.height;
+
+  var vf = ['scale=' + request.width + ':' + request.height];
+  if(this.hflip) {
+    vf.push('hflip');
+  }
+  if(this.vflip) {
+    vf.push('vflip');
+  }
+  
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
-  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
+  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -vf ' + vf.join(',') + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer(0);
   this.log("Snapshot from " + this.name + " at " + resolution);
-  if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
+  if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -vf ' + vf.join(',') + ' -f image2 -');
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
@@ -293,7 +302,6 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         if(this.hflip) {
           vf.push('hflip');
         }
-
         if(this.vflip) {
           vf.push('vflip');
         }
