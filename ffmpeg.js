@@ -5,6 +5,7 @@ var crypto = require('crypto');
 var fs = require('fs');
 var ip = require('ip');
 var spawn = require('child_process').spawn;
+var spawnSync = require('child_process').spawnSync;
 var drive = require('./drive').drive;
 
 module.exports = {
@@ -19,6 +20,7 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.log = log;
 
   var ffmpegOpt = cameraConfig.videoConfig;
+  this.videoConfig = cameraConfig.videoConfig;
   this.name = cameraConfig.name;
   this.vcodec = ffmpegOpt.vcodec;
   this.videoProcessor = videoProcessor || 'ffmpeg';
@@ -143,6 +145,11 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   let resolution = request.width + 'x' + request.height;
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
+
+  if (imageSource == "arlo") {
+    imageSource = "-i " + this.retrieveArloURL("presignedLastImageUrl");
+  }
+
   let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer(0);
   this.log("Snapshot from " + this.name + " at " + resolution);
@@ -287,7 +294,17 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let audioKey = sessionInfo["audio_srtp"];
         let audioSsrc = sessionInfo["audio_ssrc"];
 
-        let ffmpegCommand = this.ffmpegSource + ' -map 0:0' +
+        var videoSource = this.ffmpegSource;
+        var videoStreamMapping = ' -map 0:0';
+        var audioStreamMapping = ' -map 0:1';
+
+        if (videoSource == "arlo") {
+          videoSource = "-rtsp_transport tcp -re -i " + this.retrieveArloURL("getStreamingURL");
+          videoStreamMapping = ' -map 0:1';
+          audioStreamMapping = ' -map 0:0';
+        }
+
+        let ffmpegCommand = videoSource + videoStreamMapping +
           ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +
           ' -r ' + fps +
@@ -308,7 +325,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           '&pkt_size=' + packetsize;
 
         if(this.audio){
-          ffmpegCommand+= ' -map 0:1' +
+          ffmpegCommand+= audioStreamMapping +
             ' -acodec ' + acodec +
             ' -profile:a aac_eld' +
             ' -flags +global_header' +
@@ -383,6 +400,24 @@ FFMPEG.prototype.createCameraControlService = function() {
     var microphoneService = new Service.Microphone();
     this.services.push(microphoneService);
   }
+}
+
+FFMPEG.prototype.retrieveArloURL = function(urlType) {
+
+  if (this.debug)
+    this.log("Retrieving Arlo URL for camera index : " + this.videoConfig.arloCameraIndex);
+
+  var scriptExecution = spawnSync("python", [__dirname+'/arlo.py', this.videoConfig.arloUserName, this.videoConfig.arloPassword, urlType, this.videoConfig.arloCameraIndex], {env: process.env});
+
+  var arloUrl = scriptExecution.stdout.toString().trim();
+
+  if (scriptExecution.stderr.toString().length > 0)
+    console.log("error : " + scriptExecution.stderr.toString())
+
+  if(this.debug)
+    this.log(arloUrl);
+
+  return arloUrl;
 }
 
 // Private

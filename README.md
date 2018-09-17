@@ -89,6 +89,47 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 }
 ```
 
+#### Using Arlo cameras
+
+In order to use this plugin with Arlo cameras, first install Jeffrey Walter's [Arlo library](https://github.com/jeffreydwalter/arlo).
+
+Then, configure the following parameters under `videoConfig`:
+
+* `source` This should be set to `arlo`
+* `stillImageSource` This parameter should not be set.
+* `arloUserName` Your arlo account email address.
+* `arloPassword` Your arlo account password.
+* `arloCameraIndex` Index of the Arlo camera to configure. First arlo camera on your account starts at index 0.
+* `audio` Set to `false`. Audio is not currently supported with Arlo.
+
+> Note : Arlo support is experimental. I've only tested it with Arlo Pro 2 cameras. YMMV.
+
+```
+{
+  "platform": "Camera-ffmpeg",
+  "cameras": [
+    {
+      "name": "Camera Name",
+      "videoConfig": {
+      	"source": "arlo",
+      	"maxStreams": 2,
+      	"maxWidth": 1280,
+      	"maxHeight": 720,
+      	"maxFPS": 30,
+      	"maxBitrate": 300,
+      	"vcodec": "h264_omx",
+      	"audio": false,
+      	"debug": true,
+        "arloUserName": "email@provider.com",
+        "arloPassword": "<your arlo password>",
+        "arloCameraIndex": "0"
+      }
+    }
+  ]
+}
+```
+
+
 ## Uploading to Google Drive of Still Images ( Snapshots )
 
 This is an optional feature that will automatically store every snapshot taken to your Google Drive account as a photo.  This is very useful if you have motion sensor in the same room as the camera, as it will take a snapshot of whatever caused the motion sensor to trigger, and store the image on Google Drive and create a Picture Notification on your iOS device.
