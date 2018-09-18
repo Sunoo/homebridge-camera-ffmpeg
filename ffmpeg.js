@@ -305,15 +305,19 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         }
 
         let ffmpegCommand = videoSource + videoStreamMapping +
-          ' -vcodec ' + vcodec +
-          ' -pix_fmt yuv420p' +
-          ' -r ' + fps +
-          ' -f rawvideo' +
+          ' -vcodec ' + vcodec;
+
+        if (vcodec != "copy") {
+            ffmpegCommand += ' -pix_fmt yuv420p' +
+              ' -r ' + fps +
+              ' -vf scale=' + width + ':' + height +
+              ' -b:v ' + vbitrate + 'k' +
+              ' -bufsize ' + vbitrate+ 'k' +
+              ' -maxrate '+ vbitrate + 'k';
+        }
+
+        ffmpegCommand += ' -f rawvideo' +
           ' ' + additionalCommandline +
-          ' -vf scale=' + width + ':' + height +
-          ' -b:v ' + vbitrate + 'k' +
-          ' -bufsize ' + vbitrate+ 'k' +
-          ' -maxrate '+ vbitrate + 'k' +
           ' -payload_type 99' +
           ' -ssrc ' + videoSsrc +
           ' -f rtp' +
@@ -323,6 +327,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           '?rtcpport=' + targetVideoPort +
           '&localrtcpport=' + targetVideoPort +
           '&pkt_size=' + packetsize;
+
 
         if(this.audio){
           ffmpegCommand+= audioStreamMapping +

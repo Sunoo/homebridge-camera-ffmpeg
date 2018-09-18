@@ -101,8 +101,9 @@ Then, configure the following parameters under `videoConfig`:
 * `arloPassword` Your arlo account password.
 * `arloCameraIndex` Index of the Arlo camera to configure. First arlo camera on your account starts at index 0.
 * `audio` Set to `false`. Audio is not currently supported with Arlo.
+* `vcodec` Takes the usual parameters. Setting it to `copy` makes the video start faster and gives you better quality streaming.
 
-> Note : Arlo support is experimental. I've only tested it with Arlo Pro 2 cameras. YMMV.
+> Note : Arlo support is still experimental. I've only tested it with Arlo Pro 2 cameras. YMMV.
 
 ```
 {
@@ -117,7 +118,7 @@ Then, configure the following parameters under `videoConfig`:
       	"maxHeight": 720,
       	"maxFPS": 30,
       	"maxBitrate": 300,
-      	"vcodec": "h264_omx",
+      	"vcodec": "copy",
       	"audio": false,
       	"debug": true,
         "arloUserName": "email@provider.com",
