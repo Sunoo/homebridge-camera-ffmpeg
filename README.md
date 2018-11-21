@@ -35,7 +35,9 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 * `maxWidth` is the maximum width reported to HomeKit, default 1280
 * `maxHeight` is the maximum height reported to HomeKit, default 720
 * `maxFPS` is the maximum frame rate of the stream, default 10
+* `minBitrate` is the minimum bit rate of the stream in kbit/s, default 0
 * `maxBitrate` is the maximum bit rate of the stream in kbit/s, default 300
+* `preserveRatio` can be set to either `W` or `H` with respective obvious meanings, all other values have no effect
 * `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default "libx264"
 * `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default false
 * `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default 1316
