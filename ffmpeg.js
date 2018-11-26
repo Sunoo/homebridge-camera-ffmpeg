@@ -20,22 +20,22 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
 
   var ffmpegOpt = cameraConfig.videoConfig;
   this.name = cameraConfig.name;
-  this.vcodec = ffmpegOpt.vcodec;
+  this.vcodec = ffmpegOpt.vcodec || 'libx264';
   this.videoProcessor = videoProcessor || 'ffmpeg';
   this.audio = ffmpegOpt.audio;
-  this.acodec = ffmpegOpt.acodec;
-  this.packetsize = ffmpegOpt.packetSize
-  this.fps = ffmpegOpt.maxFPS || 10;
+  this.acodec = ffmpegOpt.acodec || 'libfdk_aac';
+  this.packetsize = ffmpegOpt.packetSize || 1316; // 188 376
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
+  this.global_options = ffmpegOpt.global_options || '';
+  this.input_options = ffmpegOpt.input_options || '';
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
   }
-
-  this.ffmpegSource = ffmpegOpt.source;
-  this.ffmpegImageSource = ffmpegOpt.stillImageSource;
+  this.input_url = ffmpegOpt.source;
+  this.input_url_image = ffmpegOpt.stillImageSource !== undefined ? ffmpegOpt.stillImageSource : ffmpegOpt.source;
 
   this.services = [];
   this.streamControllers = [];
@@ -52,19 +52,20 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
 
   this.maxWidth = ffmpegOpt.maxWidth || 1280;
   this.maxHeight = ffmpegOpt.maxHeight || 720;
-  var maxFPS = (this.fps > 30) ? 30 : this.fps;
+  let fps = ffmpegOpt.maxFPS || 30;
+  this.maxFPS = (fps > 30) ? 30 : fps;
 
   if (this.maxWidth >= 320) {
     if (this.maxHeight >= 240) {
-      videoResolutions.push([320, 240, maxFPS]);
-      if (maxFPS > 15) {
+      videoResolutions.push([320, 240, this.maxFPS]);
+      if (this.maxFPS > 15) {
         videoResolutions.push([320, 240, 15]);
       }
     }
 
     if (this.maxHeight >= 180) {
-      videoResolutions.push([320, 180, maxFPS]);
-      if (maxFPS > 15) {
+      videoResolutions.push([320, 180, this.maxFPS]);
+      if (this.maxFPS > 15) {
         videoResolutions.push([320, 180, 15]);
       }
     }
@@ -72,37 +73,37 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
 
   if (this.maxWidth >= 480) {
     if (this.maxHeight >= 360) {
-      videoResolutions.push([480, 360, maxFPS]);
+      videoResolutions.push([480, 360, this.maxFPS]);
     }
 
     if (this.maxHeight >= 270) {
-      videoResolutions.push([480, 270, maxFPS]);
+      videoResolutions.push([480, 270, this.maxFPS]);
     }
   }
 
   if (this.maxWidth >= 640) {
     if (this.maxHeight >= 480) {
-      videoResolutions.push([640, 480, maxFPS]);
+      videoResolutions.push([640, 480, this.maxFPS]);
     }
 
     if (this.maxHeight >= 360) {
-      videoResolutions.push([640, 360, maxFPS]);
+      videoResolutions.push([640, 360, this.maxFPS]);
     }
   }
 
   if (this.maxWidth >= 1280) {
     if (this.maxHeight >= 960) {
-      videoResolutions.push([1280, 960, maxFPS]);
+      videoResolutions.push([1280, 960, this.maxFPS]);
     }
 
     if (this.maxHeight >= 720) {
-      videoResolutions.push([1280, 720, maxFPS]);
+      videoResolutions.push([1280, 720, this.maxFPS]);
     }
   }
 
   if (this.maxWidth >= 1920) {
     if (this.maxHeight >= 1080) {
-      videoResolutions.push([1920, 1080, maxFPS]);
+      videoResolutions.push([1920, 1080, this.maxFPS]);
     }
   }
 
@@ -141,9 +142,16 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 }
 
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
-  let resolution = request.width + 'x' + request.height;
-  var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
-  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
+  let global_options = '';
+  let input_options = '';
+  let input_url = this.input_url_image;
+  let output_options = ' -f image2 -t 1 -s '+ request.width + 'x' + request.height;
+  let output_url = ' -';
+  let ffmpeg = spawn(this.videoProcessor, (global_options + input_options + '-i '+ input_url + output_options + output_url).replace(/\s\s+/g, '').split(' '), {env: process.env});
+
+  this.log("Snapshot from " + this.name + " at " + request.width + 'x' + request.height);
+  if(this.debug) console.log(this.videoProcessor + ' ' + global_options + input_options + '-i '+ input_url + output_options + output_url);
+
   var imageBuffer = Buffer(0);
   this.log("Snapshot from " + this.name + " at " + resolution);
   if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
@@ -248,15 +256,15 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
     if (requestType == "start") {
       var sessionInfo = this.pendingSessions[sessionIdentifier];
       if (sessionInfo) {
-        var width = 1280;
-        var height = 720;
-        var fps = this.fps || 30;
+        var width = this.maxWidth;
+        var height = this.maxHeight;
+        var fps = this.maxFPS;
         var vbitrate = this.maxBitrate;
         var abitrate = 32;
         var asamplerate = 16;
-        var vcodec = this.vcodec || 'libx264';
-        var acodec = this.acodec || 'libfdk_aac';
-        var packetsize = this.packetsize || 1316; // 188 376
+        var vcodec = this.vcodec;
+        var acodec = this.acodec;
+        var packetsize = this.packetsize;
         var additionalCommandline = this.additionalCommandline ;
 
         let videoInfo = request["video"];
@@ -287,16 +295,24 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let audioKey = sessionInfo["audio_srtp"];
         let audioSsrc = sessionInfo["audio_ssrc"];
 
-        let ffmpegCommand = this.ffmpegSource + ' -map 0:0' +
-          ' -vcodec ' + vcodec +
+        let output_options_vcodec = ' -vcodec ' + vcodec;
+        if (vcodec != 'copy') {
+          output_options_vcodec +=
           ' -pix_fmt yuv420p' +
           ' -r ' + fps +
-          ' -f rawvideo' +
           ' ' + additionalCommandline +
           ' -vf scale=' + width + ':' + height +
           ' -b:v ' + vbitrate + 'k' +
           ' -bufsize ' + vbitrate+ 'k' +
-          ' -maxrate '+ vbitrate + 'k' +
+          ' -maxrate '+ vbitrate + 'k';
+        }
+
+        let output_options_video =
+          ' -map 0:0' +
+          ' -f rawvideo' +
+          output_options_vcodec;
+
+        let output_url_video =
           ' -payload_type 99' +
           ' -ssrc ' + videoSsrc +
           ' -f rtp' +
@@ -307,31 +323,49 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           '&localrtcpport=' + targetVideoPort +
           '&pkt_size=' + packetsize;
 
-        if(this.audio){
-          ffmpegCommand+= ' -map 0:1' +
-            ' -acodec ' + acodec +
-            ' -profile:a aac_eld' +
-            ' -flags +global_header' +
-            ' -f null' +
-            ' -ar ' + asamplerate + 'k' +
+        let output_options_acodec = ' -acodec ' + acodec;
+        if (acodec != 'copy') {
+          output_options_acodec += 
             ' -b:a ' + abitrate + 'k' +
+            ' -ar ' + asamplerate + 'k' +
             ' -bufsize ' + abitrate + 'k' +
-            ' -ac 1' +
-            ' -payload_type 110' +
-            ' -ssrc ' + audioSsrc +
-            ' -f rtp' +
-            ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-            ' -srtp_out_params ' + audioKey.toString('base64') +
-            ' srtp://' + targetAddress + ':' + targetAudioPort +
-            '?rtcpport=' + targetAudioPort +
-            '&localrtcpport=' + targetAudioPort +
-            '&pkt_size=' + packetsize;
+            ' -ac 1';
+        }
+        if (acodec == 'libfdk_aac') {
+          output_options_acodec +=
+            ' -profile:a aac_eld' +
+            ' -flags +global_header';
+        } else if (acodec == 'libopus') {
+          output_options_acodec +=
+            ' -vbr on' +
+            ' -compression_level 5';
         }
 
-        let ffmpeg = spawn(this.videoProcessor, ffmpegCommand.split(' '), {env: process.env});
-        this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
+        let output_options_audio =
+          ' -map 0:1' +
+          ' -f null' +
+          output_options_acodec;
+
+        let output_url_audio =
+          ' -payload_type 110' +
+          ' -ssrc ' + audioSsrc +
+          ' -f rtp' +
+          ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+          ' -srtp_out_params ' + audioKey.toString('base64') +
+          ' srtp://' + targetAddress + ':' + targetAudioPort +
+          '?rtcpport=' + targetAudioPort +
+          '&localrtcpport=' + targetAudioPort +
+          '&pkt_size=' + packetsize;
+
+        let global_options = this.global_options != '' ? this.global_options + ' ' :  '';
+        let input_options = this.input_options != '' ? this.input_options + ' ' :  '';
+        let input_url = this.input_url;
+        let output_video = output_options_video + output_url_video;
+        let output_audio = (this.audio ? output_options_audio + output_url_audio : '');
+        let ffmpeg = spawn(this.videoProcessor, (global_options + input_options + '-i ' + input_url + output_video + output_audio).replace(/\s\s+/g, '').split(' '), {env: process.env});
+        this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + fps + "fps" + vbitrate + "kBit");
         if(this.debug){
-          console.log("ffmpeg " + ffmpegCommand);
+          console.log(this.videoProcessor + ' ' + global_options + input_options + '-i ' + input_url + output_video + output_audio);
         }
 
         // Always setup hook on stderr.
