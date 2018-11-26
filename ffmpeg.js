@@ -5,6 +5,7 @@ var crypto = require('crypto');
 var fs = require('fs');
 var ip = require('ip');
 var spawn = require('child_process').spawn;
+const spawnSync = require('child_process').spawnSync;
 var drive = require('./drive').drive;
 
 module.exports = {
@@ -50,60 +51,119 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   var numberOfStreams = ffmpegOpt.maxStreams || 2;
   var videoResolutions = [];
 
-  this.maxWidth = ffmpegOpt.maxWidth || 1280;
-  this.maxHeight = ffmpegOpt.maxHeight || 720;
+  this.maxWidth = ffmpegOpt.maxWidth || 1920;
+  this.maxHeight = ffmpegOpt.maxHeight || 1080;
   let fps = ffmpegOpt.maxFPS || 30;
   this.maxFPS = (fps > 30) ? 30 : fps;
 
-  if (this.maxWidth >= 320) {
-    if (this.maxHeight >= 240) {
-      videoResolutions.push([320, 240, this.maxFPS]);
-      if (this.maxFPS > 15) {
-        videoResolutions.push([320, 240, 15]);
+  this.vcopy = false;
+  const ffprobe = spawnSync('ffprobe', ('-v error -print_format json -select_streams v:0 -show_entries stream=codec_name,width,height ' + this.input_url).split(' '), {env: process.env});
+  if (!(ffprobe.error)) {
+    var probe = JSON.parse(ffprobe.stdout);
+    if (probe['streams'] && probe['streams'][0]['width'] <= this.maxWidth && probe['streams'][0]['height'] <= this.maxHeight) {
+      this.maxWidth = probe['streams'][0]['width'];
+      this.maxHeigth = probe['streams'][0]['height'];
+      if (probe['streams'][0]['codec_name'] == 'h264' && (
+        (this.maxWidth == 1920 && this.maxHeight == 1080) ||
+        (this.maxWidth == 1280 && this.maxHeight ==  960) ||
+        (this.maxWidth == 1280 && this.maxHeight ==  720) ||
+        (this.maxWidth == 1024 && this.maxHeight ==  768) ||
+        (this.maxWidth ==  640 && this.maxHeight ==  480) ||
+        (this.maxWidth ==  640 && this.maxHeight ==  360) ||
+        (this.maxWidth ==  480 && this.maxHeight ==  360) ||
+        (this.maxWidth ==  480 && this.maxHeight ==  270) ||
+        (this.maxWidth ==  320 && this.maxHeight ==  240) ||
+        (this.maxWidth ==  320 && this.maxHeight ==  180))) {
+        this.vcopy = true;
       }
     }
+  }
 
-    if (this.maxHeight >= 180) {
+  if (this.vcopy){
+    if (this.maxWidth == 1920 || this.maxWidth == 1280 || this.maxWidth == 1024) {
+      videoResolutions.push([this.maxWidth, this.maxHeight, this.maxFPS]);
+      videoResolutions.push([640, 480, this.maxFPS]);
+      videoResolutions.push([640, 360, this.maxFPS]);
+      videoResolutions.push([480, 360, this.maxFPS]);
+      videoResolutions.push([480, 270, this.maxFPS]);
+      videoResolutions.push([320, 240, this.maxFPS]);
       videoResolutions.push([320, 180, this.maxFPS]);
       if (this.maxFPS > 15) {
+        videoResolutions.push([320, 240, 15]);
         videoResolutions.push([320, 180, 15]);
       }
-    }
-  }
-
-  if (this.maxWidth >= 480) {
-    if (this.maxHeight >= 360) {
+    } else if (this.maxWidth == 640) {
+      videoResolutions.push([this.maxWidth, this.MaxHeight, this.maxFPS]);
       videoResolutions.push([480, 360, this.maxFPS]);
-    }
-
-    if (this.maxHeight >= 270) {
       videoResolutions.push([480, 270, this.maxFPS]);
+      videoResolutions.push([320, 240, this.maxFPS]);
+      videoResolutions.push([320, 180, this.maxFPS]);
+      if (this.maxFPS > 15) {
+        videoResolutions.push([320, 240, 15]);
+        videoResolutions.push([320, 180, 15]);
+      }
+    } else if (this.maxWidth == 480) {
+      videoResolutions.push([this.maxWidth, this.MaxHeight, this.maxFPS]);
+      videoResolutions.push([320, 240, this.maxFPS]);
+      videoResolutions.push([320, 180, this.maxFPS]);
+      if (this.maxFPS > 15) {
+        videoResolutions.push([320, 240, 15]);
+        videoResolutions.push([320, 180, 15]);
+      }
+    } else {
+      videoResolutions.push([this.maxWidth, this.MaxHeight, this.maxFPS]);
     }
-  }
+  } else {
+    if (this.maxWidth >= 320) {
+      if (this.maxHeight >= 240) {
+        videoResolutions.push([320, 240, this.maxFPS]);
+        if (this.maxFPS > 15) {
+          videoResolutions.push([320, 240, 15]);
+        }
+      }
 
-  if (this.maxWidth >= 640) {
-    if (this.maxHeight >= 480) {
-      videoResolutions.push([640, 480, this.maxFPS]);
+      if (this.maxHeight >= 180) {
+        videoResolutions.push([320, 180, this.maxFPS]);
+        if (this.maxFPS > 15) {
+          videoResolutions.push([320, 180, 15]);
+        }
+      }
     }
 
-    if (this.maxHeight >= 360) {
-      videoResolutions.push([640, 360, this.maxFPS]);
-    }
-  }
+    if (this.maxWidth >= 480) {
+      if (this.maxHeight >= 360) {
+        videoResolutions.push([480, 360, this.maxFPS]);
+      }
 
-  if (this.maxWidth >= 1280) {
-    if (this.maxHeight >= 960) {
-      videoResolutions.push([1280, 960, this.maxFPS]);
+      if (this.maxHeight >= 270) {
+        videoResolutions.push([480, 270, this.maxFPS]);
+      }
     }
 
-    if (this.maxHeight >= 720) {
-      videoResolutions.push([1280, 720, this.maxFPS]);
-    }
-  }
+    if (this.maxWidth >= 640) {
+      if (this.maxHeight >= 480) {
+        videoResolutions.push([640, 480, this.maxFPS]);
+      }
 
-  if (this.maxWidth >= 1920) {
-    if (this.maxHeight >= 1080) {
-      videoResolutions.push([1920, 1080, this.maxFPS]);
+      if (this.maxHeight >= 360) {
+        videoResolutions.push([640, 360, this.maxFPS]);
+      }
+    }
+
+    if (this.maxWidth >= 1280) {
+      if (this.maxHeight >= 960) {
+        videoResolutions.push([1280, 960, this.maxFPS]);
+      }
+
+      if (this.maxHeight >= 720) {
+        videoResolutions.push([1280, 720, this.maxFPS]);
+      }
+    }
+
+    if (this.maxWidth >= 1920) {
+      if (this.maxHeight >= 1080) {
+        videoResolutions.push([1920, 1080, this.maxFPS]);
+      }
     }
   }
 
@@ -203,6 +263,9 @@ FFMPEG.prototype.prepareStream = function(request, callback) {
     sessionInfo["video_port"] = targetPort;
     sessionInfo["video_srtp"] = Buffer.concat([srtp_key, srtp_salt]);
     sessionInfo["video_ssrc"] = ssrc;
+  }
+  if (this.vcopy && width == this.maxWidth && height == this.maxHeight) {
+    vcodec = 'copy';
   }
 
   let audioInfo = request["audio"];
