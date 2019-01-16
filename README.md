@@ -40,6 +40,8 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 * `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default false
 * `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default 1316
 * `debug` Show the output of ffmpeg in the log, default false
+* `additionalCommandline` Allows additional of extra command line options
+* `overrideArgs` Allows overriding all arguments. **Note:** You will need to specify every option, so it is best to ensure the command works with the video processor (i.e. FFmpeg) directly
 
 ```
 {

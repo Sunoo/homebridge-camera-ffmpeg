@@ -29,6 +29,7 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
+  this.overrideArgs = ffmpegOpt.overrideArgs || '';
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -287,7 +288,8 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let audioKey = sessionInfo["audio_srtp"];
         let audioSsrc = sessionInfo["audio_ssrc"];
 
-        let ffmpegCommand = this.ffmpegSource + ' -map 0:0' +
+        let fcmd = this.ffmpegSource + ' ';
+        let ffmpegCommand = ' -map 0:0' +
           ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +
           ' -r ' + fps +
@@ -328,7 +330,9 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
             '&pkt_size=' + packetsize;
         }
 
-        let ffmpeg = spawn(this.videoProcessor, ffmpegCommand.split(' '), {env: process.env});
+        fcmd += (!this.overrideArgs ? ffmpegCommand.split(' ') : this.overrideArgs);
+
+        let ffmpeg = spawn(this.videoProcessor, fcmd, {env: process.env});
         this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
         if(this.debug){
           console.log("ffmpeg " + ffmpegCommand);
