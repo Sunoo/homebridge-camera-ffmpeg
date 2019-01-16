@@ -29,7 +29,8 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
-  this.overrideArgs = ffmpegOpt.overrideArgs || '';
+  this.overrideVideoArgs = ffmpegOpt.overrideVideoArgs || '';
+  this.overrideAudioArgs = ffmpegOpt.overrideAudioArgs || '';
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -289,7 +290,8 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let audioSsrc = sessionInfo["audio_ssrc"];
 
         let fcmd = this.ffmpegSource + ' ';
-        let ffmpegCommand = ' -map 0:0' +
+
+        let ffmpegVideoArgs = ' -map 0:0' +
           ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +
           ' -r ' + fps +
@@ -299,8 +301,9 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           ' -b:v ' + vbitrate + 'k' +
           ' -bufsize ' + vbitrate+ 'k' +
           ' -maxrate '+ vbitrate + 'k' +
-          ' -payload_type 99' +
-          ' -ssrc ' + videoSsrc +
+          ' -payload_type 99';
+
+        let ffmpegVideoStream = ' -ssrc ' + videoSsrc +
           ' -f rtp' +
           ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
           ' -srtp_out_params ' + videoKey.toString('base64') +
@@ -309,29 +312,37 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           '&localrtcpport=' + targetVideoPort +
           '&pkt_size=' + packetsize;
 
-        if(this.audio){
-          ffmpegCommand+= ' -map 0:1' +
-            ' -acodec ' + acodec +
-            ' -profile:a aac_eld' +
-            ' -flags +global_header' +
-            ' -f null' +
-            ' -ar ' + asamplerate + 'k' +
-            ' -b:a ' + abitrate + 'k' +
-            ' -bufsize ' + abitrate + 'k' +
-            ' -ac 1' +
-            ' -payload_type 110' +
-            ' -ssrc ' + audioSsrc +
-            ' -f rtp' +
-            ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-            ' -srtp_out_params ' + audioKey.toString('base64') +
-            ' srtp://' + targetAddress + ':' + targetAudioPort +
-            '?rtcpport=' + targetAudioPort +
-            '&localrtcpport=' + targetAudioPort +
-            '&pkt_size=' + packetsize;
+        // build required video arguments
+        fcmd += (this.overrideVideoArgs ? this.overrideVideoArgs : ffmpegVideoArgs.split(' '));
+        fcmd += ffmpegVideoStream.split(' ');
+
+        // build optional audio arguments
+        if(this.audio) {
+          let ffmpegAudioArgs = ' -map 0:1' +
+              ' -acodec ' + acodec +
+              ' -profile:a aac_eld' +
+              ' -flags +global_header' +
+              ' -f null' +
+              ' -ar ' + asamplerate + 'k' +
+              ' -b:a ' + abitrate + 'k' +
+              ' -bufsize ' + abitrate + 'k' +
+              ' -ac 1' +
+              ' -payload_type 110';
+
+          let ffmpegAudioStream = ' -ssrc ' + audioSsrc +
+              ' -f rtp' +
+              ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+              ' -srtp_out_params ' + audioKey.toString('base64') +
+              ' srtp://' + targetAddress + ':' + targetAudioPort +
+              '?rtcpport=' + targetAudioPort +
+              '&localrtcpport=' + targetAudioPort +
+              '&pkt_size=' + packetsize;
+
+          fcmd += (this.overrideAudioArgs ? this.overideAudioArgs : ffmpegAudioArgs.split(''));
+          fcmd += ffmpegAudioStream.split(' ')
         }
 
-        fcmd += (!this.overrideArgs ? ffmpegCommand.split(' ') : this.overrideArgs);
-
+        // start the process
         let ffmpeg = spawn(this.videoProcessor, fcmd, {env: process.env});
         this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
         if(this.debug){

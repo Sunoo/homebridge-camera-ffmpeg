@@ -41,7 +41,8 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 * `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default 1316
 * `debug` Show the output of ffmpeg in the log, default false
 * `additionalCommandline` Allows additional of extra command line options
-* `overrideArgs` Allows overriding all arguments. **Note:** You will need to specify every option, so it is best to ensure the command works with the video processor (i.e. FFmpeg) directly
+* `overrideVideoArgs` Allows overriding video arguments. **Note:** It is best to ensure the command works with the process (i.e. FFmpeg) directly
+* `overrideAudioArgs` Allows overriding audio arguments. **Note:** It is best to ensure the command works with the process (i.e. FFmpeg) directly
 
 ```
 {
