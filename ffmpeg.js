@@ -28,6 +28,8 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.fps = ffmpegOpt.maxFPS || 10;
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
+  this.hflip = ffmpegOpt.hflip;
+  this.vflip = ffmpegOpt.vflip;
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
 
   if (!ffmpegOpt.source) {
@@ -286,6 +288,15 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let targetAudioPort = sessionInfo["audio_port"];
         let audioKey = sessionInfo["audio_srtp"];
         let audioSsrc = sessionInfo["audio_ssrc"];
+        
+        var vf = ['scale=' + width + ':' + height];
+        if(this.hflip) {
+          vf.push('hflip');
+        }
+
+        if(this.vflip) {
+          vf.push('vflip');
+        }
 
         let ffmpegCommand = this.ffmpegSource + ' -map 0:0' +
           ' -vcodec ' + vcodec +
@@ -293,7 +304,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           ' -r ' + fps +
           ' -f rawvideo' +
           ' ' + additionalCommandline +
-          ' -vf scale=' + width + ':' + height +
+          ' -vf ' + vf.join(',') +
           ' -b:v ' + vbitrate + 'k' +
           ' -bufsize ' + vbitrate+ 'k' +
           ' -maxrate '+ vbitrate + 'k' +
