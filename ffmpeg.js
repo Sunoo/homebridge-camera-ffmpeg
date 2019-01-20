@@ -152,10 +152,10 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
     vf.push('vflip');
   }
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
-  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -vf ' + vf.join(',') + ' -f image2 -').split(' '), {env: process.env});
+  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 5 -vf ' + vf.join(',') + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer.alloc(0);
   this.log("Snapshot from " + this.name + " at " + resolution);
-  if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -vf ' + vf.join(',') + ' -f image2 -');
+  if(this.debug) console.log('ffmpeg '+imageSource + ' -t 5 -vf ' + vf.join(',') + ' -f image2 -');
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
