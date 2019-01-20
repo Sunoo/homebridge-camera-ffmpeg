@@ -38,6 +38,8 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 * `maxBitrate` is the maximum bit rate of the stream in kbit/s, default 300
 * `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default "libx264"
 * `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default false
+* `hflip` Flips the stram horizontally, default false
+* `vflip` Flips the stram vertically, default false
 * `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default 1316
 * `debug` Show the output of ffmpeg in the log, default false
 
@@ -57,6 +59,8 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       	"maxBitrate": 200,
       	"vcodec": "h264_omx",
       	"audio": true,
+        "vflip": true,
+      	"hflip": true,
       	"packetSize": 188,
       	"debug": true
       }
