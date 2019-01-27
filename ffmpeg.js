@@ -28,6 +28,8 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.fps = ffmpegOpt.maxFPS || 10;
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
+  this.mapvideo = ffmpegOpt.mapvideo || "0:0";
+  this.mapaudio = ffmpegOpt.mapaudio || "0:1";
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
 
   if (!ffmpegOpt.source) {
@@ -258,6 +260,8 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         var acodec = this.acodec || 'libfdk_aac';
         var packetsize = this.packetsize || 1316; // 188 376
         var additionalCommandline = this.additionalCommandline ;
+        var mapvideo = this.mapvideo ;
+        var mapaudio = this.mapaudio ;
 
         let videoInfo = request["video"];
         if (videoInfo) {
@@ -287,7 +291,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let audioKey = sessionInfo["audio_srtp"];
         let audioSsrc = sessionInfo["audio_ssrc"];
 
-        let ffmpegCommand = this.ffmpegSource + ' -map 0:0' +
+        let ffmpegCommand = this.ffmpegSource + ' -map ' + mapvideo +
           ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +
           ' -r ' + fps +
@@ -308,7 +312,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           '&pkt_size=' + packetsize;
 
         if(this.audio){
-          ffmpegCommand+= ' -map 0:1' +
+          ffmpegCommand+= ' -map ' + mapaudio +
             ' -acodec ' + acodec +
             ' -profile:a aac_eld' +
             ' -flags +global_header' +

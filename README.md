@@ -39,6 +39,8 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 * `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default "libx264"
 * `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default false
 * `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default 1316
+* `mapvideo` If you want to remap which stream is used for video from the default 0:0. See ffmpeg documentation for more details to understand the map command line option.
+* `mapaudio` If you want to remap which stream is used for audio from the default 0:1. This option only makes sense if you use the audio option as well. See ffmpeg documentation for more details to understand the map command line option.
 * `debug` Show the output of ffmpeg in the log, default false
 
 ```
@@ -58,6 +60,8 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       	"vcodec": "h264_omx",
       	"audio": true,
       	"packetSize": 188,
+      	"mapvideo": "0:0",
+      	"mapaudio": "0:1",
       	"debug": true
       }
     }
