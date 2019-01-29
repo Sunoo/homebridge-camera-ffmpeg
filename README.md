@@ -39,10 +39,12 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 * `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default "libx264"
 * `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default false
 * `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default 1316
+* `vflip` Flips the stream vertically, default false
+* `hflip` Flips the stream horizontally, default false
 * `debug` Show the output of ffmpeg in the log, default false
-* `additionalCommandline` Allows additional of extra command line options
-* `overrideVideoArgs` Allows overriding video arguments. **Note:** It is best to ensure the command works with the process (i.e. FFmpeg) directly
-* `overrideAudioArgs` Allows overriding audio arguments. **Note:** It is best to ensure the command works with the process (i.e. FFmpeg) directly
+* `additionalCommandline` Allows additional of extra command line options to FFmpeg, for example `'-loglevel verbose'`
+* `videoFilter` Allows a custom video filter to be passed to FFmpeg via `-vf`, defaults to `scale=1280:720`
+
 
 ```
 {
