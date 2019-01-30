@@ -298,6 +298,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let audioSsrc = sessionInfo["audio_ssrc"];
         let vf = [];
 
+        let videoFilter = ((this.videoFilter === '') ? ('scale=' + width + ':' + height + '') : (this.videoFilter)); // empty string indicates default
         // In the case of null, skip entirely
         if (videoFilter !== null){
           vf.push(videoFilter)
