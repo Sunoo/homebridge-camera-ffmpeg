@@ -31,6 +31,8 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
   this.vflip = ffmpegOpt.vflip || false;
   this.hflip = ffmpegOpt.hflip || false;
+  this.mapvideo = ffmpegOpt.mapvideo || "0:0";
+  this.mapaudio = ffmpegOpt.mapaudio || "0:1";
   this.overrideVideoArgs = ffmpegOpt.overrideVideoArgs || '';
   this.overrideAudioArgs = ffmpegOpt.overrideAudioArgs || '';
   this.videoFilter = ffmpegOpt.videoFilter || ''; // null is a valid discrete value 
@@ -263,7 +265,9 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         var acodec = this.acodec || 'libfdk_aac';
         var packetsize = this.packetsize || 1316; // 188 376
         var additionalCommandline = this.additionalCommandline;
-        var videoFilter = (this.videoFilter === '') ? ('scale=' + width + ':' + height + '') : (this.videoFilter); // empty string indicates default
+        var mapvideo = this.mapvideo;
+        var mapaudio = this.mapaudio;
+        var videoFilter = ((this.videoFilter === '') ? ('scale=' + width + ':' + height + '') : (this.videoFilter)); // empty string indicates default
 
         let videoInfo = request["video"];
         if (videoInfo) {
@@ -307,12 +311,12 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
 
         let fcmd = this.ffmpegSource;
 
-        let ffmpegVideoArgs = ' -map 0:0' +
+        let ffmpegVideoArgs = ' -map ' + mapvideo +
           ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +
           ' -r ' + fps +
           ' -f rawvideo' +
-          (vf.length > 0) ? (' -vf "' + vf.join(',') + '"') : ('') +
+          ((vf.length > 0) ? (' -vf ' + vf.join(',')) : ('')) +
           ' -b:v ' + vbitrate + 'k' +
           ' -bufsize ' + vbitrate+ 'k' +
           ' -maxrate '+ vbitrate + 'k' +
@@ -333,7 +337,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
 
         // build optional audio arguments
         if(this.audio) {
-          let ffmpegAudioArgs = ' -map 0:1' +
+          let ffmpegAudioArgs = ' -map ' + mapaudio +
               ' -acodec ' + acodec +
               ' -profile:a aac_eld' +
               ' -flags +global_header' +
