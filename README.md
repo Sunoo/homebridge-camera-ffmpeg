@@ -126,9 +126,11 @@ If the option is missing, it defaults to false, and does not enable the uploader
 
 https://developers.google.com/drive/v3/web/quickstart/nodejs
 
-* In Step 1-h the working directory should be the .homebridge directory
+* In Step 1, download the configuration file into your .homebridge directory, and name it `client_secret.json`
 * Skip Step 2 and 3
-* And in step 4, use the quickstart.js included in the plugin itself.  And to do this you need to run the command from the plugin directory.  Then just follow steps a to c
+* And in step 4, from the homebridge-camera-ffmpeg directory, run `node quickstart.js`
+
+Then just follow steps a to c
 
 ## Tested configurations
 
