@@ -67,7 +67,6 @@ A somewhat complicated example:
       	"audio": false,
       	"packetSize": 188,
         "hflip": true,
-        "mapvideo": "0:2",
         "additionalCommandline": "-loglevel debug"
       	"debug": true
       }

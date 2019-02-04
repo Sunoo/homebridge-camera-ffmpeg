@@ -33,8 +33,6 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.hflip = ffmpegOpt.hflip || false;
   this.mapvideo = ffmpegOpt.mapvideo || "0:0";
   this.mapaudio = ffmpegOpt.mapaudio || "0:1";
-  // this.overrideVideoArgs = ffmpegOpt.overrideVideoArgs || '';
-  // this.overrideAudioArgs = ffmpegOpt.overrideAudioArgs || '';
   this.videoFilter = ffmpegOpt.videoFilter || ''; // null is a valid discrete value 
 
   if (!ffmpegOpt.source) {
@@ -332,7 +330,6 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           '&pkt_size=' + packetsize;
 
         // build required video arguments
-        // fcmd += (this.overrideVideoArgs ? this.overrideVideoArgs : ffmpegVideoArgs);
         fcmd += ffmpegVideoArgs;
         fcmd += ffmpegVideoStream;
 
@@ -358,7 +355,6 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
               '&localrtcpport=' + targetAudioPort +
               '&pkt_size=' + packetsize;
 
-          // fcmd += (this.overrideAudioArgs ? this.overideAudioArgs : ffmpegAudioArgs);
           fcmd += ffmpegAudioArgs;
           fcmd += ffmpegAudioStream;
         }
