@@ -32,14 +32,22 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 #### Optional Parameters
 
 * `maxStreams` is the maximum number of streams that will be generated for this camera, default 2
-* `maxWidth` is the maximum width reported to HomeKit, default 1280
-* `maxHeight` is the maximum height reported to HomeKit, default 720
-* `maxFPS` is the maximum frame rate of the stream, default 10
-* `maxBitrate` is the maximum bit rate of the stream in kbit/s, default 300
-* `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default "libx264"
-* `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default false
-* `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default 1316
-* `debug` Show the output of ffmpeg in the log, default false
+* `maxWidth` is the maximum width reported to HomeKit, default `1280`
+* `maxHeight` is the maximum height reported to HomeKit, default `720`
+* `maxFPS` is the maximum frame rate of the stream, default `10`
+* `maxBitrate` is the maximum bit rate of the stream in kbit/s, default `300`
+* `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default `libx264`
+* `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default `false`
+* `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default `1316`
+* `vflip` Flips the stream vertically, default `false`
+* `hflip` Flips the stream horizontally, default `false`
+* `mapvideo` Select the stream used for video, default `0:0`
+* `mapaudio` Select the stream used for audio, default `0:1`
+* `videoFilter` Allows a custom video filter to be passed to FFmpeg via `-vf`, defaults to `scale=1280:720`
+* `additionalCommandline` Allows additional of extra command line options to FFmpeg, for example `'-loglevel verbose'`
+* `debug` Show the output of ffmpeg in the log, default `false`
+
+A somewhat complicated example:
 
 ```
 {
@@ -56,8 +64,10 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
       	"maxFPS": 30,
       	"maxBitrate": 200,
       	"vcodec": "h264_omx",
-      	"audio": true,
+      	"audio": false,
       	"packetSize": 188,
+        "hflip": true,
+        "additionalCommandline": "-loglevel debug"
       	"debug": true
       }
     }

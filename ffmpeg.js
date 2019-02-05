@@ -29,6 +29,11 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
+  this.vflip = ffmpegOpt.vflip || false;
+  this.hflip = ffmpegOpt.hflip || false;
+  this.mapvideo = ffmpegOpt.mapvideo || "0:0";
+  this.mapaudio = ffmpegOpt.mapaudio || "0:1";
+  this.videoFilter = ffmpegOpt.videoFilter || ''; // null is a valid discrete value 
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -257,7 +262,9 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         var vcodec = this.vcodec || 'libx264';
         var acodec = this.acodec || 'libfdk_aac';
         var packetsize = this.packetsize || 1316; // 188 376
-        var additionalCommandline = this.additionalCommandline ;
+        var additionalCommandline = this.additionalCommandline;
+        var mapvideo = this.mapvideo;
+        var mapaudio = this.mapaudio;
 
         let videoInfo = request["video"];
         if (videoInfo) {
@@ -286,19 +293,34 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let targetAudioPort = sessionInfo["audio_port"];
         let audioKey = sessionInfo["audio_srtp"];
         let audioSsrc = sessionInfo["audio_ssrc"];
+        let vf = [];
 
-        let ffmpegCommand = this.ffmpegSource + ' -map 0:0' +
+        let videoFilter = ((this.videoFilter === '') ? ('scale=' + width + ':' + height + '') : (this.videoFilter)); // empty string indicates default
+        // In the case of null, skip entirely
+        if (videoFilter !== null){
+          vf.push(videoFilter)
+
+          if(this.hflip)
+            vf.push('hflip');
+
+          if(this.vflip)
+            vf.push('vflip');
+        }
+
+        let fcmd = this.ffmpegSource;
+
+        let ffmpegVideoArgs = ' -map ' + mapvideo +
           ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +
           ' -r ' + fps +
           ' -f rawvideo' +
-          ' ' + additionalCommandline +
-          ' -vf scale=' + width + ':' + height +
+          ((vf.length > 0) ? (' -vf ' + vf.join(',')) : ('')) +
           ' -b:v ' + vbitrate + 'k' +
           ' -bufsize ' + vbitrate+ 'k' +
           ' -maxrate '+ vbitrate + 'k' +
-          ' -payload_type 99' +
-          ' -ssrc ' + videoSsrc +
+          ' -payload_type 99';
+
+        let ffmpegVideoStream = ' -ssrc ' + videoSsrc +
           ' -f rtp' +
           ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
           ' -srtp_out_params ' + videoKey.toString('base64') +
@@ -307,31 +329,43 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           '&localrtcpport=' + targetVideoPort +
           '&pkt_size=' + packetsize;
 
-        if(this.audio){
-          ffmpegCommand+= ' -map 0:1' +
-            ' -acodec ' + acodec +
-            ' -profile:a aac_eld' +
-            ' -flags +global_header' +
-            ' -f null' +
-            ' -ar ' + asamplerate + 'k' +
-            ' -b:a ' + abitrate + 'k' +
-            ' -bufsize ' + abitrate + 'k' +
-            ' -ac 1' +
-            ' -payload_type 110' +
-            ' -ssrc ' + audioSsrc +
-            ' -f rtp' +
-            ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-            ' -srtp_out_params ' + audioKey.toString('base64') +
-            ' srtp://' + targetAddress + ':' + targetAudioPort +
-            '?rtcpport=' + targetAudioPort +
-            '&localrtcpport=' + targetAudioPort +
-            '&pkt_size=' + packetsize;
+        // build required video arguments
+        fcmd += ffmpegVideoArgs;
+        fcmd += ffmpegVideoStream;
+
+        // build optional audio arguments
+        if(this.audio) {
+          let ffmpegAudioArgs = ' -map ' + mapaudio +
+              ' -acodec ' + acodec +
+              ' -profile:a aac_eld' +
+              ' -flags +global_header' +
+              ' -f null' +
+              ' -ar ' + asamplerate + 'k' +
+              ' -b:a ' + abitrate + 'k' +
+              ' -bufsize ' + abitrate + 'k' +
+              ' -ac 1' +
+              ' -payload_type 110';
+
+          let ffmpegAudioStream = ' -ssrc ' + audioSsrc +
+              ' -f rtp' +
+              ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+              ' -srtp_out_params ' + audioKey.toString('base64') +
+              ' srtp://' + targetAddress + ':' + targetAudioPort +
+              '?rtcpport=' + targetAudioPort +
+              '&localrtcpport=' + targetAudioPort +
+              '&pkt_size=' + packetsize;
+
+          fcmd += ffmpegAudioArgs;
+          fcmd += ffmpegAudioStream;
         }
 
-        let ffmpeg = spawn(this.videoProcessor, ffmpegCommand.split(' '), {env: process.env});
+        fcmd += ' ' + additionalCommandline;
+
+        // start the process
+        let ffmpeg = spawn(this.videoProcessor, fcmd.split(' '), {env: process.env});
         this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
         if(this.debug){
-          console.log("ffmpeg " + ffmpegCommand);
+          console.log("ffmpeg " + fcmd);
         }
 
         // Always setup hook on stderr.
