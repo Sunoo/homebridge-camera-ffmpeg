@@ -314,6 +314,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           ' -pix_fmt yuv420p' +
           ' -r ' + fps +
           ' -f rawvideo' +
+          ' ' + additionalCommandline +
           ((vf.length > 0) ? (' -vf ' + vf.join(',')) : ('')) +
           ' -b:v ' + vbitrate + 'k' +
           ' -bufsize ' + vbitrate+ 'k' +
@@ -359,7 +360,9 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           fcmd += ffmpegAudioStream;
         }
 
-        fcmd += ' ' + additionalCommandline;
+        if (this.debug) {
+          fcmd += ' -loglevel debug';
+        }
 
         // start the process
         let ffmpeg = spawn(this.videoProcessor, fcmd.split(' '), {env: process.env});

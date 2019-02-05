@@ -18,12 +18,12 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
         {
           "name": "Camera Name",
           "videoConfig": {
-          	"source": "-re -i rtsp://myfancy_rtsp_stream",
-          	"stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
-          	"maxStreams": 2,
-          	"maxWidth": 1280,
-          	"maxHeight": 720,
-          	"maxFPS": 30
+            "source": "-re -i rtsp://myfancy_rtsp_stream",
+            "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
+            "maxStreams": 2,
+            "maxWidth": 1280,
+            "maxHeight": 720,
+            "maxFPS": 30
           }
         }
       ]
@@ -56,19 +56,19 @@ A somewhat complicated example:
     {
       "name": "Camera Name",
       "videoConfig": {
-      	"source": "-re -i rtsp://myfancy_rtsp_stream",
+        "source": "-re -i rtsp://myfancy_rtsp_stream",
         "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
-      	"maxStreams": 2,
-      	"maxWidth": 1280,
-      	"maxHeight": 720,
-      	"maxFPS": 30,
-      	"maxBitrate": 200,
-      	"vcodec": "h264_omx",
-      	"audio": false,
-      	"packetSize": 188,
+        "maxStreams": 2,
+        "maxWidth": 1280,
+        "maxHeight": 720,
+        "maxFPS": 30,
+        "maxBitrate": 200,
+        "vcodec": "h264_omx",
+        "audio": false,
+        "packetSize": 188,
         "hflip": true,
-        "additionalCommandline": "-loglevel debug"
-      	"debug": true
+        "additionalCommandline": "-x264-params intra-refresh=1:bframes=0",
+        "debug": true
       }
     }
   ]
@@ -117,13 +117,13 @@ To enable this feature, please add a new config option "uploader", and follow th
       "name": "Camera Name",
       "uploader": true,
       "videoConfig": {
-      	"source": "-re -i rtsp://myfancy_rtsp_stream",
+        "source": "-re -i rtsp://myfancy_rtsp_stream",
         "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
-      	"maxStreams": 2,
-      	"maxWidth": 1280,
-      	"maxHeight": 720,
-      	"maxFPS": 30,
-      	"vcodec": "h264_omx"            
+        "maxStreams": 2,
+        "maxWidth": 1280,
+        "maxHeight": 720,
+        "maxFPS": 30,
+        "vcodec": "h264_omx"
       }
     }
   ]
