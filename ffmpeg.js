@@ -30,6 +30,9 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.debug = ffmpegOpt.debug;
   this.hflip = ffmpegOpt.hflip;
   this.vflip = ffmpegOpt.vflip;
+  this.stillscript = ffmpegOpt.stillscript || false;
+  this.stillscript1 = ffmpegOpt.stillscript1;
+  this.stillscript2 = ffmpegOpt.stillscript2;
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
 
   if (!ffmpegOpt.source) {
@@ -152,6 +155,42 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
     vf.push('vflip');
   }
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
+  
+  if (this.stillscript) {
+  this.log("Script requested for snapshot : stillscript1");
+  let snap1=spawn('sudo',('-u pi '+this.stillscript1).split(' '), {env: process.env});
+
+  snap1.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
+  });
+
+  snap1.stderr.on('data', (data) => {
+    console.log(`stderr: ${data}`);
+  });
+
+  snap1.on('close', (code) => {
+    console.log(`child process snap1 exited with code ${code}`);
+  });
+
+  this.log("Script requested for snapshot : stillscript2");
+  let snap2=spawn('sudo',('-u pi '+this.stillscript2).split(' '), {env: process.env});
+  snap2.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
+  });
+
+  snap2.stderr.on('data', (data) => {
+    console.log(`stderr: ${data}`);
+  });
+
+  snap2.on('close', (code) => {
+    console.log(`child process snap2 exited with code ${code}`);
+  });
+
+  this.log("Snapshot by script done");
+  }
+ 
+    
+  
   let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 5 -vf ' + vf.join(',') + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer.alloc(0);
   this.log("Snapshot from " + this.name + " at " + resolution);
