@@ -128,6 +128,34 @@ If the option is missing, it defaults to false, and does not enable the uploader
 
 * For the setup of Google Drive, please follow the Google Drive Quickstart for Node.js instructions from here except for these changes.
 
+## Use scripts to prepare the snapshot on host
+
+You can use this if you need to issue few command by ssh on host to make a snapshot. For instance, you can log on an computer, snapshot the webcam then upload to homebridge
+
+To configure, add special parameters to JSON :
+{
+  "platform":"Camera-ffmpeg",
+  "cameras":[
+     {
+        "name":"Snapshot Desktop",
+        "videoConfig":{
+           "source":"",
+           "stillImageSource":"-i /tmp/snapshot.jpg",
+           "maxStreams":2,
+           "maxWidth": 640,
+           "maxHeight": 480,
+           "maxFPS":20,
+           "stillscript":true,
+           "stillscript1":"ssh john@192.168.1.10 /usr/local/Cellar/imagesnap/0.2.6/bin/imagesnap",
+           "stillscript2":"scp john@192.168.1.10:snapshot.jpg /tmp/snapshot.jpg"
+        }
+     }
+  ]
+}
+
+
+
+
 https://developers.google.com/drive/v3/web/quickstart/nodejs
 
 * In Step 1-h the working directory should be the .homebridge directory
