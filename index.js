@@ -34,6 +34,7 @@ ffmpegPlatform.prototype.configureAccessory = function(accessory) {
 ffmpegPlatform.prototype.didFinishLaunching = function() {
   var self = this;
   var videoProcessor = self.config.videoProcessor || 'ffmpeg';
+  var interfaceName = self.config.interfaceName;
 
   if (self.config.cameras) {
     var configuredAccessories = [];
@@ -50,7 +51,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
 
       var uuid = UUIDGen.generate(cameraName);
       var cameraAccessory = new Accessory(cameraName, uuid, hap.Accessory.Categories.CAMERA);
-      var cameraSource = new FFMPEG(hap, cameraConfig, self.log, videoProcessor);
+      var cameraSource = new FFMPEG(hap, cameraConfig, self.log, videoProcessor, interfaceName);
       cameraAccessory.configureCameraSource(cameraSource);
       configuredAccessories.push(cameraAccessory);
     });
