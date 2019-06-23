@@ -11,7 +11,7 @@ module.exports = {
   FFMPEG: FFMPEG
 };
 
-function FFMPEG(hap, cameraConfig, log, videoProcessor) {
+function FFMPEG(hap, cameraConfig, log, videoProcessor, interfaceName) {
   uuid = hap.uuid;
   Service = hap.Service;
   Characteristic = hap.Characteristic;
@@ -33,7 +33,8 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor) {
   this.hflip = ffmpegOpt.hflip || false;
   this.mapvideo = ffmpegOpt.mapvideo || "0:0";
   this.mapaudio = ffmpegOpt.mapaudio || "0:1";
-  this.videoFilter = ffmpegOpt.videoFilter || ''; // null is a valid discrete value 
+  this.videoFilter = ffmpegOpt.videoFilter || ''; // null is a valid discrete value
+  this.interfaceName = interfaceName;
 
   if (!ffmpegOpt.source) {
     throw new Error("Missing source for camera.");
@@ -227,7 +228,7 @@ FFMPEG.prototype.prepareStream = function(request, callback) {
     sessionInfo["audio_ssrc"] = ssrc;
   }
 
-  let currentAddress = ip.address();
+  let currentAddress = ip.address(this.interfaceName);
   var addressResp = {
     address: currentAddress
   };
@@ -297,7 +298,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
 
         let videoFilter = ((this.videoFilter === '') ? ('scale=' + width + ':' + height + '') : (this.videoFilter)); // empty string indicates default
         // In the case of null, skip entirely
-        if (videoFilter !== null){
+        if (videoFilter !== null && videoFilter !== 'none') {
           vf.push(videoFilter)
 
           if(this.hflip)

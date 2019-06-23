@@ -100,6 +100,20 @@ A somewhat complicated example:
 }
 ```
 
+#### Setting a source interface, or IP address
+
+* `interfaceName` selects the IP address of a given network interface. The default is to select the first available, and that may not be the same IP address that ffmpeg will use. A mismatch will cause the iOS device to discard the video stream.
+
+```
+{
+  "platform": "Camera-ffmpeg",
+  "interfaceName": "bond0",
+  "cameras": [
+    ...
+  ]
+}
+```
+
 ## Uploading to Google Drive of Still Images ( Snapshots )
 
 This is an optional feature that will automatically store every snapshot taken to your Google Drive account as a photo.  This is very useful if you have motion sensor in the same room as the camera, as it will take a snapshot of whatever caused the motion sensor to trigger, and store the image on Google Drive and create a Picture Notification on your iOS device.
