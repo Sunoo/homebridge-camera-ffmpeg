@@ -1,10 +1,12 @@
-var Accessory, hap, UUIDGen;
+var Accessory, Service, Characteristic, hap, UUIDGen;
 
 var FFMPEG = require('./ffmpeg').FFMPEG;
 
 module.exports = function(homebridge) {
   Accessory = homebridge.platformAccessory;
   hap = homebridge.hap;
+  Service = homebridge.hap.Service;
+  Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
 
   homebridge.registerPlatform("homebridge-camera-ffmpeg", "Camera-ffmpeg", ffmpegPlatform, true);
@@ -51,6 +53,30 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
 
       var uuid = UUIDGen.generate(cameraName);
       var cameraAccessory = new Accessory(cameraName, uuid, hap.Accessory.Categories.CAMERA);
+      var cameraAccessoryInfo = cameraAccessory.getService(Service.AccessoryInformation);
+      if (cameraConfig.manufacturer) {
+        cameraAccessoryInfo.setCharacteristic(Characteristic.Manufacturer, cameraConfig.manufacturer);
+      }
+      if (cameraConfig.model) {
+        cameraAccessoryInfo.setCharacteristic(Characteristic.Model, cameraConfig.model);
+      }
+      if (cameraConfig.serialNumber) {
+        cameraAccessoryInfo.setCharacteristic(Characteristic.SerialNumber, cameraConfig.serialNumber);
+      }
+      if (cameraConfig.firmwareRevision) {
+        cameraAccessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, cameraConfig.firmwareRevision);
+      }
+
+      cameraAccessory.context.log = self.log;
+      var button = new Service.Switch(cameraName);
+      cameraAccessory.addService(button);
+
+      var motion = new Service.MotionSensor(cameraName);
+      cameraAccessory.addService(motion);
+
+      button.getCharacteristic(Characteristic.On)
+        .on('set', _Motion.bind(cameraAccessory));
+
       var cameraSource = new FFMPEG(hap, cameraConfig, self.log, videoProcessor, interfaceName);
       cameraAccessory.configureCameraSource(cameraSource);
       configuredAccessories.push(cameraAccessory);
@@ -58,4 +84,20 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
 
     self.api.publishCameraAccessories("Camera-ffmpeg", configuredAccessories);
   }
+};
+
+function _Motion(on, callback) {
+  this.context.log("Setting %s Motion to %s", this.displayName, on);
+
+  this.getService(Service.MotionSensor).setCharacteristic(Characteristic.MotionDetected, (on ? 1 : 0));
+  if (on) {
+    setTimeout(_Reset.bind(this), 5000);
+  }
+  callback();
+}
+
+function _Reset() {
+  this.context.log("Setting %s Button to false", this.displayName);
+
+  this.getService(Service.Switch).setCharacteristic(Characteristic.On, false);
 }
