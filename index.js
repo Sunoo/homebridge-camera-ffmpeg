@@ -68,14 +68,16 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       }
 
       cameraAccessory.context.log = self.log;
-      var button = new Service.Switch(cameraName);
-      cameraAccessory.addService(button);
+      if (cameraConfig.motion) {
+        var button = new Service.Switch(cameraName);
+        cameraAccessory.addService(button);
 
-      var motion = new Service.MotionSensor(cameraName);
-      cameraAccessory.addService(motion);
+        var motion = new Service.MotionSensor(cameraName);
+        cameraAccessory.addService(motion);
 
-      button.getCharacteristic(Characteristic.On)
-        .on('set', _Motion.bind(cameraAccessory));
+        button.getCharacteristic(Characteristic.On)
+          .on('set', _Motion.bind(cameraAccessory));
+      }
 
       var cameraSource = new FFMPEG(hap, cameraConfig, self.log, videoProcessor, interfaceName);
       cameraAccessory.configureCameraSource(cameraSource);
