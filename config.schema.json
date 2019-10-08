@@ -59,7 +59,7 @@
                     "description": "The maximum height reported to HomeKit"
                 },
                 "maxFPS": {
-                    "title": "Maximum FBS",
+                    "title": "Maximum FPS",
                     "type": "integer",
                     "default": 10,
                     "minimum": 1,
