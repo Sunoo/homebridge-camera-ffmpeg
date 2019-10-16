@@ -4,7 +4,7 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 
 ## Installation
 
-1. Install ffmpeg on your computer
+1. Install ffmpeg on your computer (note that in some cases, this requires compiling ffmpeg from scratch due to the use of rstp, namely for pi configurations)
 2. Install this plugin using: npm install -g homebridge-camera-ffmpeg
 3. Edit ``config.json`` and add the camera.
 3. Run Homebridge
