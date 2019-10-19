@@ -31,14 +31,17 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 
 #### Optional Parameters
 
-* `uploader` enable uploading of snapshots to Google Drive, defaults to `false`. See wiki for more detailed instructions.
+* `uploader` enable uploading of snapshots to Google Photo's, defaults to `false`.
+* `username` Google Photo's account username
+* `password` Google Photo's account password
+* `album` Google Photo's Album, defaults to `Camera Pictures`
 * `motion` enable a dummy switch and motion sensor to trigger picture notifications in iOS 13, defaults to `false`.  See wiki for more detailed instructions.
 * `manufacturer` set manufacturer name for display in the Home app
 * `model` set model for display in the Home app
 * `serialNumber` set serial number for display in the Home app
 * `firmwareRevision` set firmware revision for display in the Home app
 
-Example with manufacturer, model, serial number and firmware set:
+##### Example with manufacturer, model, serial number and firmware set:
 
 ```
 {
@@ -62,6 +65,33 @@ Example with manufacturer, model, serial number and firmware set:
   ]
 }
 ```
+
+##### Example with uploading to Google Photo's upload enabled
+
+```
+{
+  "platform": "Camera-ffmpeg",
+  "cameras": [
+    {
+      "name": "Camera Name",
+      "uploader": true,
+      "username": "xxxxxxxxx@gmail.com",
+      "password": "xxxxxxxxxxx",
+      "album": "Test Album",
+      "videoConfig": {
+        "source": "-re -i rtsp://myfancy_rtsp_stream",
+        "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
+        "maxStreams": 2,
+        "maxWidth": 1280,
+        "maxHeight": 720,
+        "maxFPS": 30
+      }
+    }
+  ]
+}
+```
+
+I would not recommend using your primary Google Photo's account for this, but create a separate account, then share the Photo Album with your primary account.
 
 #### Optional videoConfig Parameters
 
