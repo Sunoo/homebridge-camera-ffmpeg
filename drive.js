@@ -2,6 +2,7 @@ var debug = require('debug')('CameraDrive');
 var fs = require('fs');
 var readline = require('readline');
 const {google} = require('googleapis');
+var streamifier = require('./lib/streamifier.js');
 var url = require('url');
 
 module.exports = {
@@ -103,7 +104,7 @@ function uploadPicture(folder, prefix, picture) {
     };
     var media = {
         mimeType: 'image/jpeg',
-        body: picture.toString()
+        body: streamifier.createReadStream(picture)
     };
 
     drive.files.create({
