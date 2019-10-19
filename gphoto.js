@@ -1,0 +1,74 @@
+'use strict';
+
+const GPhotos = require('upload-gphotos').default;
+var Queue = require('better-queue');
+var streamifier = require('./lib/streamifier.js');
+let debug = require('debug')('ffmpeg:gphoto');
+
+module.exports = {
+  gphoto: gphoto
+};
+
+var uploadQueue = new Queue(function(upload, callback) {
+  googleUpload.call(upload.that, upload, callback);
+}, {
+  autoResume: true,
+  maxRetries: 0,
+  retryDelay: 30000,
+  batchDelay: 500,
+  afterProcessDelay: 500
+});
+
+var gphotos;
+
+function gphoto(cameraConfig) {
+  (async () => {
+    if (!gphotos) {
+      gphotos = new GPhotos({
+        username: cameraConfig.username,
+        password: cameraConfig.password,
+        options: {
+          silence: false,
+          progress: false
+        }
+      });
+      await gphotos.login();
+      debug("Logged in");
+    }
+  })();
+}
+
+function googleUpload(upload, callback) {
+  (async () => {
+    // {
+    //   that: self,
+    //  fileName: self.fileName,
+    //   imageBuffer: imageBuffer
+    // }
+    debug("Dequeue", upload.imageBuffer.length, upload.fileName);
+    (async () => {
+      if (gphotos.params) {
+        // streamifier.createReadStream(new Buffer ([97, 98, 99])).pipe(process.stdout);
+        try {
+          const photo = await gphotos.uploadFromStream(streamifier.createReadStream(upload.imageBuffer), upload.imageBuffer.length, upload.fileName);
+          // this.log("addPhoto", this.time, photo);
+          const album = await gphotos.searchOrCreateAlbum((this.cameraConfig.album ? this.cameraConfig.album : 'Camera Pictures'));
+          // this.log("searchOrCreateAlbum", this.time, photo);
+          const id = await album.addPhoto(photo);
+          debug("addPhoto", id, upload.fileName);
+        } catch (err) {
+          this.log("Error:", err);
+        }
+        callback();
+      } else {
+        this.log("Not logged in, not uploaded", upload.fileName);
+        callback();
+      }
+    })();
+  })();
+}
+
+gphoto.prototype.upload = function(upload) {
+  debug("Queue", upload.imageBuffer.length);
+  uploadQueue.push(upload);
+};
