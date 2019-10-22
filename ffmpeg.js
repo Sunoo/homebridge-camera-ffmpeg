@@ -10,7 +10,7 @@ module.exports = {
   FFMPEG: FFMPEG
 };
 
-function FFMPEG(hap, cameraConfig, log, videoProcessor, interfaceName) {
+function FFMPEG(hap, cameraConfig, log, stillProcessor, videoProcessor, interfaceName) {
   uuid = hap.uuid;
   Service = hap.Service;
   Characteristic = hap.Characteristic;
@@ -20,10 +20,11 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor, interfaceName) {
   var ffmpegOpt = cameraConfig.videoConfig;
   this.name = cameraConfig.name;
   this.vcodec = ffmpegOpt.vcodec;
+  this.stillProcessor = stillProcessor || 'ffmpeg';
   this.videoProcessor = videoProcessor || 'ffmpeg';
   this.audio = ffmpegOpt.audio;
   this.acodec = ffmpegOpt.acodec;
-  this.packetsize = ffmpegOpt.packetSize
+  this.packetsize = ffmpegOpt.packetSize;
   this.fps = ffmpegOpt.maxFPS || 10;
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
   this.debug = ffmpegOpt.debug;
@@ -52,7 +53,6 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor, interfaceName) {
   if (this.uploader) {
     this.cameraConfig = cameraConfig;
     this.gphoto = new Gphoto(cameraConfig);
-
   }
 
   var numberOfStreams = ffmpegOpt.maxStreams || 2;
@@ -150,12 +150,12 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   let resolution = request.width + 'x' + request.height;
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
-  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -s ' + resolution + ' -f image2 -').split(' '), {
+  let ffmpeg = spawn(this.stillProcessor, (imageSource + ' -t 1 -s ' + resolution + ' -f image2 -').split(' '), {
     env: process.env
   });
   var imageBuffer = Buffer.alloc(0);
   this.log("Snapshot from " + this.name + " at " + resolution);
-  if (this.debug) console.log('ffmpeg ' + imageSource + ' -t 1 -s ' + resolution + ' -f image2 -');
+  if (this.debug) console.log(this.stillProcessor + ' ' + imageSource + ' -t 1 -s ' + resolution + ' -f image2 -');
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
@@ -310,7 +310,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let videoFilter = ((this.videoFilter === '') ? ('scale=' + width + ':' + height + '') : (this.videoFilter)); // empty string indicates default
         // In the case of null, skip entirely
         if (videoFilter !== null && videoFilter !== 'none') {
-          vf.push(videoFilter)
+          vf.push(videoFilter);
 
           if (this.hflip)
             vf.push('hflip');

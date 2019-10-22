@@ -29,7 +29,7 @@ function gphoto(cameraConfig) {
         password: cameraConfig.password,
         options: {
           silence: false,
-          progress: false
+          progress: true
         }
       });
       await gphotos.login();
@@ -51,9 +51,9 @@ function googleUpload(upload, callback) {
         // streamifier.createReadStream(new Buffer ([97, 98, 99])).pipe(process.stdout);
         try {
           const photo = await gphotos.uploadFromStream(streamifier.createReadStream(upload.imageBuffer), upload.imageBuffer.length, upload.fileName);
-          // this.log("addPhoto", this.time, photo);
+          this.log("addPhoto", this.time, photo);
           const album = await gphotos.searchOrCreateAlbum((this.cameraConfig.album ? this.cameraConfig.album : 'Camera Pictures'));
-          // this.log("searchOrCreateAlbum", this.time, photo);
+          this.log("searchOrCreateAlbum", this.time, photo);
           const id = await album.addPhoto(photo);
           debug("addPhoto", id, upload.fileName);
         } catch (err) {

@@ -93,6 +93,12 @@ ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
 
 I would not recommend using your primary Google Photo's account for this, but create a separate account, then share the Photo Album with your primary account.
 
+Please note, this requires the Chromium browser installed, please ensure that it is installed before starting configuration. And a minimum of Rasbian Stretch on a RPI.
+
+```
+sudo apt-get install chromium-browser
+```
+
 #### Optional videoConfig Parameters
 
 * `maxStreams` is the maximum number of streams that will be generated for this camera, default 2
@@ -163,6 +169,8 @@ A somewhat complicated example:
   ]
 }
 ```
+
+* `stillProcessor` is the video processor used to manage snapshots. eg: ffmpeg (by default) or avconv or /a/path/to/another/ffmpeg. Need to use the same parameters than ffmpeg.
 
 #### Setting a source interface, or IP address
 
