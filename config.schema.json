@@ -1,0 +1,102 @@
+{
+  "pluginAlias": "Camera-ffmpeg",
+  "pluginType": "platform",
+  "headerDisplay": "The **ffmpeg** binary must be installed on your system for this plugin to work.",
+  "footerDisplay": "For help please see the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).",
+  "schema": {
+    "name": {
+      "title": "Name",
+      "type": "string",
+      "default": "Camera ffmpeg",
+      "required": true
+    },
+    "cameras": {
+      "type": "array",
+      "items": {
+        "title": "Camera Config",
+        "type": "object",
+        "properties": {
+          "name":{
+            "title": "Name",
+            "type": "string",
+            "default": "Default Camera",
+            "required": true
+          },
+          "videoConfig": {
+            "title": "Video Configuration",
+            "type": "object",
+            "properties": {
+                "source": {
+                    "title": "Source",
+                    "type": "string",
+                    "default": "-re -i rtsp://myfancy_rtsp_stream",
+                    "required": true
+                },
+                "stillImageSource": {
+                    "title": "Still Image Source",
+                    "type": "string",
+                    "default": "-i http://faster_still_image_grab_url/this_is_optional.jpg"
+                },
+                "maxStreams": {
+                    "title": "Maximum Number of Streams",
+                    "type": "integer",
+                    "default": 2,
+                    "minimum": 1,
+                    "description": "The maximum number of streams that will be generated for this camera"
+                },
+                "maxWidth": {
+                    "title": "Maximum Width",
+                    "type": "integer",
+                    "default": 1280,
+                    "minimum": 1,
+                    "description": "The maximum width reported to HomeKit"
+                },
+                "maxHeight": {
+                    "title": "Maximum Height",
+                    "type": "integer",
+                    "default": 720,
+                    "minimum": 1,
+                    "description": "The maximum height reported to HomeKit"
+                },
+                "maxFPS": {
+                    "title": "Maximum FPS",
+                    "type": "integer",
+                    "default": 10,
+                    "minimum": 1,
+                    "description": "The maximum frame rate of the stream"
+                    },
+                "maxBitrate": {
+                    "title": "Maximum Bitrate",
+                    "type": "integer",
+                    "default": 300,
+                    "minimum": 1,
+                    "description": "The maximum bit rate of the stream"
+                },
+                "vcodec": {
+                    "title": "Video Codec",
+                    "type": "string",
+                    "default": "libx264"
+                },
+                "packetSize": {
+                    "title": "Packet Size",
+                    "type": "number",
+                    "default": 1316,
+                    "multipleOf": 188.0
+                },
+                "audio": {
+                    "title": "Enable Audio?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "debug": {
+                    "title": "Enable Debug Mode?",
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+          }
+        }
+      }
+    }
+  }
+}

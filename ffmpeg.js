@@ -33,7 +33,7 @@ function FFMPEG(hap, cameraConfig, log, stillProcessor, videoProcessor, interfac
   this.hflip = ffmpegOpt.hflip || false;
   this.mapvideo = ffmpegOpt.mapvideo || "0:0";
   this.mapaudio = ffmpegOpt.mapaudio || "0:1";
-  this.videoFilter = ffmpegOpt.videoFilter || ''; // null is a valid discrete value
+  this.videoFilter = ffmpegOpt.videoFilter || null; // null is a valid discrete value
   this.interfaceName = interfaceName;
 
   if (!ffmpegOpt.source) {
