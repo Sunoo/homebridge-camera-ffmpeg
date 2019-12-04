@@ -40,30 +40,25 @@ function gphoto(cameraConfig) {
 
 function googleUpload(upload, callback) {
   (async () => {
-    // {
-    //   that: self,
-    //  fileName: self.fileName,
-    //   imageBuffer: imageBuffer
-    // }
     debug("Dequeue", upload.imageBuffer.length, upload.fileName);
     (async () => {
-      if (gphotos.params) {
-        // streamifier.createReadStream(new Buffer ([97, 98, 99])).pipe(process.stdout);
-        try {
-          const photo = await gphotos.uploadFromStream(streamifier.createReadStream(upload.imageBuffer), upload.imageBuffer.length, upload.fileName);
-          this.log("addPhoto", this.time, photo);
-          const album = await gphotos.searchOrCreateAlbum((this.cameraConfig.album ? this.cameraConfig.album : 'Camera Pictures'));
-          this.log("searchOrCreateAlbum", this.time, photo);
-          const id = await album.addPhoto(photo);
-          debug("addPhoto", id, upload.fileName);
-        } catch (err) {
-          this.log("Error:", err);
+      // streamifier.createReadStream(new Buffer ([97, 98, 99])).pipe(process.stdout);
+      try {
+        if (!gphotos.params) {
+          await gphotos.login();
+          debug("Logged in");
         }
-        callback();
-      } else {
-        this.log("Not logged in, not uploaded", upload.fileName);
-        callback();
+        const photo = await gphotos.uploadFromStream(streamifier.createReadStream(upload.imageBuffer), upload.imageBuffer.length, upload.fileName);
+        this.log("addPhoto", this.time, photo);
+        const album = await gphotos.searchOrCreateAlbum((this.cameraConfig.album ? this.cameraConfig.album : 'Camera Pictures'));
+        this.log("searchOrCreateAlbum", this.time, photo);
+        const id = await album.addPhoto(photo);
+        debug("addPhoto", id, upload.fileName);
+      } catch (err) {
+        this.log("Error:", err);
+        gphotos.params = null;
       }
+      callback();
     })();
   })();
 }
