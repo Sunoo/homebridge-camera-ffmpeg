@@ -2,7 +2,7 @@
   "pluginAlias": "Camera-ffmpeg",
   "pluginType": "platform",
   "headerDisplay": "The **ffmpeg** binary must be installed on your system for this plugin to work.",
-  "footerDisplay": "For help please see the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).",
+  "footerDisplay": "For help please read the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).",
   "schema": {
     "name": {
       "title": "Name",
@@ -87,6 +87,28 @@
                     "title": "Enable Audio?",
                     "type": "boolean",
                     "default": false
+                },
+                "vflip": {
+                    "title": "Flip Stream Vertically?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "hflip": {
+                    "title": "Flip Stream Horizontally?",
+                    "type": "boolean",
+                    "default": false
+                },
+                "motion":{
+                    "title": "Enable Motion?",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "IOS 13 Notification"
+                },
+                "uploader":{
+                    "title": "Enable Uploader?",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Uploading Snapshots to Google"
                 },
                 "debug": {
                     "title": "Enable Debug Mode?",
