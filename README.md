@@ -1,6 +1,11 @@
 # homebridge-camera-ffmpeg
 
-ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
+FFmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
+
+[![npm](https://img.shields.io/npm/v/homebridge-camera-ffmpeg?style=for-the-badge)](https://www.npmjs.com/package/homebridge-camera-ffmpeg)
+[![npm](https://img.shields.io/npm/dt/homebridge-camera-ffmpeg?style=for-the-badge)](https://www.npmjs.com/package/homebridge-camera-ffmpeg)
+[![GitHub issues](https://img.shields.io/github/issues/KhaosT/homebridge-camera-ffmpeg?style=for-the-badge)](https://github.com/KhaosT/homebridge-camera-ffmpeg/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/KhaosT/homebridge-camera-ffmpeg?style=for-the-badge)](https://github.com/KhaosT/homebridge-camera-ffmpeg/pulls)
 
 ## Installation
 
