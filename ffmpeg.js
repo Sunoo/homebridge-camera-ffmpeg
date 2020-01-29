@@ -361,10 +361,6 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           fcmd += ffmpegAudioStream;
         }
 
-        if (this.debug) {
-          fcmd += ' -loglevel debug';
-        }
-
         // start the process
         let ffmpeg = spawn(this.videoProcessor, fcmd.split(' '), {env: process.env});
         this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
