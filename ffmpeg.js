@@ -8,13 +8,6 @@ var spawn = require('child_process').spawn;
 var drive = require('./drive').drive;
 var pathToFfmpeg = require('ffmpeg-for-homebridge');
 
-if (pathToFfmpeg) {
-  child_process.spawn(pathToFfmpeg, [])
-} else {
-  // fallback, load from PATH
-  child_process.spawn('ffmpeg', [])
-}
-
 module.exports = {
   FFMPEG: FFMPEG
 };
@@ -29,7 +22,7 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor, interfaceName) {
   var ffmpegOpt = cameraConfig.videoConfig;
   this.name = cameraConfig.name;
   this.vcodec = ffmpegOpt.vcodec;
-  this.videoProcessor = videoProcessor || 'ffmpeg';
+  this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
   this.audio = ffmpegOpt.audio;
   this.acodec = ffmpegOpt.acodec;
   this.packetsize = ffmpegOpt.packetSize
