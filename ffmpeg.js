@@ -6,6 +6,14 @@ var fs = require('fs');
 var ip = require('ip');
 var spawn = require('child_process').spawn;
 var drive = require('./drive').drive;
+var pathToFfmpeg = require('ffmpeg-for-homebridge');
+
+if (pathToFfmpeg) {
+  child_process.spawn(pathToFfmpeg, [])
+} else {
+  // fallback, load from PATH
+  child_process.spawn('ffmpeg', [])
+}
 
 module.exports = {
   FFMPEG: FFMPEG
