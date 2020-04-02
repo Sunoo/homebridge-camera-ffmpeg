@@ -46,14 +46,14 @@ function googleUpload(upload, callback) {
       try {
         if (!gphotos.params) {
           await gphotos.login();
-          debug("Logged in");
+          debug("Logged in to Google");
         }
         const photo = await gphotos.uploadFromStream(streamifier.createReadStream(upload.imageBuffer), upload.imageBuffer.length, upload.fileName);
-        this.log("addPhoto", this.time, photo);
+        // this.log("addPhoto", photo.createdAt);
         const album = await gphotos.searchOrCreateAlbum((this.cameraConfig.album ? this.cameraConfig.album : 'Camera Pictures'));
-        this.log("searchOrCreateAlbum", this.time, photo);
+        // this.log("searchOrCreateAlbum", photo.createdAt);
         const id = await album.addPhoto(photo);
-        debug("addPhoto", id, upload.fileName);
+        this.log("Uploaded", upload.fileName);
       } catch (err) {
         this.log("Error:", err);
         gphotos.params = null;
@@ -64,6 +64,5 @@ function googleUpload(upload, callback) {
 }
 
 gphoto.prototype.upload = function(upload) {
-  debug("Queue", upload.imageBuffer.length);
   uploadQueue.push(upload);
 };

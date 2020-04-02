@@ -154,26 +154,33 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
     env: process.env
   });
   var imageBuffer = Buffer.alloc(0);
+  var stderrBuffer = Buffer.alloc(0);
+  let self = this;
   this.log("Snapshot from " + this.name + " at " + resolution);
-  if (this.debug) console.log(this.stillProcessor + ' ' + imageSource + ' -t 1 -s ' + resolution + ' -f image2 -');
+  if (this.debug) this.log(this.stillProcessor + ' ' + imageSource + ' -t 1 -s ' + resolution + ' -f image2 -');
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
-  let self = this;
+  ffmpeg.stderr.on('data', function(data) {
+    stderrBuffer = Buffer.concat([stderrBuffer, data]);
+  });
   ffmpeg.on('error', function(error) {
-    self.log("An error occurs while making snapshot request");
-    self.debug ? self.log(error) : null;
+    self.log("ERROR: ", stderrBuffer.toString(), error);
+    callback(error, imageBuffer);
   });
   ffmpeg.on('close', function(code) {
-    if (this.uploader) {
+    if (this.uploader && imageBuffer.length > 0) {
       var d = new Date();
       var fileName = this.name.replace(/ /g, "_") + "_" + d.toLocaleString().replace(/ |,|[\/]/g, "_") + ".jpeg";
+	self.log("Queue", imageBuffer.length, fileName);
       self.gphoto.upload({
         id: fileName,
         that: self,
         fileName: fileName,
         imageBuffer: imageBuffer
       });
+    } else {
+    	self.log("ERROR: ", stderrBuffer.toString());
     }
     callback(null, imageBuffer);
   }.bind(this));

@@ -13,10 +13,8 @@ fi
 
 
 ( cd /var/tmp
-# rm *.jpeg
-ls -tr ${INSTANCE}/* | tail -2 | head -1 |awk '{ print "file "$1 }' > snapshot_${INSTANCE}_$$.txt
+FILE=`ls -tr ${INSTANCE}/* | tail -3 | head -1`
 
-ffmpeg -f concat -i snapshot_${INSTANCE}_$$.txt -frames:v 1 ${OPTIONS} -f image2 -
+~/npm/lib/node_modules/ffmpeg-for-homebridge/ffmpeg -i $FILE -frames:v 1 ${OPTIONS} -f image2 -
 # ffmpeg -f concat -i snapshot_${INSTANCE}.txt -frames:v 1  ${OPTIONS} -f image2 -y ${GFILENAME}
-rm snapshot_${INSTANCE}_$$.txt
 )
