@@ -4,6 +4,7 @@ var uuid, Service, Characteristic, StreamController;
 var crypto = require('crypto');
 var ip = require('ip');
 var spawn = require('child_process').spawn;
+var pathToFfmpeg = require('ffmpeg-for-homebridge');
 var Gphoto = require('./gphoto').gphoto;
 
 module.exports = {
@@ -20,8 +21,8 @@ function FFMPEG(hap, cameraConfig, log, stillProcessor, videoProcessor, interfac
   var ffmpegOpt = cameraConfig.videoConfig;
   this.name = cameraConfig.name;
   this.vcodec = ffmpegOpt.vcodec;
-  this.stillProcessor = stillProcessor || 'ffmpeg';
-  this.videoProcessor = videoProcessor || 'ffmpeg';
+  this.stillProcessor = stillProcessor || pathToFfmpeg || 'ffmpeg';
+  this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
   this.audio = ffmpegOpt.audio;
   this.acodec = ffmpegOpt.acodec;
   this.packetsize = ffmpegOpt.packetSize;
@@ -114,7 +115,7 @@ function FFMPEG(hap, cameraConfig, log, stillProcessor, videoProcessor, interfac
     }
   }
 
-  let options = {
+  const options = {
     proxy: false, // Requires RTP/RTCP MUX Proxy
     srtp: true, // Supports SRTP AES_CM_128_HMAC_SHA1_80 encryption
     video: {
@@ -172,7 +173,7 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
     if (this.uploader && imageBuffer.length > 0) {
       var d = new Date();
       var fileName = this.name.replace(/ /g, "_") + "_" + d.toLocaleString().replace(/ |,|[\/]/g, "_") + ".jpeg";
-	self.log("Queue", imageBuffer.length, fileName);
+      self.log("Queue", imageBuffer.length, fileName);
       self.gphoto.upload({
         id: fileName,
         that: self,
@@ -180,7 +181,7 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
         imageBuffer: imageBuffer
       });
     } else {
-    	self.log("ERROR: ", stderrBuffer.toString());
+      self.log("ERROR: ", stderrBuffer.toString());
     }
     callback(null, imageBuffer);
   }.bind(this));
@@ -430,7 +431,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
       delete this.ongoingSessions[sessionIdentifier];
     }
   }
-}
+};
 
 FFMPEG.prototype.createCameraControlService = function() {
   var controlService = new Service.CameraControl();
@@ -441,12 +442,12 @@ FFMPEG.prototype.createCameraControlService = function() {
     var microphoneService = new Service.Microphone();
     this.services.push(microphoneService);
   }
-}
+};
 
 // Private
 
 FFMPEG.prototype._createStreamControllers = function(maxStreams, options) {
-  let self = this;
+  const self = this;
 
   for (var i = 0; i < maxStreams; i++) {
     var streamController = new StreamController(i, options, self);
@@ -454,4 +455,4 @@ FFMPEG.prototype._createStreamControllers = function(maxStreams, options) {
     self.services.push(streamController.service);
     self.streamControllers.push(streamController);
   }
-}
+};
