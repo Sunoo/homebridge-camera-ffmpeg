@@ -4,7 +4,8 @@ DIRECTORY=$1
 FILENAME=$2
 
 ( cd
-echo DEBUG=*,-log4j ~/npm/bin/upload-gphotos ${FILENAME} -q -c ~/.node-red/upload-gphoto.json -a "${DIRECTORY}"
-DEBUG=*,-log4js:* ~/npm/bin/upload-gphotos ${FILENAME} -q -c ~/.node-red/upload-gphoto.json -a "${DIRECTORY}"
+source ~/.node-red/passwords.sh
+echo DEBUG=*,-log4j,-puppeteer:* ~/npm/bin/upload-gphotos ${FILENAME} -u USERNAME -p PASSWORD -a "${DIRECTORY}"
+DEBUG=*,-log4js:*,-puppeteer:* ~/npm/bin/upload-gphotos ${FILENAME} -u $USERNAME -p $PASSWORD -a "${DIRECTORY}"
 rm ${FILENAME}
 )
