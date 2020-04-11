@@ -1,6 +1,17 @@
-# homebridge-camera-ffmpeg
+<span align="center">
 
-ffmpeg plugin for [Homebridge](https://github.com/nfarina/homebridge)
+<a href="https://github.com/homebridge/verified/blob/master/verified-plugins.json"><img alt="homebridge-verified" src="https://github.com/homebridge/branding/blob/master/logos/homebridge-color-round.svg?sanitize=true" width="140px"></a>
+
+# Homebridge Camera FFmpeg
+
+<a href="https://www.npmjs.com/package/homebridge-camera-ffmpeg"><img title="npm version" src="https://badgen.net/npm/v/homebridge-camera-ffmpeg" ></a>
+<a href="https://www.npmjs.com/package/homebridge-camera-ffmpeg"><img title="npm downloads" src="https://badgen.net/npm/dt/homebridge-camera-ffmpeg" ></a>
+
+<p><a href="https://www.ffmpeg.org">FFmpeg</a> plugin for 
+  <a href="https://homebridge.io">Homebridge</a>. 
+</p>
+
+</span>
 
 ## Installation
 
