@@ -17,5 +17,5 @@ fi
 #rm *mp4
 ls -tr ${INSTANCE}/* | tail -61 | head -60 | awk '{ print "file "$1 }' > ${INSTANCE}.txt
 #ffmpeg -f concat -c:v h264_mmal -i ${INSTANCE}.txt -c:v h264_omx -profile:v high -b:v 3000000 -y ${FILENAME}
-~/npm/lib/node_modules/ffmpeg-for-homebridge/ffmpeg -f concat -i ${INSTANCE}.txt ${OPTIONS} -y ${FILENAME}
+~/npm/lib/node_modules/ffmpeg-for-homebridge/ffmpeg -f concat -i ${INSTANCE}.txt ${OPTIONS} -vf "select=gt(scene\,0.01),setpts=0.5*PTS" -y ${FILENAME}
 )
