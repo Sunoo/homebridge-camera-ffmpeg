@@ -1,8 +1,8 @@
 var debug = require('debug')('CameraDrive');
 var fs = require('fs');
 var readline = require('readline');
-var google = require('googleapis');
-var googleAuth = require('google-auth-library');
+const {google} = require('googleapis');
+var streamifier = require('./lib/streamifier.js');
 var url = require('url');
 
 module.exports = {
@@ -44,7 +44,6 @@ drive.prototype.storePicture = function(prefix, picture) {
     debug("getFolder");
     if (auth) {
         getPictureFolder(function(err, folder) {
-            debug("upload");
             uploadPicture(folder, prefix, picture);
         })
     }
@@ -63,8 +62,8 @@ function getPictureFolder(cb) {
         if (err) {
             cb(err);
         } else {
-            if (res.files.length > 0) {
-                res.files.forEach(function(file) {
+            if (res.data.files.length > 0) {
+                res.data.files.forEach(function(file) {
                     debug('Found Folder: ', file.name, file.id);
                     cb(null, file.id);
                 });
@@ -105,7 +104,7 @@ function uploadPicture(folder, prefix, picture) {
     };
     var media = {
         mimeType: 'image/jpeg',
-        body: picture
+        body: streamifier.createReadStream(picture)
     };
 
     drive.files.create({
@@ -118,7 +117,7 @@ function uploadPicture(folder, prefix, picture) {
             // Handle error
             console.log(err);
         } else {
-            debug('File Id: ', file.id);
+            debug('File Id: ', file.data.id);
         }
     });
 
@@ -134,19 +133,16 @@ function uploadPicture(folder, prefix, picture) {
  * @param {function} callback The callback to call with the authorized client.
  */
 function authorize(credentials, callback) {
-    var clientSecret = credentials.installed.client_secret;
-    var clientId = credentials.installed.client_id;
-    var redirectUrl = credentials.installed.redirect_uris[0];
-    var auth = new googleAuth();
-    var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+  const {client_secret, client_id, redirect_uris} = credentials.installed;
+  const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
     // Check if we have previously stored a token.
     fs.readFile(TOKEN_PATH, function(err, token) {
         if (err) {
-            getNewToken(oauth2Client, callback);
+            getNewToken(oAuth2Client, callback);
         } else {
-            oauth2Client.credentials = JSON.parse(token);
-            callback(oauth2Client);
+            oAuth2Client.credentials = JSON.parse(token);
+            callback(oAuth2Client);
         }
     });
 }
@@ -155,12 +151,12 @@ function authorize(credentials, callback) {
  * Get and store new token after prompting for user authorization, and then
  * execute the given callback with the authorized OAuth2 client.
  *
- * @param {google.auth.OAuth2} oauth2Client The OAuth2 client to get token for.
+ * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
  * @param {getEventsCallback} callback The callback to call with the authorized
  *     client.
  */
-function getNewToken(oauth2Client, callback) {
-    var authUrl = oauth2Client.generateAuthUrl({
+function getNewToken(oAuth2Client, callback) {
+    var authUrl = oAuth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES
     });
@@ -171,14 +167,14 @@ function getNewToken(oauth2Client, callback) {
     });
     rl.question('Enter the code from that page here: ', function(code) {
         rl.close();
-        oauth2Client.getToken(code, function(err, token) {
+        oAuth2Client.getToken(code, function(err, token) {
             if (err) {
                 console.log('Error while trying to retrieve access token', err);
                 return;
             }
-            oauth2Client.credentials = token;
+            oAuth2Client.credentials = token;
             storeToken(token);
-            callback(oauth2Client);
+            callback(oAuth2Client);
         });
     });
 }
@@ -245,7 +241,7 @@ function uploadFile(auth) {
             if (err) {
                 callback(err);
             } else {
-                res.files.forEach(function(file) {
+                res.data.files.forEach(function(file) {
                     debug('Found file: ', file.name, file.id);
                 });
                 if (res.nextPageToken) {
@@ -283,7 +279,7 @@ function uploadFile(auth) {
             // Handle error
             console.log(err);
         } else {
-            debug('Folder Id: ', file.id);
+            debug('Folder Id: ', file.data.id);
 
             var fileMetadata = {
                 'name': 'photo.jpg',
@@ -304,7 +300,7 @@ function uploadFile(auth) {
                     // Handle error
                     console.log(err);
                 } else {
-                    debug('File Id: ', file.id);
+                    debug('File Id: ', file.data.id);
                 }
             });
 
