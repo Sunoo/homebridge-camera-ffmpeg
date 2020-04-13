@@ -16,15 +16,14 @@
 ## Installation
 
 - Basic Installation
-  - Install [homebridge-config-ui-x](https://github.com/oznu/homebridge-config-ui-x).
-  - Search for "Camera FFmpeg]" on the plugin ccreen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
-  - Click install.
-  
-- Manual Installation
-  - Install this plugin using: npm install -g homebridge-camera-ffmpeg
-  - Edit ``config.json`` and add the camera.
+  - Install this plugin using: `npm install -g homebridge-camera-ffmpeg`
+  - Edit `config.json` and add the camera.
   - Run Homebridge
   - Add extra camera accessories in Home app. The setup code is the same as homebridge.
+
+- Install via Homebridge Web UI 
+  - Search for `Camera FFmpeg` on the plugin screen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
+  - Click install.
 
 ## Configuration
 
