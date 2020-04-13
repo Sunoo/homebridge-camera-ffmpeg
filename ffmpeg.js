@@ -28,6 +28,10 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor, interfaceName) {
   this.packetsize = ffmpegOpt.packetSize
   this.fps = ffmpegOpt.maxFPS || 10;
   this.maxBitrate = ffmpegOpt.maxBitrate || 300;
+  this.minBitrate = ffmpegOpt.minBitrate || 0;
+  if (this.minBitrate > this.maxBitrate) {
+    this.minBitrate = this.maxBitrate;
+  }
   this.debug = ffmpegOpt.debug;
   this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
   this.vflip = ffmpegOpt.vflip || false;
@@ -59,6 +63,7 @@ function FFMPEG(hap, cameraConfig, log, videoProcessor, interfaceName) {
 
   this.maxWidth = ffmpegOpt.maxWidth || 1280;
   this.maxHeight = ffmpegOpt.maxHeight || 720;
+  this.preserveRatio = ffmpegOpt.preserveRatio || "";
   var maxFPS = (this.fps > 30) ? 30 : this.fps;
 
   if (this.maxWidth >= 320) {
@@ -148,12 +153,30 @@ FFMPEG.prototype.handleCloseConnection = function(connectionID) {
 }
 
 FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
-  let resolution = request.width + 'x' + request.height;
+  var width = request.width;
+  var height = request.height;
+  if (width > this.maxWidth) {
+    width = this.maxWidth;
+  }
+  if (height > this.maxHeight) {
+    height = this.maxHeight;
+  }
+  switch (this.preserveRatio) {
+    case "W":
+      var resolution = width + ':-1';
+      break;
+    case "H":
+      var resolution = '-1:' + height;
+      break;
+    default:
+      var resolution = width + ':' + height;
+      break;
+  }
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
-  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -s '+ resolution + ' -f image2 -').split(' '), {env: process.env});
+  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -vf scale=' + resolution + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer.alloc(0);
   this.log("Snapshot from " + this.name + " at " + resolution);
-  if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -s '+ resolution + ' -f image2 -');
+  if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -vf scale='+ resolution + ' -f image2 -');
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
@@ -282,6 +305,29 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
           }
         }
 
+        if (width > this.maxWidth) {
+          width = this.maxWidth;
+        }
+        if (height > this.maxHeight) {
+          height = this.maxHeight;
+        }
+
+        switch (this.preserveRatio) {
+          case "W":
+            var resolution = width + ':-1';
+            break;
+          case "H":
+            var resolution = '-1:' + height;
+            break;
+          default:
+            var resolution = width + ':' + height;
+            break;
+        }
+
+        if (vbitrate < this.minBitrate) {
+          vbitrate = this.minBitrate;
+        }
+
         let audioInfo = request["audio"];
         if (audioInfo) {
           abitrate = audioInfo["max_bit_rate"];
@@ -297,7 +343,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let audioSsrc = sessionInfo["audio_ssrc"];
         let vf = [];
 
-        let videoFilter = ((this.videoFilter === '') ? ('scale=' + width + ':' + height + '') : (this.videoFilter)); // empty string indicates default
+        let videoFilter = ((this.videoFilter === '') ? ('scale=' + resolution) : (this.videoFilter)); // empty string indicates default
         // In the case of null, skip entirely
         if (videoFilter !== null && videoFilter !== 'none') {
           vf.push(videoFilter)
@@ -368,7 +414,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
 
         // start the process
         let ffmpeg = spawn(this.videoProcessor, fcmd.split(' '), {env: process.env});
-        this.log("Start streaming video from " + this.name + " with " + width + "x" + height + "@" + vbitrate + "kBit");
+        this.log("Start streaming video from " + this.name + " with " + resolution + "@" + fps + "fps (" + vbitrate + "kBit)");
         if(this.debug){
           console.log("ffmpeg " + fcmd);
         }
