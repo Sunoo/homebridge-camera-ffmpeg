@@ -1,124 +1,214 @@
 {
   "pluginAlias": "Camera-ffmpeg",
   "pluginType": "platform",
-  "headerDisplay": "The **ffmpeg** binary must be installed on your system for this plugin to work.",
-  "footerDisplay": "For help please read the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).",
+  "headerDisplay": "Cameras are exposed to HomeKit as separate accessories and each needs to be manually paired.\n\n1. Open the Home <img src='https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png' height='16.42px'> app on your device.\n2. Tap the Home tab, then tap <img src='https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png' height='16.42px'>.\n3. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan*.\n4. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.\n\nFor help and examples of common configurations please read the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).",
+  "footerDisplay": "The **ffmpeg** binary must be installed on your system for this plugin to work.",
   "schema": {
     "name": {
       "title": "Name",
-      "type": "string",
-      "default": "Camera ffmpeg",
-      "required": true
+      "type": "string"
+    },
+    "videoProcessor": {
+      "title": "Video Processor",
+      "type": "string"
+    },
+    "interfaceName": {
+      "title": "Interface Name",
+      "type": "string"
+    },
+    "uploader": {
+      "type": "boolean"
+    },
+    "manufacturer": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "serialNumber": {
+      "type": "string"
+    },
+    "firmwareRevision": {
+      "type": "string"
     },
     "cameras": {
       "type": "array",
       "items": {
-        "title": "Camera Config",
+        "title": "Cameras",
         "type": "object",
         "properties": {
-          "name":{
+          "name": {
             "title": "Name",
             "type": "string",
-            "default": "Default Camera",
+            "placeholder": "Enter camera name...",
             "required": true
           },
           "videoConfig": {
             "title": "Video Configuration",
             "type": "object",
             "properties": {
-                "source": {
-                    "title": "Source",
-                    "type": "string",
-                    "default": "-re -i rtsp://myfancy_rtsp_stream",
-                    "required": true
-                },
-                "stillImageSource": {
-                    "title": "Still Image Source",
-                    "type": "string",
-                    "default": "-i http://faster_still_image_grab_url/this_is_optional.jpg"
-                },
-                "maxStreams": {
-                    "title": "Maximum Number of Streams",
-                    "type": "integer",
-                    "default": 2,
-                    "minimum": 1,
-                    "description": "The maximum number of streams that will be generated for this camera"
-                },
-                "maxWidth": {
-                    "title": "Maximum Width",
-                    "type": "integer",
-                    "default": 1280,
-                    "minimum": 1,
-                    "description": "The maximum width reported to HomeKit"
-                },
-                "maxHeight": {
-                    "title": "Maximum Height",
-                    "type": "integer",
-                    "default": 720,
-                    "minimum": 1,
-                    "description": "The maximum height reported to HomeKit"
-                },
-                "maxFPS": {
-                    "title": "Maximum FPS",
-                    "type": "integer",
-                    "default": 10,
-                    "minimum": 1,
-                    "description": "The maximum frame rate of the stream"
-                    },
-                "maxBitrate": {
-                    "title": "Maximum Bitrate",
-                    "type": "integer",
-                    "default": 300,
-                    "minimum": 1,
-                    "description": "The maximum bit rate of the stream"
-                },
-                "vcodec": {
-                    "title": "Video Codec",
-                    "type": "string",
-                    "default": "libx264"
-                },
-                "packetSize": {
-                    "title": "Packet Size",
-                    "type": "number",
-                    "default": 1316,
-                    "multipleOf": 188.0
-                },
-                "audio": {
-                    "title": "Enable Audio?",
-                    "type": "boolean",
-                    "default": false
-                },
-                "vflip": {
-                    "title": "Flip Stream Vertically?",
-                    "type": "boolean",
-                    "default": false
-                },
-                "hflip": {
-                    "title": "Flip Stream Horizontally?",
-                    "type": "boolean",
-                    "default": false
-                },
-                "motion":{
-                    "title": "Enable Motion?",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "IOS 13 Notification"
-                },
-                "uploader":{
-                    "title": "Enable Uploader?",
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Uploading Snapshots to Google"
-                },
-                "debug": {
-                    "title": "Enable Debug Mode?",
-                    "type": "boolean",
-                    "default": false
+              "source": {
+                "title": "Source",
+                "type": "string",
+                "placeholder": "-re -i rtsp://myfancy_rtsp_stream",
+                "required": true
+              },
+              "stillImageSource": {
+                "title": "Still Image Source",
+                "type": "string"
+              },
+              "maxStreams": {
+                "title": "Maximum Number of Streams",
+                "type": "integer",
+                "placeholder": 2,
+                "minimum": 1,
+                "description": "The maximum number of streams that will be generated for this camera"
+              },
+              "maxWidth": {
+                "title": "Maximum Width",
+                "type": "integer",
+                "placeholder": 1280,
+                "minimum": 1,
+                "description": "The maximum width reported to HomeKit"
+              },
+              "maxHeight": {
+                "title": "Maximum Height",
+                "type": "integer",
+                "placeholder": 720,
+                "minimum": 1,
+                "description": "The maximum height reported to HomeKit"
+              },
+              "maxFPS": {
+                "title": "Maximum FPS",
+                "type": "integer",
+                "placeholder": 10,
+                "minimum": 1,
+                "description": "The maximum frame rate of the stream"
+              },
+              "maxBitrate": {
+                "title": "Maximum Bitrate",
+                "type": "integer",
+                "placeholder": 300,
+                "minimum": 1,
+                "description": "The maximum bit rate of the stream"
+              },
+              "preserveRatio": {
+                "title": "Preserve Ratio",
+                "type": "string",
+                "description": "Can be set to either 'W' or 'H' with respective obvious meanings.",
+                "typeahead": {
+                  "source": [
+                    "W",
+                    "H"
+                  ]
                 }
+              },
+              "vcodec": {
+                "title": "Video Codec",
+                "type": "string",
+                "placeholder": "libx264",
+                "description": "The ffmpeg video processing codec to use.",
+                "typeahead": {
+                  "source": [
+                    "libx264",
+                    "copy",
+                    "h264_omx",
+                    "h264",
+                    "h264_mmal"
+                  ]
+                }
+              },
+              "packetSize": {
+                "title": "Packet Size",
+                "type": "number",
+                "placeholder": 1316,
+                "multipleOf": 188.0
+              },
+              "videoFilter": {
+                "title": "Allows a custom video filter to be passed to FFmpeg via -vf",
+                "type": "string",
+                "placeholder": "scale=1280:720"
+              },
+              "additionalCommandline": {
+                "title": "Additional of extra command line options",
+                "type": "string",
+                "description": "Additional of extra command line options to use with FFmpeg, for example '-loglevel verbose'"
+              },
+              "mapvideo": {
+                "type": "string",
+                "title": "Map Video",
+                "placeholder": "0:0",
+                "description": " Select the stream used for video"
+              },
+              "mapaudio": {
+                "type": "string",
+                "title": "Map Audio",
+                "placeholder": "0:1",
+                "description": " Select the stream used for audio"
+              },
+              "audio": {
+                "title": "Enable Audio (requires ffmpeg with libfdk-aac)",
+                "type": "boolean"
+              },
+              "vflip": {
+                "title": "Flip Stream Vertically",
+                "type": "boolean"
+              },
+              "hflip": {
+                "title": "Flip Stream Horizontally",
+                "type": "boolean"
+              },
+              "motion": {
+                "title": "Enable IOS 13 Motion Notifications",
+                "type": "boolean"
+              },
+              "debug": {
+                "title": "Enable Debug Mode",
+                "type": "boolean"
+              }
             }
           }
         }
       }
     }
-  }
+  },
+  "layout": [
+    {
+      "key": "cameras",
+      "type": "array",
+      "orderable": false,
+      "buttonText": "Add Camera",
+      "items": [
+        "cameras[].name",
+        "cameras[].videoConfig.source",
+        "cameras[].videoConfig.stillImageSource",
+        "cameras[].videoConfig.vcodec",
+        "cameras[].videoConfig.audio",
+        "cameras[].videoConfig.debug",
+        {
+          "key": "cameras[].videoConfig",
+          "type": "section",
+          "title": "Advanced Settings",
+          "expandable": true,
+          "expanded": false,
+          "items": [
+            "cameras[].videoConfig.maxStreams",
+            "cameras[].videoConfig.maxWidth",
+            "cameras[].videoConfig.maxHeight",
+            "cameras[].videoConfig.maxFPS",
+            "cameras[].videoConfig.maxBitrate",
+            "cameras[].videoConfig.preserveRatio",
+            "cameras[].videoConfig.packetSize",
+            "cameras[].videoConfig.videoFilter",
+            "cameras[].videoConfig.additionalCommandline",
+            "cameras[].videoConfig.mapvideo",
+            "cameras[].videoConfig.mapaudio",
+            "cameras[].videoConfig.vflip",
+            "cameras[].videoConfig.hflip",
+            "cameras[].videoConfig.motion"
+          ]
+        }
+      ]
+    }
+  ]
 }
