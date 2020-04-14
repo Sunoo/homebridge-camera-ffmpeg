@@ -1,8 +1,8 @@
 {
   "pluginAlias": "Camera-ffmpeg",
   "pluginType": "platform",
-  "headerDisplay": "The **ffmpeg** binary must be installed on your system for this plugin to work.",
-  "footerDisplay": "For help please read the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).",
+  "headerDisplay": "Cameras are exposed to HomeKit as separate accessories and each needs to be manually paired. See the [How To Add Homebridge Cameras / TVs](https://github.com/homebridge/homebridge/wiki/Connecting-Homebridge-To-HomeKit#how-to-add-homebridge-cameras--tvs) wiki page for further information.",
+  "footerDisplay": "The **ffmpeg** binary must be installed on your system for this plugin to work.\n\nFor help please read the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).",
   "schema": {
     "name": {
       "title": "Name",
