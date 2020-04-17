@@ -16,21 +16,6 @@
       "title": "Interface Name",
       "type": "string"
     },
-    "uploader": {
-      "type": "boolean"
-    },
-    "manufacturer": {
-      "type": "string"
-    },
-    "model": {
-      "type": "string"
-    },
-    "serialNumber": {
-      "type": "string"
-    },
-    "firmwareRevision": {
-      "type": "string"
-    },
     "cameras": {
       "type": "array",
       "items": {
@@ -42,6 +27,25 @@
             "type": "string",
             "placeholder": "Enter camera name...",
             "required": true
+          },
+          "uploader": {
+            "type": "boolean"
+          },
+          "manufacturer": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "firmwareRevision": {
+            "type": "string"
+          },
+          "motion": {
+            "title": "Enable IOS 13 Motion Notifications",
+            "type": "boolean"
           },
           "videoConfig": {
             "title": "Video Configuration",
@@ -158,10 +162,6 @@
                 "title": "Flip Stream Horizontally",
                 "type": "boolean"
               },
-              "motion": {
-                "title": "Enable IOS 13 Motion Notifications",
-                "type": "boolean"
-              },
               "debug": {
                 "title": "Enable Debug Mode",
                 "type": "boolean"
@@ -205,7 +205,7 @@
             "cameras[].videoConfig.mapaudio",
             "cameras[].videoConfig.vflip",
             "cameras[].videoConfig.hflip",
-            "cameras[].videoConfig.motion"
+            "cameras[].motion"
           ]
         }
       ]
