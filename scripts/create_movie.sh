@@ -17,5 +17,5 @@ fi
 #rm *mp4
 ls -tr ${INSTANCE}/* | tail -61 | head -60 | awk '{ print "file "$1 }' > ${INSTANCE}.txt
 #ffmpeg -f concat -c:v h264_mmal -i ${INSTANCE}.txt -c:v h264_omx -profile:v high -b:v 3000000 -y ${FILENAME}
-~/npm/lib/node_modules/ffmpeg-for-homebridge/ffmpeg -f concat -i ${INSTANCE}.txt ${OPTIONS} -vf "mpdecimate=hi=10000:lo=600:frac=0.1,setpts=N/(15*TB)" -y ${FILENAME}
+~/npm/lib/node_modules/ffmpeg-for-homebridge/ffmpeg -hide_banner -loglevel error -f concat -i ${INSTANCE}.txt ${OPTIONS} -vf "mpdecimate=hi=10000:lo=600:frac=0.1,setpts=N/(15*TB)" -y ${FILENAME}
 )
