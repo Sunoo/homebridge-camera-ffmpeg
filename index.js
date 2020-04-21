@@ -73,7 +73,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
         var button = new Service.Switch(cameraName);
         cameraAccessory.addService(button);
 
-        var motion = new Service.MotionSensor(cameraName);
+        var motion = new Service.MotionSensor(cameraName + " - Dummy");
         cameraAccessory.addService(motion);
 
         button.getCharacteristic(Characteristic.On)
