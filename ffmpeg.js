@@ -172,8 +172,19 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
       var resolution = width + ':' + height;
       break;
   }
+  let vf = [];
+  let videoFilter = ((this.videoFilter === '') ? ('scale=' + resolution) : (this.videoFilter)); // empty string indicates default
+  // In the case of null, skip entirely
+  if (videoFilter !== null && videoFilter !== 'none') {
+    vf.push(videoFilter)
+    if(this.hflip)
+      vf.push('hflip');
+
+    if(this.vflip)
+      vf.push('vflip');
+  }
   var imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
-  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -vf scale=' + resolution + ' -f image2 -').split(' '), {env: process.env});
+  let ffmpeg = spawn(this.videoProcessor, (imageSource + ' -t 1 -vf ' + vf.join(',')) : ('')) + ' -f image2 -').split(' '), {env: process.env});
   var imageBuffer = Buffer.alloc(0);
   this.log("Snapshot from " + this.name + " at " + resolution);
   if(this.debug) console.log('ffmpeg '+imageSource + ' -t 1 -vf scale='+ resolution + ' -f image2 -');
