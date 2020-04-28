@@ -173,9 +173,7 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
       break;
   }
   let vf = [];
-  this.log("this.videoFilter is " + this.videoFilter);
   let videoFilter = ((this.videoFilter === '' || this.videoFilter === null) ? ('scale=' + resolution) : (this.videoFilter)); // empty string or null indicates default
-  this.log("videoFilter is " + videoFilter)
   // In the case of null, skip entirely
   if (videoFilter !== null && videoFilter !== 'none') {
     if(this.hflip)
