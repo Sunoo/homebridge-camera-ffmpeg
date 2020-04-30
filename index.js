@@ -84,7 +84,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       configuredAccessories.push(cameraAccessory);
     });
 
-    self.api.publishCameraAccessories("Camera-ffmpeg", configuredAccessories);
+    self.api.publishCameraAccessories("homebridge-camera-ffmpeg", configuredAccessories);
   }
 };
 
