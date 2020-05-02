@@ -191,7 +191,7 @@ FFMPEG.prototype.handleSnapshotRequest = function(request, callback) {
   var stderrBuffer = Buffer.alloc(0);
   let self = this;
   this.log("Snapshot from " + this.name + " at " + resolution);
-  if(this.debug) console.log(this.stillProcessor + imageSource + ' -t 1' + ((vf.length > 0) ? (' -vf ' + vf.join(',')) : ('')) + ' -f image2 -');
+  if(this.debug) console.log(this.stillProcessor + ' ' + imageSource + ' -t 1' + ((vf.length > 0) ? (' -vf ' + vf.join(',')) : ('')) + ' -f image2 -');
   ffmpeg.stdout.on('data', function(data) {
     imageBuffer = Buffer.concat([imageBuffer, data]);
   });
