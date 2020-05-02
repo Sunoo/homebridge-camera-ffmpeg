@@ -373,8 +373,8 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
 
         let videoFilter = ((this.videoFilter === '' || this.videoFilter === null) ? ('scale=' + resolution) : (this.videoFilter)); // empty string or null indicates default
         // In the case of null, skip entirely
-        if (videoFilter !== null && videoFilter !== 'none') {
-          vf.push(videoFilter);
+        if (videoFilter !== null && videoFilter !== 'none' && vcodec !== 'copy') { // Filters cannot be set if the copy vcodec is used.
+          vf.push(videoFilter)
 
           if (this.hflip)
             vf.push('hflip');
