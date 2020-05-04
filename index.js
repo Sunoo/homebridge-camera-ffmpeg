@@ -35,8 +35,6 @@ ffmpegPlatform.prototype.configureAccessory = function(accessory) {
 
 ffmpegPlatform.prototype.didFinishLaunching = function() {
   var self = this;
-  var videoProcessor = self.config.videoProcessor || 'ffmpeg';
-  var stillProcessor = self.config.stillProcessor || 'ffmpeg';
   var interfaceName = self.config.interfaceName || '';
 
   if (self.config.cameras) {
@@ -80,7 +78,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
           .on('set', _Motion.bind(cameraAccessory));
       }
 
-      var cameraSource = new FFMPEG(hap, cameraConfig, self.log, stillProcessor, videoProcessor, interfaceName);
+      var cameraSource = new FFMPEG(hap, cameraConfig, self.log, self.config.stillProcessor, self.config.videoProcessor, interfaceName);
       cameraAccessory.configureCameraSource(cameraSource);
       configuredAccessories.push(cameraAccessory);
     });
