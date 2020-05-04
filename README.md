@@ -90,7 +90,7 @@ Example with manufacturer, model, serial number and firmware set:
 * `maxBitrate` is the maximum bit rate of the stream in kbit/s, default `300`
 * `preserveRatio` can be set to either `W` or `H` with respective obvious meanings, all other values have no effect
 * `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default `libx264`
-* `audio` can be set to true to enable audio streaming from camera.
+* `audio` can be set to true to enable audio streaming from camera, default `false`.
 * `acodec` Default audio codec is `libfdk_aac` and is enabled in the bundled ffmpeg version.
 * `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default `1316`
 * `vflip` Flips the stream vertically, default `false`
