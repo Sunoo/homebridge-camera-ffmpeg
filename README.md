@@ -50,6 +50,7 @@
 
 * `uploader` enable uploading of snapshots to Google Drive, defaults to `false`. See wiki for more detailed instructions.
 * `motion` enable a dummy switch and motion sensor to trigger picture notifications in iOS 13, defaults to `false`.  See wiki for more detailed instructions.
+* `doorbell` enable doorbell function for this camera (image notifications). When enabled there will be an additional switch that triggers the doorbell event, automate it to use it with other HomeKit switches, HTTP events etc.
 * `manufacturer` set manufacturer name for display in the Home app
 * `model` set model for display in the Home app
 * `serialNumber` set serial number for display in the Home app

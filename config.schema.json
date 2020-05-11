@@ -48,6 +48,10 @@
             "title": "Enable IOS 13 Motion Notifications",
             "type": "boolean"
           },
+          "doorbell": {
+            "title": "Set this up as a doorbell with a switch as trigger (automate the switch to get notifications)",
+            "type": "boolean"
+          },
           "videoConfig": {
             "title": "Video Configuration",
             "type": "object",
@@ -206,7 +210,8 @@
             "cameras[].videoConfig.mapaudio",
             "cameras[].videoConfig.vflip",
             "cameras[].videoConfig.hflip",
-            "cameras[].motion"
+            "cameras[].motion",
+            "cameras[].doorbell"
           ]
         }
       ]
