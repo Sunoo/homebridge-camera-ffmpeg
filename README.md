@@ -19,7 +19,7 @@
   - Install this plugin using: `npm install -g homebridge-camera-ffmpeg`
   - Edit `config.json` and add the camera.
   - Run Homebridge
-  - Add extra camera accessories in Home app. The setup code is the same as homebridge.
+  - In Home App tap +, select Add Accessory, select I Don't Have a Code or Cannot Scan. Under Nearby Accessories select the camera. In Uncertified Accessory, select Add Anyway. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select Use Camera and scan the QR code again.
 
 - Install via Homebridge Web UI
   - Search for `Camera FFmpeg` on the plugin screen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
