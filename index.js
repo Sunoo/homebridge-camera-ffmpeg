@@ -76,13 +76,13 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
         var switchService = new Service.Switch(cameraName + " Doorbell Trigger");
         switchService.getCharacteristic(Characteristic.On)
         .on('set', function(state, callback){
-            if(state){
-                cameraAccessory.getService(Service.Doorbell).getCharacteristic(Characteristic.ProgrammableSwitchEvent).setValue(0);
-                setTimeout(function(){
-                    switchService.getCharacteristic(Characteristic.On).updateValue(false);
-                }, 1000);
-            }
-            callback(null, state);
+          if(state){
+            cameraAccessory.getService(Service.Doorbell).getCharacteristic(Characteristic.ProgrammableSwitchEvent).setValue(0);
+            setTimeout(function(){
+              switchService.getCharacteristic(Characteristic.On).updateValue(false);
+            }, 1000);
+          }
+          callback(null, state);
         });
         cameraAccessory.addService(switchService);
       }
