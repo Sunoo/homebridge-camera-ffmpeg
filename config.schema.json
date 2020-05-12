@@ -49,7 +49,8 @@
             "type": "boolean"
           },
           "doorbell": {
-            "title": "Set this up as a doorbell with a switch as trigger (automate the switch to get notifications)",
+            "title": "Enable Doorbell"
+            "description": "Set this up as a doorbell with a switch as trigger (automate the switch to get notifications)",
             "type": "boolean"
           },
           "videoConfig": {
