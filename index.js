@@ -72,10 +72,6 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
 
       if(cameraConfig.doorbell) {
         var doorbellService = new Service.Doorbell(cameraName+" Doorbell");
-        doorbellService.getCharacteristic(Characteristic.ProgrammableSwitchEvent)
-        .on('get', function(callback){
-            callback(null, 0);
-        });
         cameraAccessory.addService(doorbellService);
         var switchService = new Service.Switch(cameraName + " Doorbell Trigger");
         switchService.getCharacteristic(Characteristic.On)
@@ -87,9 +83,6 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
                 }, 1000);
             }
             callback(null, state);
-        })
-        .on('get', function(callback){
-            callback(null, false);
         });
         cameraAccessory.addService(switchService);
       }
