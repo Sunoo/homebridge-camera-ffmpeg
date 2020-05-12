@@ -7,8 +7,8 @@
 <a href="https://www.npmjs.com/package/homebridge-camera-ffmpeg"><img title="npm version" src="https://badgen.net/npm/v/homebridge-camera-ffmpeg" ></a>
 <a href="https://www.npmjs.com/package/homebridge-camera-ffmpeg"><img title="npm downloads" src="https://badgen.net/npm/dt/homebridge-camera-ffmpeg" ></a>
 
-<p><a href="https://www.ffmpeg.org">FFmpeg</a> plugin for 
-  <a href="https://homebridge.io">Homebridge</a>. 
+<p><a href="https://www.ffmpeg.org">FFmpeg</a> plugin for
+  <a href="https://homebridge.io">Homebridge</a>.
 </p>
 
 </span>
@@ -21,7 +21,7 @@
   - Run Homebridge
   - Add extra camera accessories in Home app. The setup code is the same as homebridge.
 
-- Install via Homebridge Web UI 
+- Install via Homebridge Web UI
   - Search for `Camera FFmpeg` on the plugin screen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
   - Click install.
 
@@ -90,8 +90,8 @@ Example with manufacturer, model, serial number and firmware set:
 * `maxBitrate` is the maximum bit rate of the stream in kbit/s, default `300`
 * `preserveRatio` can be set to either `W` or `H` with respective obvious meanings, all other values have no effect
 * `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default `libx264`
-* `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default `false`. Many ffmpeg binaries are not compiled with libfdk-aac, and to work around this issue, force the OPUS codec:
-  `"acodec": "libopus"`
+* `audio` can be set to true to enable audio streaming from camera, default `false`.
+* `acodec` Default audio codec is `libfdk_aac` and is enabled in the bundled ffmpeg version.
 * `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default `1316`
 * `vflip` Flips the stream vertically, default `false`
 * `hflip` Flips the stream horizontally, default `false`
