@@ -4,9 +4,11 @@
   "version": "1.1.0",
   "author": "homebridge-plugins",
   "description": "ffmpeg plugin for homebridge: https://github.com/homebridge/homebridge",
-  "license": "ISC",
+  "license": "MIT",
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "meross",
+    "homebridge"
   ],
   "repository": {
     "type": "git",
@@ -15,23 +17,17 @@
   "bugs": {
     "url": "http://github.com/homebridge-plugins/homebridge-camera-ffmpeg/issues"
   },
-    "license": "MIT",
-  "keywords": [
-    "homebridge-plugin",
-    "meross",
-    "homebridge"
-  ],
   "engines": {
     "node": ">=5.0.0",
     "homebridge": ">=0.4.5"
   },
-    "devDependencies": {
+  "devDependencies": {
     "nodemon": ">=2.0.2"
   },
   "dependencies": {
     "googleapis": ">=50.0.0",
     "ffmpeg-for-homebridge": "0.0.4",
     "ip": "^1.1.5",
-    "debug": "^4.4.1"
+    "debug": "^4.1.1"
   }
 }
