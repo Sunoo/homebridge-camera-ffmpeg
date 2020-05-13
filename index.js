@@ -51,7 +51,11 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       }
 
       var uuid = UUIDGen.generate(cameraName);
-      var cameraAccessory = new Accessory(cameraName, uuid, hap.Accessory.Categories.CAMERA);
+      var accessoryType = hap.Accessory.Categories.CAMERA;
+      if(cameraConfig.doorbell){
+        accessoryType = hap.Accessory.Categories.VIDEO_DOORBELL;
+      }
+      var cameraAccessory = new Accessory(cameraName, uuid, accessoryType);
       var cameraAccessoryInfo = cameraAccessory.getService(Service.AccessoryInformation);
       if (cameraConfig.manufacturer) {
         cameraAccessoryInfo.setCharacteristic(Characteristic.Manufacturer, cameraConfig.manufacturer);
@@ -66,9 +70,25 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
         cameraAccessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, cameraConfig.firmwareRevision);
       }
 
+      if(cameraConfig.doorbell) {
+        var doorbellService = new Service.Doorbell(cameraName+" Doorbell");
+        cameraAccessory.addService(doorbellService);
+        var switchService = new Service.Switch(cameraName + " Doorbell Trigger", "DoorbellTrigger");
+        switchService.getCharacteristic(Characteristic.On)
+        .on('set', function(state, callback){
+          if(state){
+            cameraAccessory.getService(Service.Doorbell).getCharacteristic(Characteristic.ProgrammableSwitchEvent).setValue(0);
+            setTimeout(function(){
+              switchService.getCharacteristic(Characteristic.On).updateValue(false);
+            }, 1000);
+          }
+          callback(null, state);
+        });
+        cameraAccessory.addService(switchService);
+      }
       cameraAccessory.context.log = self.log;
       if (cameraConfig.motion) {
-        var button = new Service.Switch(cameraName);
+        var button = new Service.Switch(cameraName, "MotionTrigger");
         cameraAccessory.addService(button);
 
         var motion = new Service.MotionSensor(cameraName);

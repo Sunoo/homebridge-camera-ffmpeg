@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v1.1.0 (2020-05-13)
+
+### Features
+* Adds an option to have a camera behave like a video doorbell, including a switch to trigger doorbell events (automate the switch to get notifications)
+* Add Manufacturer, Model, Serial, and Firmware Revision into config.schema.json.
 
 ## v1.0.0 (2020-05-11)
 

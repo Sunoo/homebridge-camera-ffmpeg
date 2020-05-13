@@ -50,6 +50,7 @@
 
 * `uploader` enable uploading of snapshots to Google Drive, defaults to `false`. See wiki for more detailed instructions.
 * `motion` enable a dummy switch and motion sensor to trigger picture notifications in iOS 13, defaults to `false`.  See wiki for more detailed instructions.
+* `doorbell` enable doorbell function for this camera (image notifications). When enabled there will be an additional switch that triggers the doorbell event, automate it to use it with other HomeKit switches, HTTP events etc.
 * `manufacturer` set manufacturer name for display in the Home app
 * `model` set model for display in the Home app
 * `serialNumber` set serial number for display in the Home app
@@ -172,3 +173,7 @@ A somewhat complicated example:
 We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).  Also if you have a working configuration that you would like to share, please add it to the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).
 
 https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki
+
+## Credit
+
+Homebridge Camera FFmpeg was originally created by [Khaos Tian](https://twitter.com/khaost).
