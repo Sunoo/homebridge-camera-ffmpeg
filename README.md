@@ -173,3 +173,7 @@ A somewhat complicated example:
 We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).  Also if you have a working configuration that you would like to share, please add it to the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).
 
 https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki
+
+## Credit
+
+Homebridge Camera FFmpeg was originally created by [Khaos Tian](https://twitter.com/khaost).
