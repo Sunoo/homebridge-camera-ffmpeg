@@ -73,7 +73,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       if(cameraConfig.doorbell) {
         var doorbellService = new Service.Doorbell(cameraName+" Doorbell");
         cameraAccessory.addService(doorbellService);
-        var switchService = new Service.Switch(cameraName + " Doorbell Trigger");
+        var switchService = new Service.Switch(cameraName + " Doorbell Trigger", "DoorbellTrigger");
         switchService.getCharacteristic(Characteristic.On)
         .on('set', function(state, callback){
           if(state){
@@ -88,7 +88,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       }
       cameraAccessory.context.log = self.log;
       if (cameraConfig.motion) {
-        var button = new Service.Switch(cameraName);
+        var button = new Service.Switch(cameraName, "MotionTrigger");
         cameraAccessory.addService(button);
 
         var motion = new Service.MotionSensor(cameraName);
