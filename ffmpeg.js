@@ -444,7 +444,7 @@ FFMPEG.prototype.handleStreamRequest = function(request) {
         let ffmpeg = spawn(this.videoProcessor, fcmd.split(' '), {env: process.env});
         this.log("Start streaming video from " + this.name + " with " + resolution + "@" + fps + "fps (" + vbitrate + "kBit)");
         if(this.debug){
-          console.log(this.videoProcessor + '  ' + fcmd);
+          console.log(this.videoProcessor + ' ' + fcmd);
         }
 
         // Always setup hook on stderr.
