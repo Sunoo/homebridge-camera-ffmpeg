@@ -98,11 +98,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
           .on('set', _Motion.bind(cameraAccessory));
       }
 
-<<<<<<< HEAD
       var cameraSource = new FFMPEG(hap, cameraConfig, self.log, self.config.stillProcessor, self.config.videoProcessor, interfaceName);
-=======
-      var cameraSource = new FFMPEG(hap, cameraConfig, self.log, self.config.videoProcessor, interfaceName);
->>>>>>> Brandawg93/master
       cameraAccessory.configureCameraSource(cameraSource);
       configuredAccessories.push(cameraAccessory);
     });
