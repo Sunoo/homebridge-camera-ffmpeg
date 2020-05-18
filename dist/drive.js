@@ -1,14 +1,13 @@
+"use strict";
 var debug = require('debug')('CameraDrive');
 var fs = require('fs');
 var readline = require('readline');
-const {google} = require('googleapis');
+const { google } = require('googleapis');
 var streamifier = require('./lib/streamifier.js');
 var url = require('url');
-
 module.exports = {
     drive: drive
-}
-
+};
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/drive-nodejs-quickstart.json
 var SCOPES = ['https://www.googleapis.com/auth/drive'];
@@ -17,9 +16,7 @@ var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
 var TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
 var SECRET_PATH = TOKEN_DIR + 'client_secret.json';
 var auth;
-
 function drive() {
-
     // Load client secrets from a local file.
     fs.readFile(SECRET_PATH, function processClientSecrets(err, content) {
         if (err) {
@@ -28,46 +25,41 @@ function drive() {
         }
         // Authorize a client with the loaded credentials, then call the
         // Drive API.
-        authorize(JSON.parse(content), function(authenticated) {
-
+        authorize(JSON.parse(content), function (authenticated) {
             auth = authenticated;
             debug("Authenticated");
-
         });
     });
-
-
 }
-
-drive.prototype.storePicture = function(prefix, picture) {
+drive.prototype.storePicture = function (prefix, picture) {
     // get folder ID
     debug("getFolder");
     if (auth) {
-        getPictureFolder(function(err, folder) {
+        getPictureFolder(function (err, folder) {
             uploadPicture(folder, prefix, picture);
-        })
+        });
     }
-}
-
+};
 function getPictureFolder(cb) {
     var folder;
     var drive = google.drive('v3');
-
     drive.files.list({
         q: "mimeType='application/vnd.google-apps.folder' and name = 'Camera Pictures'",
         fields: 'nextPageToken, files(id, name)',
         spaces: 'drive',
         auth: auth
-    }, function(err, res) {
+    }, function (err, res) {
         if (err) {
             cb(err);
-        } else {
+        }
+        else {
             if (res.data.files.length > 0) {
-                res.data.files.forEach(function(file) {
+                res.data.files.forEach(function (file) {
                     debug('Found Folder: ', file.name, file.id);
                     cb(null, file.id);
                 });
-            } else {
+            }
+            else {
                 var fileMetadata = {
                     'name': 'Camera Pictures',
                     'mimeType': 'application/vnd.google-apps.folder'
@@ -76,28 +68,26 @@ function getPictureFolder(cb) {
                     resource: fileMetadata,
                     fields: 'id',
                     auth: auth
-                }, function(err, file) {
+                }, function (err, file) {
                     if (err) {
                         // Handle error
                         console.log(err);
-                    } else {
+                    }
+                    else {
                         debug("Created Folder", file.id);
                         cb(null, file.id);
                     }
-                })
+                });
             }
         }
-    })
+    });
 }
-
 function uploadPicture(folder, prefix, picture) {
     var drive = google.drive('v3');
     var d = new Date();
     var parsedUrl = url.parse(prefix.substr(prefix.search('http')), true, true);
     var name = prefix.replace(/ /g, "_") + "_" + d.toLocaleString().replace(/ /g, "_").replace(/,/g, "") + ".jpeg";
-
     debug("upload picture", folder, name);
-
     var fileMetadata = {
         'name': name,
         parents: [folder]
@@ -106,25 +96,22 @@ function uploadPicture(folder, prefix, picture) {
         mimeType: 'image/jpeg',
         body: streamifier.createReadStream(picture)
     };
-
     drive.files.create({
         resource: fileMetadata,
         media: media,
         fields: 'id',
         auth: auth
-    }, function(err, file) {
+    }, function (err, file) {
         if (err) {
             // Handle error
             console.log(err);
-        } else {
+        }
+        else {
             debug('File Id: ', file.data.id);
         }
     });
-
 }
-
 // This is all from the Google Drive Quickstart
-
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
  * given callback function.
@@ -133,20 +120,19 @@ function uploadPicture(folder, prefix, picture) {
  * @param {function} callback The callback to call with the authorized client.
  */
 function authorize(credentials, callback) {
-  const {client_secret, client_id, redirect_uris} = credentials.installed;
-  const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
-
+    const { client_secret, client_id, redirect_uris } = credentials.installed;
+    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
     // Check if we have previously stored a token.
-    fs.readFile(TOKEN_PATH, function(err, token) {
+    fs.readFile(TOKEN_PATH, function (err, token) {
         if (err) {
             getNewToken(oAuth2Client, callback);
-        } else {
+        }
+        else {
             oAuth2Client.credentials = JSON.parse(token);
             callback(oAuth2Client);
         }
     });
 }
-
 /**
  * Get and store new token after prompting for user authorization, and then
  * execute the given callback with the authorized OAuth2 client.
@@ -165,9 +151,9 @@ function getNewToken(oAuth2Client, callback) {
         input: process.stdin,
         output: process.stdout
     });
-    rl.question('Enter the code from that page here: ', function(code) {
+    rl.question('Enter the code from that page here: ', function (code) {
         rl.close();
-        oAuth2Client.getToken(code, function(err, token) {
+        oAuth2Client.getToken(code, function (err, token) {
             if (err) {
                 console.log('Error while trying to retrieve access token', err);
                 return;
@@ -178,7 +164,6 @@ function getNewToken(oAuth2Client, callback) {
         });
     });
 }
-
 /**
  * Store token to disk be used in later program executions.
  *
@@ -187,17 +172,18 @@ function getNewToken(oAuth2Client, callback) {
 function storeToken(token) {
     try {
         fs.mkdirSync(TOKEN_DIR);
-    } catch (err) {
+    }
+    catch (err) {
         if (err.code != 'EEXIST') {
             throw err;
         }
     }
     fs.writeFile(TOKEN_PATH, JSON.stringify(token), function (err) {
-        if (err) throw err;
+        if (err)
+            throw err;
     });
     console.log('Token stored to ' + TOKEN_PATH);
 }
-
 /**
  * Lists the names and IDs of up to 10 files.
  *
@@ -209,7 +195,7 @@ function listFiles(auth) {
         auth: auth,
         pageSize: 30,
         fields: "nextPageToken, files(id, name)"
-    }, function(err, response) {
+    }, function (err, response) {
         if (err) {
             console.log('The API returned an error: ' + err);
             return;
@@ -217,7 +203,8 @@ function listFiles(auth) {
         var files = response.files;
         if (files.length == 0) {
             debug('No files found.');
-        } else {
+        }
+        else {
             debug('Files:');
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
@@ -226,46 +213,42 @@ function listFiles(auth) {
         }
     });
 }
-
 function uploadFile(auth) {
     var drive = google.drive('v3');
-
-    var fetchPage = function(pageToken, pageFn, callback) {
+    var fetchPage = function (pageToken, pageFn, callback) {
         drive.files.list({
             q: "mimeType='application/vnd.google-apps.folder' and name = 'Camera Pictures'",
             fields: 'nextPageToken, files(id, name)',
             spaces: 'drive',
             pageToken: pageToken,
             auth: auth
-        }, function(err, res) {
+        }, function (err, res) {
             if (err) {
                 callback(err);
-            } else {
-                res.data.files.forEach(function(file) {
+            }
+            else {
+                res.data.files.forEach(function (file) {
                     debug('Found file: ', file.name, file.id);
                 });
                 if (res.nextPageToken) {
                     debug("Page token", res.nextPageToken);
                     pageFn(res.nextPageToken, pageFn, callback);
-                } else {
+                }
+                else {
                     callback();
                 }
             }
         });
     };
-    fetchPage(null, fetchPage, function(err) {
+    fetchPage(null, fetchPage, function (err) {
         if (err) {
             // Handle error
             console.log(err);
-        } else {
+        }
+        else {
             // All pages fetched
         }
     });
-
-
-
-
-
     var fileMetadata = {
         'name': 'Camera Pictures',
         'mimeType': 'application/vnd.google-apps.folder'
@@ -274,13 +257,13 @@ function uploadFile(auth) {
         resource: fileMetadata,
         fields: 'id',
         auth: auth
-    }, function(err, file) {
+    }, function (err, file) {
         if (err) {
             // Handle error
             console.log(err);
-        } else {
+        }
+        else {
             debug('Folder Id: ', file.data.id);
-
             var fileMetadata = {
                 'name': 'photo.jpg',
                 parents: [file.id]
@@ -289,25 +272,21 @@ function uploadFile(auth) {
                 mimeType: 'image/jpeg',
                 body: fs.createReadStream('photo.jpg')
             };
-
             drive.files.create({
                 resource: fileMetadata,
                 media: media,
                 fields: 'id',
                 auth: auth
-            }, function(err, file) {
+            }, function (err, file) {
                 if (err) {
                     // Handle error
                     console.log(err);
-                } else {
+                }
+                else {
                     debug('File Id: ', file.data.id);
                 }
             });
-
-
-
         }
     });
-
-
 }
+//# sourceMappingURL=drive.js.map

@@ -1,10 +1,10 @@
 'use strict';
 
-var util = require('util');
-var stream = require('stream');
+const util = require('util');
+const stream = require('stream');
 
 module.exports.createReadStream = function (object, options) {
-  return new MultiStream (object, options);
+  return new MultiStream(object, options);
 };
 
 var MultiStream = function (object, options) {
@@ -12,7 +12,7 @@ var MultiStream = function (object, options) {
     options = options || {};
     stream.Readable.call(this, {
       highWaterMark: options.highWaterMark,
-      encoding: options.encoding
+      encoding: options.encoding,
     });
   } else {
     stream.Readable.call(this, { objectMode: true });
