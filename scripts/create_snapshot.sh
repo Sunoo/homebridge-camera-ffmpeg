@@ -15,6 +15,10 @@ fi
 ( cd /var/tmp
 FILE=`ls -tr ${INSTANCE}/* | tail -3 | head -1`
 
-~/npm/lib/node_modules/ffmpeg-for-homebridge/ffmpeg -hide_banner -loglevel error -i $FILE -frames:v 1 ${OPTIONS} -f image2 -
-# ffmpeg -f concat -i snapshot_${INSTANCE}.txt -frames:v 1  ${OPTIONS} -f image2 -y ${GFILENAME}
+if [ -z "$FILE" ]
+then
+	pkill ffmpeg
+else
+	~/npm/lib/node_modules/ffmpeg-for-homebridge/ffmpeg -hide_banner -loglevel error -i $FILE -frames:v 1 ${OPTIONS} -f image2 -
+fi
 )
