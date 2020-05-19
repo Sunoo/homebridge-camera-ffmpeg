@@ -1,13 +1,11 @@
+import { Logging } from 'homebridge';
+import { createMultiStream } from './streamifier';
+import * as fs from 'fs';
+
 const debug = require('debug')('CameraDrive');
-const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
-const streamifier = require('./lib/streamifier.js');
 const url = require('url');
-
-module.exports = {
-  drive: drive,
-};
 
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/drive-nodejs-quickstart.json
@@ -15,33 +13,38 @@ const SCOPES = ['https://www.googleapis.com/auth/drive'];
 const TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE) + '/.homebridge/';
 const TOKEN_PATH = TOKEN_DIR + 'drive-nodejs-quickstart.json';
 const SECRET_PATH = TOKEN_DIR + 'client_secret.json';
-let auth;
 
-function drive() {
-  // Load client secrets from a local file.
-  fs.readFile(SECRET_PATH, function processClientSecrets(err, content) {
-    if (err) {
-      console.log('Error loading client secret file, please follow the instructions in the README!!!' + err);
-      return;
-    }
-    // Authorize a client with the loaded credentials, then call the
-    // Drive API.
-    authorize(JSON.parse(content), function (authenticated) {
-      auth = authenticated;
-      debug('Authenticated');
-    });
-  });
-}
+export class Drive {
+  private readonly log: Logging;
+  private auth: any;
 
-drive.prototype.storePicture = function (prefix, picture) {
-  // get folder ID
-  debug('getFolder');
-  if (auth) {
-    getPictureFolder(function (err, folder) {
-      uploadPicture(folder, prefix, picture);
+  constructor(log: Logging) {
+    this.log = log;
+    let self = this;
+    fs.readFile(SECRET_PATH, function processClientSecrets(err, content) {
+      if (err) {
+        self.log.info('Error loading client secret file, please follow the instructions in the README!!!' + err);
+        return;
+      }
+      // Authorize a client with the loaded credentials, then call the
+      // Drive API.
+      authorize(JSON.stringify(content)), function (authenticated: any) {
+        self.auth = authenticated;
+        self.log.debug('Authenticated');
+      });
     });
   }
-};
+
+  storePicture(prefix, picture) {
+    // get folder ID
+    debug('getFolder');
+    if (auth) {
+      getPictureFolder(function (err, folder) {
+        uploadPicture(folder, prefix, picture);
+      });
+    }
+  }
+}
 
 function getPictureFolder(cb) {
   let folder;
@@ -104,7 +107,7 @@ function uploadPicture(folder, prefix, picture) {
   };
   const media = {
     mimeType: 'image/jpeg',
-    body: streamifier.createReadStream(picture),
+    body: createMultiStream(picture),
   };
 
   drive.files.create(

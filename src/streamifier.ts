@@ -1,28 +1,28 @@
-'use strict';
+import { Readable } from 'stream';
 
-const util = require('util');
-const stream = require('stream');
+class MultiStream extends Readable {
+  private _object: any;
 
-module.exports.createReadStream = function (object, options) {
-  return new MultiStream(object, options);
-};
-
-var MultiStream = function (object, options) {
-  if (object instanceof Buffer || typeof object === 'string') {
-    options = options || {};
-    stream.Readable.call(this, {
-      highWaterMark: options.highWaterMark,
-      encoding: options.encoding,
-    });
-  } else {
-    stream.Readable.call(this, { objectMode: true });
+  constructor(object: any, options?: any) {
+    super();
+    if (object instanceof Buffer || typeof object === 'string') {
+      options = options || {};
+      Readable.call(this, {
+        highWaterMark: options.highWaterMark,
+        encoding: options.encoding,
+      });
+    } else {
+      Readable.call(this, { objectMode: true });
+    }
+    this._object = object;
   }
-  this._object = object;
-};
 
-util.inherits(MultiStream, stream.Readable);
+  _read(): void {
+    this.push(this._object);
+    this._object = null;
+  }
+}
 
-MultiStream.prototype._read = function () {
-  this.push(this._object);
-  this._object = null;
+export const createMultiStream = function (object: any, options?: any): MultiStream {
+  return new MultiStream(object, options);
 };

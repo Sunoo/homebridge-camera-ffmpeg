@@ -25,7 +25,6 @@ import { ChildProcess, spawn } from 'child_process';
 
 let StreamController;
 
-const crypto = require('crypto');
 const drive = require('./drive').drive;
 
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -172,77 +171,318 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.createCameraControlService();
     this._createStreamControllers(numberOfStreams, options);
   }
-}
 
-FFMPEG.prototype.handleCloseConnection = function (connectionID) {
-  this.streamControllers.forEach(function (controller) {
-    controller.handleCloseConnection(connectionID);
-  });
-};
-
-FFMPEG.prototype.handleSnapshotRequest = function (request, callback) {
-  let width = request.width;
-  let height = request.height;
-  if (width > this.maxWidth) {
-    width = this.maxWidth;
-  }
-  if (height > this.maxHeight) {
-    height = this.maxHeight;
-  }
-  let resolution = width + ':' + height;
-  switch (this.preserveRatio) {
-    case 'W':
-      resolution = width + ':-1';
-      break;
-    case 'H':
-      resolution = '-1:' + height;
-      break;
-    default:
-      break;
-  }
-  const vf = [];
-  const videoFilter = this.videoFilter === '' || this.videoFilter === null ? 'scale=' + resolution : this.videoFilter; // empty string or null indicates default
-  // In the case of null, skip entirely
-  if (videoFilter !== null && videoFilter !== 'none') {
-    if (this.hflip) {
-      vf.push('hflip');
+  handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
+    let width = request.width;
+    let height = request.height;
+    if (width > this.maxWidth) {
+      width = this.maxWidth;
     }
-
-    if (this.vflip) {
-      vf.push('vflip');
+    if (height > this.maxHeight) {
+      height = this.maxHeight;
     }
-
-    vf.push(videoFilter); // vflip and hflip filters must precede the scale filter to work
-  }
-  const imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
-  const ffmpeg = spawn(
-    this.videoProcessor,
-    (imageSource + ' -t 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(' '),
-    { env: process.env },
-  );
-  let imageBuffer = Buffer.alloc(0);
-  this.log(`Snapshot from ${this.name} at ${resolution}`);
-  if (this.debug) {
-    this.log(`ffmpeg ${imageSource} -t 1${vf.length > 0 ? ' -vf ' + vf.join(',') : ''} -f image2 -`);
-  }
-  ffmpeg.stdout.on('data', function (data) {
-    imageBuffer = Buffer.concat([imageBuffer, data]);
-  });
-  const self = this;
-  ffmpeg.on('error', function (error) {
-    self.log('An error occurs while making snapshot request');
-    self.debug ? self.log(error) : null;
-  });
-  ffmpeg.on(
-    'close',
-    function (code) {
-      if (this.uploader) {
-        this.drive.storePicture(this.name, imageBuffer);
+    let resolution = width + ':' + height;
+    switch (this.preserveRatio) {
+      case 'W':
+        resolution = width + ':-1';
+        break;
+      case 'H':
+        resolution = '-1:' + height;
+        break;
+      default:
+        break;
+    }
+    const vf = [];
+    const videoFilter = this.videoFilter === '' || this.videoFilter === null ? 'scale=' + resolution : this.videoFilter; // empty string or null indicates default
+    // In the case of null, skip entirely
+    if (videoFilter !== null && videoFilter !== 'none') {
+      if (this.hflip) {
+        vf.push('hflip');
       }
-      callback(undefined, imageBuffer);
-    }.bind(this),
-  );
-};
+
+      if (this.vflip) {
+        vf.push('vflip');
+      }
+
+      vf.push(videoFilter); // vflip and hflip filters must precede the scale filter to work
+    }
+    const imageSource = this.ffmpegImageSource !== undefined ? this.ffmpegImageSource : this.ffmpegSource;
+    const ffmpeg = spawn(
+      this.videoProcessor,
+      (imageSource + ' -t 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(' '),
+      { env: process.env },
+    );
+    let imageBuffer = Buffer.alloc(0);
+    this.log(`Snapshot from ${this.name} at ${resolution}`);
+    if (this.debug) {
+      this.log(`ffmpeg ${imageSource} -t 1${vf.length > 0 ? ' -vf ' + vf.join(',') : ''} -f image2 -`);
+    }
+    ffmpeg.stdout.on('data', function (data) {
+      imageBuffer = Buffer.concat([imageBuffer, data]);
+    });
+    const self = this;
+    ffmpeg.on('error', function (error) {
+      self.log('An error occurs while making snapshot request');
+      self.debug ? self.log(error) : null;
+    });
+    ffmpeg.on(
+      'close',
+      function (code) {
+        if (this.uploader) {
+          this.drive.storePicture(this.name, imageBuffer);
+        }
+        callback(undefined, imageBuffer);
+      }.bind(this),
+    );
+  }
+
+  handleStreamRequest(request: StreamingRequest, callback: StreamRequestCallback): void {
+    const sessionID = request['sessionID'];
+    const requestType = request['type'];
+    if (sessionID) {
+      const sessionIdentifier = uuid.unparse(sessionID);
+
+      if (requestType == 'start') {
+        const sessionInfo = this.pendingSessions[sessionIdentifier];
+        if (sessionInfo) {
+          let width = 1280;
+          let height = 720;
+          let fps = this.fps || 30;
+          let vbitrate = this.maxBitrate;
+          let abitrate = 32;
+          let asamplerate = 16;
+          const vcodec = this.vcodec || 'libx264';
+          const acodec = this.acodec || 'libfdk_aac';
+          const packetsize = this.packetsize || 1316; // 188 376
+          const additionalCommandline = this.additionalCommandline;
+          const mapvideo = this.mapvideo;
+          const mapaudio = this.mapaudio;
+
+          const videoInfo = request['video'];
+          if (videoInfo) {
+            width = videoInfo['width'];
+            height = videoInfo['height'];
+
+            const expectedFPS = videoInfo['fps'];
+            if (expectedFPS < fps) {
+              fps = expectedFPS;
+            }
+            if (videoInfo['max_bit_rate'] < vbitrate) {
+              vbitrate = videoInfo['max_bit_rate'];
+            }
+          }
+
+          if (width > this.maxWidth) {
+            width = this.maxWidth;
+          }
+          if (height > this.maxHeight) {
+            height = this.maxHeight;
+          }
+
+          let resolution = width + ':' + height;
+          switch (this.preserveRatio) {
+            case 'W':
+              resolution = width + ':-1';
+              break;
+            case 'H':
+              resolution = '-1:' + height;
+              break;
+            default:
+              break;
+          }
+
+          if (vbitrate < this.minBitrate) {
+            vbitrate = this.minBitrate;
+          }
+
+          const audioInfo = request['audio'];
+          if (audioInfo) {
+            abitrate = audioInfo['max_bit_rate'];
+            asamplerate = audioInfo['sample_rate'];
+          }
+
+          const targetAddress = sessionInfo['address'];
+          const targetVideoPort = sessionInfo['video_port'];
+          const videoKey = sessionInfo['video_srtp'];
+          const videoSsrc = sessionInfo['video_ssrc'];
+          const targetAudioPort = sessionInfo['audio_port'];
+          const audioKey = sessionInfo['audio_srtp'];
+          const audioSsrc = sessionInfo['audio_ssrc'];
+          const vf = [];
+
+          const videoFilter =
+            this.videoFilter === '' || this.videoFilter === null ? 'scale=' + resolution : this.videoFilter; // empty string or null indicates default
+          // In the case of null, skip entirely
+          if (videoFilter !== null && videoFilter !== 'none' && vcodec !== 'copy') {
+            // Filters cannot be set if the copy vcodec is used.
+            vf.push(videoFilter);
+
+            if (this.hflip) vf.push('hflip');
+
+            if (this.vflip) vf.push('vflip');
+          }
+
+          let fcmd = this.ffmpegSource;
+
+          const ffmpegVideoArgs =
+            ' -map ' +
+            mapvideo +
+            ' -vcodec ' +
+            vcodec +
+            ' -pix_fmt yuv420p' +
+            ' -r ' +
+            fps +
+            ' -f rawvideo' +
+            ' ' +
+            additionalCommandline +
+            (vf.length > 0 ? ' -vf ' + vf.join(',') : '') +
+            ' -b:v ' +
+            vbitrate +
+            'k' +
+            ' -bufsize ' +
+            vbitrate +
+            'k' +
+            ' -maxrate ' +
+            vbitrate +
+            'k' +
+            ' -payload_type 99';
+
+          const ffmpegVideoStream =
+            ' -ssrc ' +
+            videoSsrc +
+            ' -f rtp' +
+            ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+            ' -srtp_out_params ' +
+            videoKey.toString('base64') +
+            ' srtp://' +
+            targetAddress +
+            ':' +
+            targetVideoPort +
+            '?rtcpport=' +
+            targetVideoPort +
+            '&localrtcpport=' +
+            targetVideoPort +
+            '&pkt_size=' +
+            packetsize;
+
+          // build required video arguments
+          fcmd += ffmpegVideoArgs;
+          fcmd += ffmpegVideoStream;
+
+          // build optional audio arguments
+          if (this.audio) {
+            const ffmpegAudioArgs =
+              ' -map ' +
+              mapaudio +
+              ' -acodec ' +
+              acodec +
+              ' -profile:a aac_eld' +
+              ' -flags +global_header' +
+              ' -f null' +
+              ' -ar ' +
+              asamplerate +
+              'k' +
+              ' -b:a ' +
+              abitrate +
+              'k' +
+              ' -bufsize ' +
+              abitrate +
+              'k' +
+              ' -ac 1' +
+              ' -payload_type 110';
+
+            const ffmpegAudioStream =
+              ' -ssrc ' +
+              audioSsrc +
+              ' -f rtp' +
+              ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+              ' -srtp_out_params ' +
+              audioKey.toString('base64') +
+              ' srtp://' +
+              targetAddress +
+              ':' +
+              targetAudioPort +
+              '?rtcpport=' +
+              targetAudioPort +
+              '&localrtcpport=' +
+              targetAudioPort +
+              '&pkt_size=' +
+              packetsize;
+
+            fcmd += ffmpegAudioArgs;
+            fcmd += ffmpegAudioStream;
+          }
+
+          if (this.debug) {
+            fcmd += ' -loglevel debug';
+          }
+
+          // start the process
+          const ffmpeg = spawn(this.videoProcessor, fcmd.split(' '), { env: process.env });
+          this.log(
+            'Start streaming video from ' +
+              this.name +
+              ' with ' +
+              resolution +
+              '@' +
+              fps +
+              'fps (' +
+              vbitrate +
+              'kBit)',
+          );
+          if (this.debug) {
+            console.log(this.videoProcessor + ' ' + fcmd);
+          }
+
+          // Always setup hook on stderr.
+          // Without this streaming stops within one to two minutes.
+          ffmpeg.stderr.on(
+            'data',
+            function (data) {
+              // Do not log to the console if debugging is turned off
+              if (this.debug) {
+                console.log(data.toString());
+              }
+            }.bind(this),
+          );
+          const self = this;
+          ffmpeg.on('error', function (error) {
+            self.log('An error occurs while making stream request');
+            self.debug ? self.log(error) : null;
+          });
+          ffmpeg.on('close', (code) => {
+            if (code == null || code == 0 || code == 255) {
+              self.log('Stopped streaming');
+            } else {
+              self.log('ERROR: FFmpeg exited with code ' + code);
+              for (let i = 0; i < self.streamControllers.length; i++) {
+                const controller = self.streamControllers[i];
+                if (controller.sessionIdentifier === sessionID) {
+                  controller.forceStop();
+                }
+              }
+            }
+          });
+          this.ongoingSessions[sessionIdentifier] = ffmpeg;
+        }
+
+        delete this.pendingSessions[sessionIdentifier];
+      } else if (requestType == 'stop') {
+        const ffmpegProcess = this.ongoingSessions[sessionIdentifier];
+        if (ffmpegProcess) {
+          ffmpegProcess.kill('SIGTERM');
+        }
+        delete this.ongoingSessions[sessionIdentifier];
+      }
+    }
+  }
+
+  handleCloseConnection(connectionID: void) {
+    this.streamControllers.forEach(function (controller) {
+      controller.handleCloseConnection(connectionID);
+    });
+  }
+}
 
 FFMPEG.prototype.prepareStream = function (request, callback) {
   const sessionInfo = {};
@@ -261,7 +501,7 @@ FFMPEG.prototype.prepareStream = function (request, callback) {
     const srtp_salt = videoInfo['srtp_salt'];
 
     // SSRC is a 32 bit integer that is unique per stream
-    const ssrcSource = crypto.randomBytes(4);
+    const ssrcSource = this.hap.CameraController.generateSynchronisationSource();
     ssrcSource[0] = 0;
     const ssrc = ssrcSource.readInt32BE(0, true);
 
@@ -286,7 +526,7 @@ FFMPEG.prototype.prepareStream = function (request, callback) {
     const srtp_salt = audioInfo['srtp_salt'];
 
     // SSRC is a 32 bit integer that is unique per stream
-    const ssrcSource = crypto.randomBytes(4);
+    const ssrcSource = this.hap.CameraController.generateSynchronisationSource();
     ssrcSource[0] = 0;
     const ssrc = ssrcSource.readInt32BE(0, true);
 
@@ -319,239 +559,6 @@ FFMPEG.prototype.prepareStream = function (request, callback) {
   this.pendingSessions[uuid.unparse(sessionID)] = sessionInfo;
 
   callback(response);
-};
-
-FFMPEG.prototype.handleStreamRequest = function (request) {
-  const sessionID = request['sessionID'];
-  const requestType = request['type'];
-  if (sessionID) {
-    const sessionIdentifier = uuid.unparse(sessionID);
-
-    if (requestType == 'start') {
-      const sessionInfo = this.pendingSessions[sessionIdentifier];
-      if (sessionInfo) {
-        let width = 1280;
-        let height = 720;
-        let fps = this.fps || 30;
-        let vbitrate = this.maxBitrate;
-        let abitrate = 32;
-        let asamplerate = 16;
-        const vcodec = this.vcodec || 'libx264';
-        const acodec = this.acodec || 'libfdk_aac';
-        const packetsize = this.packetsize || 1316; // 188 376
-        const additionalCommandline = this.additionalCommandline;
-        const mapvideo = this.mapvideo;
-        const mapaudio = this.mapaudio;
-
-        const videoInfo = request['video'];
-        if (videoInfo) {
-          width = videoInfo['width'];
-          height = videoInfo['height'];
-
-          const expectedFPS = videoInfo['fps'];
-          if (expectedFPS < fps) {
-            fps = expectedFPS;
-          }
-          if (videoInfo['max_bit_rate'] < vbitrate) {
-            vbitrate = videoInfo['max_bit_rate'];
-          }
-        }
-
-        if (width > this.maxWidth) {
-          width = this.maxWidth;
-        }
-        if (height > this.maxHeight) {
-          height = this.maxHeight;
-        }
-
-        let resolution = width + ':' + height;
-        switch (this.preserveRatio) {
-          case 'W':
-            resolution = width + ':-1';
-            break;
-          case 'H':
-            resolution = '-1:' + height;
-            break;
-          default:
-            break;
-        }
-
-        if (vbitrate < this.minBitrate) {
-          vbitrate = this.minBitrate;
-        }
-
-        const audioInfo = request['audio'];
-        if (audioInfo) {
-          abitrate = audioInfo['max_bit_rate'];
-          asamplerate = audioInfo['sample_rate'];
-        }
-
-        const targetAddress = sessionInfo['address'];
-        const targetVideoPort = sessionInfo['video_port'];
-        const videoKey = sessionInfo['video_srtp'];
-        const videoSsrc = sessionInfo['video_ssrc'];
-        const targetAudioPort = sessionInfo['audio_port'];
-        const audioKey = sessionInfo['audio_srtp'];
-        const audioSsrc = sessionInfo['audio_ssrc'];
-        const vf = [];
-
-        const videoFilter =
-          this.videoFilter === '' || this.videoFilter === null ? 'scale=' + resolution : this.videoFilter; // empty string or null indicates default
-        // In the case of null, skip entirely
-        if (videoFilter !== null && videoFilter !== 'none' && vcodec !== 'copy') {
-          // Filters cannot be set if the copy vcodec is used.
-          vf.push(videoFilter);
-
-          if (this.hflip) vf.push('hflip');
-
-          if (this.vflip) vf.push('vflip');
-        }
-
-        let fcmd = this.ffmpegSource;
-
-        const ffmpegVideoArgs =
-          ' -map ' +
-          mapvideo +
-          ' -vcodec ' +
-          vcodec +
-          ' -pix_fmt yuv420p' +
-          ' -r ' +
-          fps +
-          ' -f rawvideo' +
-          ' ' +
-          additionalCommandline +
-          (vf.length > 0 ? ' -vf ' + vf.join(',') : '') +
-          ' -b:v ' +
-          vbitrate +
-          'k' +
-          ' -bufsize ' +
-          vbitrate +
-          'k' +
-          ' -maxrate ' +
-          vbitrate +
-          'k' +
-          ' -payload_type 99';
-
-        const ffmpegVideoStream =
-          ' -ssrc ' +
-          videoSsrc +
-          ' -f rtp' +
-          ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-          ' -srtp_out_params ' +
-          videoKey.toString('base64') +
-          ' srtp://' +
-          targetAddress +
-          ':' +
-          targetVideoPort +
-          '?rtcpport=' +
-          targetVideoPort +
-          '&localrtcpport=' +
-          targetVideoPort +
-          '&pkt_size=' +
-          packetsize;
-
-        // build required video arguments
-        fcmd += ffmpegVideoArgs;
-        fcmd += ffmpegVideoStream;
-
-        // build optional audio arguments
-        if (this.audio) {
-          const ffmpegAudioArgs =
-            ' -map ' +
-            mapaudio +
-            ' -acodec ' +
-            acodec +
-            ' -profile:a aac_eld' +
-            ' -flags +global_header' +
-            ' -f null' +
-            ' -ar ' +
-            asamplerate +
-            'k' +
-            ' -b:a ' +
-            abitrate +
-            'k' +
-            ' -bufsize ' +
-            abitrate +
-            'k' +
-            ' -ac 1' +
-            ' -payload_type 110';
-
-          const ffmpegAudioStream =
-            ' -ssrc ' +
-            audioSsrc +
-            ' -f rtp' +
-            ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-            ' -srtp_out_params ' +
-            audioKey.toString('base64') +
-            ' srtp://' +
-            targetAddress +
-            ':' +
-            targetAudioPort +
-            '?rtcpport=' +
-            targetAudioPort +
-            '&localrtcpport=' +
-            targetAudioPort +
-            '&pkt_size=' +
-            packetsize;
-
-          fcmd += ffmpegAudioArgs;
-          fcmd += ffmpegAudioStream;
-        }
-
-        if (this.debug) {
-          fcmd += ' -loglevel debug';
-        }
-
-        // start the process
-        const ffmpeg = spawn(this.videoProcessor, fcmd.split(' '), { env: process.env });
-        this.log(
-          'Start streaming video from ' + this.name + ' with ' + resolution + '@' + fps + 'fps (' + vbitrate + 'kBit)',
-        );
-        if (this.debug) {
-          console.log(this.videoProcessor + ' ' + fcmd);
-        }
-
-        // Always setup hook on stderr.
-        // Without this streaming stops within one to two minutes.
-        ffmpeg.stderr.on(
-          'data',
-          function (data) {
-            // Do not log to the console if debugging is turned off
-            if (this.debug) {
-              console.log(data.toString());
-            }
-          }.bind(this),
-        );
-        const self = this;
-        ffmpeg.on('error', function (error) {
-          self.log('An error occurs while making stream request');
-          self.debug ? self.log(error) : null;
-        });
-        ffmpeg.on('close', (code) => {
-          if (code == null || code == 0 || code == 255) {
-            self.log('Stopped streaming');
-          } else {
-            self.log('ERROR: FFmpeg exited with code ' + code);
-            for (let i = 0; i < self.streamControllers.length; i++) {
-              const controller = self.streamControllers[i];
-              if (controller.sessionIdentifier === sessionID) {
-                controller.forceStop();
-              }
-            }
-          }
-        });
-        this.ongoingSessions[sessionIdentifier] = ffmpeg;
-      }
-
-      delete this.pendingSessions[sessionIdentifier];
-    } else if (requestType == 'stop') {
-      const ffmpegProcess = this.ongoingSessions[sessionIdentifier];
-      if (ffmpegProcess) {
-        ffmpegProcess.kill('SIGTERM');
-      }
-      delete this.ongoingSessions[sessionIdentifier];
-    }
-  }
 };
 
 FFMPEG.prototype.createCameraControlService = function () {

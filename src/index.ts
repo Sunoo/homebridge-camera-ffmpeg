@@ -10,14 +10,13 @@ import {
   PlatformAccessory,
   PlatformConfig,
 } from 'homebridge';
+import { StreamingDelegate } from './ffmpeg';
 
 let hap: HAP;
 let Accessory: typeof PlatformAccessory;
 
 const PLUGIN_NAME = 'homebridge-camera-ffmpeg';
 const PLATFORM_NAME = 'Camera-ffmpeg';
-
-const FFMPEG = require('./ffmpeg').FFMPEG;
 
 class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logging;
@@ -132,7 +131,14 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
             });
         }
 
-        const cameraSource = new FFMPEG(hap, cameraConfig, this.log, this.config.videoProcessor, interfaceName);
+        const cameraSource = new StreamingDelegate(
+          hap,
+          cameraConfig,
+          this.config,
+          this.log,
+          this.config.videoProcessor,
+          interfaceName,
+        );
         cameraAccessory.configureCameraSource(cameraSource);
         this.accessories.push(cameraAccessory);
       });
