@@ -25,8 +25,6 @@ import { ChildProcess, spawn } from 'child_process';
 
 let StreamController;
 
-const drive = require('./drive').drive;
-
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export class StreamingDelegate implements CameraStreamingDelegate {
@@ -78,11 +76,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     this.pendingSessions = {};
     this.ongoingSessions = {};
-
-    this.uploader = cameraConfig.uploader || false;
-    if (this.uploader) {
-      this.drive = new drive();
-    }
 
     const numberOfStreams = ffmpegOpt.maxStreams || 2;
     const videoResolutions = [];
@@ -227,10 +220,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     });
     ffmpeg.on(
       'close',
-      function (code) {
-        if (this.uploader) {
-          this.drive.storePicture(this.name, imageBuffer);
-        }
+      function () {
         callback(undefined, imageBuffer);
       }.bind(this),
     );
