@@ -1,6 +1,9 @@
 import {
   API,
   APIEvent,
+  AudioStreamingCodecType,
+  AudioStreamingSamplerate,
+  CameraControllerOptions,
   CharacteristicEventTypes,
   CharacteristicSetCallback,
   CharacteristicValue,
@@ -10,7 +13,7 @@ import {
   PlatformAccessory,
   PlatformConfig,
 } from 'homebridge';
-import { StreamingDelegate } from './ffmpeg';
+import { StreamingDelegate } from './streamingDelegate';
 
 let hap: HAP;
 let Accessory: typeof PlatformAccessory;
@@ -42,8 +45,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   didFinishLaunching(): void {
-    const interfaceName = this.config.interfaceName || '';
-
     if (this.config.cameras) {
       const cameras = this.config.cameras;
       cameras.forEach((cameraConfig: any) => {
@@ -131,15 +132,52 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
             });
         }
 
-        const cameraSource = new StreamingDelegate(
-          hap,
-          cameraConfig,
-          this.config,
-          this.log,
-          this.config.videoProcessor,
-          interfaceName,
-        );
-        cameraAccessory.configureCameraSource(cameraSource);
+        const streamingDelegate = new StreamingDelegate(hap, cameraConfig, this.log, this.config.videoProcessor);
+
+        const options: CameraControllerOptions = {
+          cameraStreamCount: cameraConfig.videoConfig.maxStreams || 2, // HomeKit requires at least 2 streams, but 1 is also just fine
+          delegate: streamingDelegate,
+          streamingOptions: {
+            supportedCryptoSuites: [hap.SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
+            video: {
+              resolutions: [
+                [320, 180, 30],
+                [320, 240, 15], // Apple Watch requires this configuration
+                [320, 240, 30],
+                [480, 270, 30],
+                [480, 360, 30],
+                [640, 360, 30],
+                [640, 480, 30],
+                [1280, 720, 30],
+                [1280, 960, 30],
+                [1920, 1080, 30],
+                [1600, 1200, 30],
+              ],
+              codec: {
+                profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
+                levels: [hap.H264Level.LEVEL3_1, hap.H264Level.LEVEL3_2, hap.H264Level.LEVEL4_0],
+              },
+            },
+            audio: {
+              codecs: [
+                {
+                  type: AudioStreamingCodecType.OPUS,
+                  samplerate: AudioStreamingSamplerate.KHZ_24,
+                },
+                {
+                  type: AudioStreamingCodecType.AAC_ELD,
+                  samplerate: AudioStreamingSamplerate.KHZ_16,
+                },
+              ],
+            },
+          },
+        };
+
+        const cameraController = new hap.CameraController(options);
+        streamingDelegate.controller = cameraController;
+
+        cameraAccessory.configureController(cameraController);
+
         this.accessories.push(cameraAccessory);
       });
 

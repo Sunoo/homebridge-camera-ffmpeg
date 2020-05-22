@@ -3,6 +3,7 @@
   "name": "homebridge-camera-ffmpeg",
   "version": "2.0.0",
   "description": "ffmpeg plugin for homebridge: https://github.com/homebridge/homebridge",
+  "main": "dist/index.js",
   "license": "ISC",
   "scripts": {
     "clean": "rimraf ./dist ./coverage",
@@ -55,7 +56,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "ffmpeg-for-homebridge": "0.0.5",
+    "ffmpeg-for-homebridge": "0.0.4",
     "ip": "^1.1.5",
     "debug": "^4.1.1"
   }
