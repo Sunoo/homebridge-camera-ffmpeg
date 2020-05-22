@@ -103,12 +103,6 @@
                   ]
                 }
               },
-              "packetSize": {
-                "title": "Packet Size",
-                "type": "number",
-                "placeholder": 1316,
-                "multipleOf": 188
-              },
               "videoFilter": {
                 "title": "Allows a custom video filter to be passed to FFmpeg via -vf",
                 "type": "string",
