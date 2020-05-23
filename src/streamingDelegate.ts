@@ -105,8 +105,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
       vf.push(videoFilter); // vflip and hflip filters must precede the scale filter to work
     }
-    const imageSource =
-      this.ffmpegOpt.stillImageSource !== undefined ? this.ffmpegOpt.stillImageSource : this.ffmpegOpt.source;
+    const imageSource = this.ffmpegOpt.stillImageSource || this.ffmpegOpt.source;
     const ffmpeg = spawn(
       this.videoProcessor,
       (imageSource + ' -t 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(' '),
