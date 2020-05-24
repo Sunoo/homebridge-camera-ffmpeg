@@ -1,4 +1,3 @@
-
 var mqtt = require("mqtt");
 var Accessory, Service, Characteristic, hap, UUIDGen;
 
@@ -115,7 +114,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       var cameraSource = new FFMPEG(hap, cameraConfig, self.log, self.config.videoProcessor, interfaceName);
       cameraAccessory.configureCameraSource(cameraSource);
       configuredAccessories.push(cameraAccessory);
-      self.cameranamelist[cameraName]=cameraAccessory
+      self.cameranamelist[cameraName]=cameraAccessory;
     });
 
     self.api.publishCameraAccessories("homebridge-camera-ffmpeg", configuredAccessories);
@@ -124,7 +123,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
 
 function _mqttHandler(value, self) {
     var accessory = self.cameranamelist[value];
-    accessory.getService(Service.Switch).setCharacteristic(Characteristic.On);
+    accessory.getService(Service.Switch).setCharacteristic(Characteristic.On, true);
 }
 
 
@@ -142,4 +141,3 @@ function _Reset() {
   this.context.log("Setting %s Button to false", this.displayName);
 
   this.getService(Service.Switch).setCharacteristic(Characteristic.On, false);
-}
