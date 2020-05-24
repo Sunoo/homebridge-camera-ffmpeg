@@ -123,8 +123,9 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
 };
 
 function _mqttHandler(value, self) {
-    var accessory = self.cameranamelist[value]
+    var accessory = self.cameranamelist[value];
     accessory.getService(Service.Switch).setCharacteristic(Characteristic.On);
+}
 
 
 function _Motion(on, callback) {
