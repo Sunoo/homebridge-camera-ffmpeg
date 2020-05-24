@@ -42,12 +42,15 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
   var topics = self.config.topics || 'homebridge/motion/#';
   var client = mqtt.connect("mqtt://"+servermqtt+":1883");
       client.on('message', function (topic, message) {
-                var status = message.toString();
+                var status = topic.toString();
+                var parts = status.split('/');
+                var partsThree = parts[2];
                 console.log("MQTT state message received:", status);
-                var parts = status.replace('_',' ')
-                
+                var name = partsThree.replace('_',' ');
+                _mqttHandler(name,self);
             });
   client.subscribe(topics);
+  var self.cameranamelist = {};
   if (self.config.cameras) {
     var configuredAccessories = [];
 
@@ -112,11 +115,17 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
       var cameraSource = new FFMPEG(hap, cameraConfig, self.log, self.config.videoProcessor, interfaceName);
       cameraAccessory.configureCameraSource(cameraSource);
       configuredAccessories.push(cameraAccessory);
+      self.cameranamelist[cameraName]=cameraAccessory
     });
 
     self.api.publishCameraAccessories("homebridge-camera-ffmpeg", configuredAccessories);
   }
 };
+
+function _mqttHandler(value, self) {
+    var accessory = self.cameranamelist[value]
+    accessory.getService(Service.Switch).setCharacteristic(Characteristic.On);
+
 
 function _Motion(on, callback) {
   this.context.log("Setting %s Motion to %s", this.displayName, on);
