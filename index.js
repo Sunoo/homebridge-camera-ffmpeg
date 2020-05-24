@@ -1,3 +1,5 @@
+
+var mqtt = require("mqtt");
 var Accessory, Service, Characteristic, hap, UUIDGen;
 
 var FFMPEG = require('./ffmpeg').FFMPEG;
@@ -36,7 +38,16 @@ ffmpegPlatform.prototype.configureAccessory = function(accessory) {
 ffmpegPlatform.prototype.didFinishLaunching = function() {
   var self = this;
   var interfaceName = self.config.interfaceName || '';
-
+  var servermqtt = self.config.mqtt || '127.0.0.1';
+  var topics = self.config.topics || 'homebridge/motion/#';
+  var client = mqtt.connect("mqtt://"+servermqtt+":1883");
+      client.on('message', function (topic, message) {
+                var status = message.toString();
+                console.log("MQTT state message received:", status);
+                var parts = status.replace('_',' ')
+                
+            });
+  client.subscribe(topics);
   if (self.config.cameras) {
     var configuredAccessories = [];
 
