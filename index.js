@@ -50,7 +50,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
                 _mqttHandler(name,self);
             });
   client.subscribe(topics);
-  var self.cameranamelist = {};
+  self.cameranamelist = {};
   if (self.config.cameras) {
     var configuredAccessories = [];
 
