@@ -24,6 +24,7 @@
     "nodemon": ">=2.0.2"
   },
   "dependencies": {
+    "mqtt": "^1.6.3"
     "googleapis": ">=50.0.0",
     "ffmpeg-for-homebridge": "0.0.4",
     "ip": "^1.1.5",
