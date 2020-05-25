@@ -122,8 +122,9 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
 };
 
 function _mqttHandler(value, self) {
+  if (value in self.cameranamelist){
     var accessory = self.cameranamelist[value];
-    accessory.getService(Service.Switch).setCharacteristic(Characteristic.On, true);
+    accessory.getService(Service.Switch).setCharacteristic(Characteristic.On, true);}
 }
 
 
