@@ -106,31 +106,37 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       vf.push(videoFilter); // vflip and hflip filters must precede the scale filter to work
     }
     const imageSource = this.ffmpegOpt.stillImageSource || this.ffmpegOpt.source;
-    const ffmpeg = spawn(
-      this.videoProcessor,
-      (imageSource + ' -t 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(' '),
-      { env: process.env },
-    );
-    let imageBuffer = Buffer.alloc(0);
-    this.log(`Snapshot from ${this.name} at ${resolution}`);
-    if (this.debug) {
-      this.log(`ffmpeg ${imageSource} -t 1${vf.length > 0 ? ' -vf ' + vf.join(',') : ''} -f image2 -`);
+
+    try {
+      const ffmpeg = spawn(
+        this.videoProcessor,
+        (imageSource + ' -t 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(' '),
+        { env: process.env },
+      );
+      let imageBuffer = Buffer.alloc(0);
+      this.log(`Snapshot from ${this.name} at ${resolution}`);
+      if (this.debug) {
+        this.log(`ffmpeg ${imageSource} -t 1${vf.length > 0 ? ' -vf ' + vf.join(',') : ''} -f image2 -`);
+      }
+      ffmpeg.stdout.on('data', function (data: any) {
+        imageBuffer = Buffer.concat([imageBuffer, data]);
+      });
+      const log = this.log;
+      const debug = this.debug;
+      ffmpeg.on('error', function (error: any) {
+        log('An error occurs while making snapshot request');
+        debug ? log(error) : null;
+      });
+      ffmpeg.on(
+        'close',
+        function (): void {
+          callback(undefined, imageBuffer);
+        }.bind(this),
+      );
+    } catch (err) {
+      this.log.error(err);
+      callback(err);
     }
-    ffmpeg.stdout.on('data', function (data: any) {
-      imageBuffer = Buffer.concat([imageBuffer, data]);
-    });
-    const log = this.log;
-    const debug = this.debug;
-    ffmpeg.on('error', function (error: any) {
-      log('An error occurs while making snapshot request');
-      debug ? log(error) : null;
-    });
-    ffmpeg.on(
-      'close',
-      function (): void {
-        callback(undefined, imageBuffer);
-      }.bind(this),
-    );
   }
 
   prepareStream(request: PrepareStreamRequest, callback: PrepareStreamCallback): void {

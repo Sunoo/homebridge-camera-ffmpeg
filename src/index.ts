@@ -51,7 +51,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     const cameraConfig = cameraAccessory.context.cameraConfig;
 
     const motion = cameraAccessory.getService(hap.Service.MotionSensor);
-    const doorbellSwitch = cameraAccessory.getService(hap.Service.Switch);
+    const doorbellSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'DoorbellTrigger');
+    const motionSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
     const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
 
     if (motion) {
@@ -62,6 +63,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
     if (doorbellSwitch) {
       cameraAccessory.removeService(doorbellSwitch);
+    }
+    if (motionSwitch) {
+      cameraAccessory.removeService(motionSwitch);
     }
 
     if (cameraConfig.doorbell) {
