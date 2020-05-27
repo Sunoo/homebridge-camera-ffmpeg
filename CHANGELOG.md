@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v1.2.0 (2020-05-27)
+
+### Changes
+* Update ffmpeg-for-homebridge to 0.0.5.
+
 ## v1.1.1 (2020-05-14)
 
 ### Changes
