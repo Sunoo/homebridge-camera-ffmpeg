@@ -24,9 +24,9 @@
     "nodemon": ">=2.0.2"
   },
   "dependencies": {
+    "debug": "^4.1.1",
+    "ffmpeg-for-homebridge": "0.0.5",
     "googleapis": ">=50.0.0",
-    "ffmpeg-for-homebridge": "0.0.4",
-    "ip": "^1.1.5",
-    "debug": "^4.1.1"
+    "ip": "^1.1.5"
   }
 }
