@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v1.2.1 (2020-05-28)
+
+### Changes
+* Fixes [#522](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/issues/522), Cleans Up and Condenses the code around the motion switch.
+
 ## v1.2.0 (2020-05-27)
 
 ### Changes
