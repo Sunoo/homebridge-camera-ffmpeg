@@ -77,7 +77,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
         switchService.getCharacteristic(Characteristic.On)
         .on('set', function(state, callback){
           if(state){
-            cameraAccessory.getService(Service.Doorbell).getCharacteristic(Characteristic.ProgrammableSwitchEvent).setValue(0);
+            doorbellService.getCharacteristic(Characteristic.ProgrammableSwitchEvent).setValue(0);
             setTimeout(function(){
               switchService.getCharacteristic(Characteristic.On).updateValue(false);
             }, 1000);
@@ -95,7 +95,15 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
         cameraAccessory.addService(motion);
 
         button.getCharacteristic(Characteristic.On)
-          .on('set', _Motion.bind(cameraAccessory));
+        .on('set', function(state, callback){
+          motion.setCharacteristic(Characteristic.MotionDetected, (state ? 1 : 0));
+          if(state){
+            setTimeout(function(){
+              button.getCharacteristic(Characteristic.On).updateValue(false);
+            }, 5000);
+          }
+          callback(null, state);
+        });
       }
 
       var cameraSource = new FFMPEG(hap, cameraConfig, self.log, self.config.videoProcessor, interfaceName);
@@ -106,19 +114,3 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
     self.api.publishCameraAccessories("homebridge-camera-ffmpeg", configuredAccessories);
   }
 };
-
-function _Motion(on, callback) {
-  this.context.log("Setting %s Motion to %s", this.displayName, on);
-
-  this.getService(Service.MotionSensor).setCharacteristic(Characteristic.MotionDetected, (on ? 1 : 0));
-  if (on) {
-    setTimeout(_Reset.bind(this), 5000);
-  }
-  callback();
-}
-
-function _Reset() {
-  this.context.log("Setting %s Button to false", this.displayName);
-
-  this.getService(Service.Switch).setCharacteristic(Characteristic.On, false);
-}
