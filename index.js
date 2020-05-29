@@ -99,7 +99,7 @@ ffmpegPlatform.prototype.didFinishLaunching = function() {
           motion.setCharacteristic(Characteristic.MotionDetected, (state ? 1 : 0));
           if(state){
             setTimeout(function(){
-              button.getCharacteristic(Characteristic.On).updateValue(false);
+              button.setCharacteristic(Characteristic.On, false);
             }, 5000);
           }
           callback(null, state);
