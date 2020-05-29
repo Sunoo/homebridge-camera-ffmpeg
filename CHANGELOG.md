@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v1.2.2 (2020-05-28)
+
+### Changes
+* Fixed for Fake Motion Sensor, it was not reseting after Motion Events.
+
 ## v1.2.1 (2020-05-28)
 
 ### Changes
