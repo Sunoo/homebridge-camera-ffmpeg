@@ -56,7 +56,7 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "ffmpeg-for-homebridge": "0.0.4",
+    "ffmpeg-for-homebridge": "0.0.5",
     "ip": "^1.1.5",
     "debug": "^4.1.1"
   }

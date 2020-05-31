@@ -20,6 +20,8 @@ import ip from 'ip';
 import { FfmpegProcess } from './ffmpeg';
 import { spawn } from 'child_process';
 
+const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
+
 type SessionInfo = {
   address: string; // address of the HAP controller
 
@@ -63,7 +65,13 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.log = log;
     this.ffmpegOpt = cameraConfig.videoConfig;
     this.name = cameraConfig.name;
-    this.videoProcessor = videoProcessor;
+    if (videoProcessor && videoProcessor !== '') {
+      this.videoProcessor = videoProcessor;
+    } else if (pathToFfmpeg) {
+      this.videoProcessor = pathToFfmpeg;
+    } else {
+      this.videoProcessor = 'ffmpeg';
+    }
     this.debug = this.ffmpegOpt.debug;
 
     if (!this.ffmpegOpt.source) {
@@ -124,7 +132,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       const log = this.log;
       const debug = this.debug;
       ffmpeg.on('error', function (error: any) {
-        log('An error occurs while making snapshot request');
+        log('An error occurred while making snapshot request');
         debug ? log(error) : null;
       });
       ffmpeg.on(
