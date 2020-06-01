@@ -1,0 +1,14 @@
+# Add 'repo' label to any root file changes
+repo:
+  - ./*
+
+# Add 'enhancement' label to any change to index.js file
+enhancement:
+  - ./index.js
+  - ./package.json
+  - ./pakcage-lock.json
+  - ./config.schema.json
+
+# Add 'workflow' to any changes within 'workflow' folder or any subfolders
+workflow:
+  - /github/workflows/*
