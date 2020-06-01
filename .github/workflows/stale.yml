@@ -24,3 +24,4 @@ jobs:
         days-before-close: 5
         exempt-issue-labels: 'pin'
         exempt-pr-labels: 'awaiting-approval,work-in-progress'
+        remove-stale-when-updated: true
