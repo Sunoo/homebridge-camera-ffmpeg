@@ -91,7 +91,7 @@
               "vcodec": {
                 "title": "Video Codec",
                 "type": "string",
-                "placeholder": "libx264",
+                "placeholder": "copy",
                 "description": "The ffmpeg video processing codec to use.",
                 "typeahead": {
                   "source": [
@@ -148,6 +148,8 @@
     }
   },
   "layout": [
+    "name",
+    "videoProcessor",
     {
       "key": "cameras",
       "type": "array",
