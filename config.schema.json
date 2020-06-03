@@ -70,28 +70,28 @@
               "maxStreams": {
                 "title": "Maximum Number of Streams",
                 "type": "integer",
-                "placeholder": 2,
+                "default": 2,
                 "minimum": 1,
                 "description": "The maximum number of streams that will be generated for this camera"
               },
               "maxFPS": {
                 "title": "Maximum FPS",
                 "type": "integer",
-                "placeholder": 10,
+                "default": 10,
                 "minimum": 1,
                 "description": "The maximum frame rate of the stream"
               },
               "maxBitrate": {
                 "title": "Maximum Bitrate",
                 "type": "integer",
-                "placeholder": 300,
+                "default": 300,
                 "minimum": 1,
                 "description": "The maximum bit rate of the stream"
               },
               "vcodec": {
                 "title": "Video Codec",
                 "type": "string",
-                "placeholder": "libx264",
+                "default": "libx264",
                 "description": "The ffmpeg video processing codec to use.",
                 "typeahead": {
                   "source": [
