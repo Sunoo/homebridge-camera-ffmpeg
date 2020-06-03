@@ -148,8 +148,6 @@
     }
   },
   "layout": [
-    "name",
-    "videoProcessor",
     {
       "key": "cameras",
       "type": "array",
@@ -198,7 +196,8 @@
             "cameras[].videoConfig.vflip",
             "cameras[].videoConfig.hflip"
           ]
-        }
+        },
+    "videoProcessor"
       ]
     }
   ]
