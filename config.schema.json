@@ -91,7 +91,7 @@
               "vcodec": {
                 "title": "Video Codec",
                 "type": "string",
-                "placeholder": "libx264",
+                "placeholder": "copy",
                 "description": "The ffmpeg video processing codec to use.",
                 "typeahead": {
                   "source": [
@@ -149,54 +149,71 @@
   },
   "layout": [
     {
-      "key": "cameras",
-      "type": "array",
-      "orderable": false,
-      "buttonText": "Add Camera",
+      "type": "section",
+      "title": "Cameras",
+      "expandable": true,
+      "expanded": true,
       "items": [
-        "cameras[].name",
-        "cameras[].videoConfig.source",
-        "cameras[].videoConfig.stillImageSource",
-        "cameras[].videoConfig.vcodec",
-        "cameras[].videoConfig.audio",
-        "cameras[].motion",
-        "cameras[].doorbell",
-        "cameras[].videoConfig.debug",
         {
-          "key": "cameras[]",
-          "type": "section",
-          "title": "Customization Settings",
-          "expandable": true,
-          "expanded": false,
+          "key": "cameras",
+          "type": "array",
+          "orderable": false,
+          "buttonText": "Add Camera",
           "items": [
-            "cameras[].manufacturer",
-            "cameras[].model",
-            "cameras[].serialNumber",
-            "cameras[].firmwareRevision"
-          ]
-        },
-        {
-          "key": "cameras[].videoConfig",
-          "type": "section",
-          "title": "Advanced Settings",
-          "expandable": true,
-          "expanded": false,
-          "items": [
-            "cameras[].videoConfig.maxStreams",
-            "cameras[].videoConfig.maxWidth",
-            "cameras[].videoConfig.maxHeight",
-            "cameras[].videoConfig.maxFPS",
-            "cameras[].videoConfig.maxBitrate",
-            "cameras[].videoConfig.preserveRatio",
-            "cameras[].videoConfig.packetSize",
-            "cameras[].videoConfig.videoFilter",
-            "cameras[].videoConfig.additionalCommandline",
-            "cameras[].videoConfig.mapvideo",
-            "cameras[].videoConfig.mapaudio",
-            "cameras[].videoConfig.vflip",
-            "cameras[].videoConfig.hflip"
+            "cameras[].name",
+            "cameras[].videoConfig.source",
+            "cameras[].videoConfig.stillImageSource",
+            "cameras[].videoConfig.vcodec",
+            "cameras[].videoConfig.audio",
+            "cameras[].motion",
+            "cameras[].doorbell",
+            "cameras[].videoConfig.debug",
+            {
+              "key": "cameras[]",
+              "type": "section",
+              "title": "Customization Settings",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "cameras[].manufacturer",
+                "cameras[].model",
+                "cameras[].serialNumber",
+                "cameras[].firmwareRevision"
+              ]
+            },
+            {
+              "key": "cameras[].videoConfig",
+              "type": "section",
+              "title": "Advanced Settings",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "cameras[].videoConfig.maxStreams",
+                "cameras[].videoConfig.maxWidth",
+                "cameras[].videoConfig.maxHeight",
+                "cameras[].videoConfig.maxFPS",
+                "cameras[].videoConfig.maxBitrate",
+                "cameras[].videoConfig.preserveRatio",
+                "cameras[].videoConfig.packetSize",
+                "cameras[].videoConfig.videoFilter",
+                "cameras[].videoConfig.additionalCommandline",
+                "cameras[].videoConfig.mapvideo",
+                "cameras[].videoConfig.mapaudio",
+                "cameras[].videoConfig.vflip",
+                "cameras[].videoConfig.hflip"
+              ]
+            }
           ]
         }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Optional Settings",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        "videoProcessor"
       ]
     }
   ]
