@@ -65,13 +65,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.log = log;
     this.ffmpegOpt = cameraConfig.videoConfig;
     this.name = cameraConfig.name;
-    if (videoProcessor && videoProcessor !== '') {
-      this.videoProcessor = videoProcessor;
-    } else if (pathToFfmpeg) {
-      this.videoProcessor = pathToFfmpeg;
-    } else {
-      this.videoProcessor = 'ffmpeg';
-    }
+    this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
     this.debug = this.ffmpegOpt.debug;
 
     if (!this.ffmpegOpt.source) {

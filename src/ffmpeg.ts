@@ -18,7 +18,7 @@ export class FfmpegProcess {
     controller: CameraController | undefined,
     sessionId: string,
     ffmpegDebugOutput: boolean,
-    customFfmpeg?: string,
+    videoProcessor: string,
   ) {
     let started = false;
     this.log = log;
@@ -28,13 +28,7 @@ export class FfmpegProcess {
     if (this.ffmpegDebugOutput) {
       this.log(`${this.title} command: ffmpeg ${command}`);
     }
-    if (customFfmpeg && customFfmpeg !== '') {
-      this.ff = spawn(customFfmpeg, command.split(' '), { env: process.env });
-    } else if (pathToFfmpeg) {
-      this.ff = spawn(pathToFfmpeg, command.split(' '), { env: process.env });
-    } else {
-      this.ff = spawn('ffmpeg', command.split(' '), { env: process.env });
-    }
+    this.ff = spawn(videoProcessor, command.split(' '), { env: process.env });
 
     if (this.ff.stdin) {
       this.ff.stdin.on('error', (error) => {
