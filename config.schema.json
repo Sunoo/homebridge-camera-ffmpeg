@@ -196,9 +196,9 @@
             "cameras[].videoConfig.vflip",
             "cameras[].videoConfig.hflip"
           ]
-        },
-    "videoProcessor"
+        }
       ]
-    }
+    },
+    "videoProcessor"
   ]
 }
