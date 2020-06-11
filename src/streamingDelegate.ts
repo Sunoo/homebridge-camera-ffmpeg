@@ -375,7 +375,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           fcmd,
           this.log,
           callback,
-          this.controller,
+          this,
           sessionId,
           false,
           this.videoProcessor,
@@ -390,23 +390,25 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         callback();
         break;
       case StreamRequestTypes.STOP:
-        try {
-          if (this.ongoingSessions[sessionId]) {
-            const ffmpegProcess = this.ongoingSessions[sessionId];
-            if (ffmpegProcess) {
-              ffmpegProcess.stop();
-            }
-          }
-        } catch (e) {
-          this.log.error('Error occurred terminating the video process!');
-          this.log.error(e);
-        }
-
-        delete this.ongoingSessions[sessionId];
-
-        this.log.debug('Stopped streaming session!');
+        this.stopStream(sessionId);
         callback();
         break;
+    }
+  }
+
+  public stopStream(sessionId: string): void {
+    try {
+      if (this.ongoingSessions[sessionId]) {
+        const ffmpegProcess = this.ongoingSessions[sessionId];
+        if (ffmpegProcess) {
+          ffmpegProcess.stop();
+        }
+      }
+      delete this.ongoingSessions[sessionId];
+      this.log.debug('Stopped streaming session!');
+    } catch (e) {
+      this.log.error('Error occurred terminating the video process!');
+      this.log.error(e);
     }
   }
 }

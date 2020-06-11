@@ -1,39 +1,37 @@
 import { ChildProcess, spawn } from 'child_process';
-import { CameraController, Logging, StreamRequestCallback } from 'homebridge';
-import { Writable } from 'stream';
+import { Logging, StreamRequestCallback } from 'homebridge';
+import { StreamingDelegate } from './streamingDelegate';
+import { Readable, Writable } from 'stream';
 
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export class FfmpegProcess {
-  private title = '';
-  private readonly log: Logging;
-  private ffmpegDebugOutput = false;
   private ff: ChildProcess;
 
   constructor(
     title: string,
-    command: string,
+    command: Array<string>,
     log: Logging,
     callback: StreamRequestCallback | undefined,
-    controller: CameraController | undefined,
+    delegate: StreamingDelegate,
     sessionId: string,
     ffmpegDebugOutput: boolean,
-    videoProcessor: string,
+    customFfmpeg?: string,
   ) {
     let started = false;
-    this.log = log;
-    this.ffmpegDebugOutput = ffmpegDebugOutput;
-    this.title = title;
+    const controller = delegate.controller;
 
-    if (this.ffmpegDebugOutput) {
-      this.log(`${this.title} command: ffmpeg ${command}`);
+    if (ffmpegDebugOutput) {
+      log(`${title} command: ffmpeg ${command}`);
     }
-    this.ff = spawn(videoProcessor, command.split(' '), { env: process.env });
+
+    const videoProcessor = customFfmpeg || pathToFfmpeg || 'ffmpeg';
+    this.ff = spawn(videoProcessor, command, { env: process.env });
 
     if (this.ff.stdin) {
       this.ff.stdin.on('error', (error) => {
         if (!error.message.includes('EPIPE')) {
-          this.log.error(error.message);
+          log.error(error.message);
         }
       });
     }
@@ -41,39 +39,36 @@ export class FfmpegProcess {
       this.ff.stderr.on('data', (data) => {
         if (!started) {
           started = true;
-          this.log.debug(`${this.title}: received first frame`);
+          log.debug(`${title}: received first frame`);
           if (callback) {
             callback(); // do not forget to execute callback once set up
           }
         }
 
-        if (this.ffmpegDebugOutput) {
-          this.log(`${this.title}: ${String(data)}`);
+        if (ffmpegDebugOutput) {
+          log(`${title}: ${String(data)}`);
         }
       });
     }
     this.ff.on('error', (error) => {
-      this.log.error(`[${this.title}] Failed to start stream: ` + error.message);
+      log.error(`[${title}] Failed to start stream: ` + error.message);
       if (callback) {
         callback(new Error('ffmpeg process creation failed!'));
+        delegate.stopStream(sessionId);
       }
     });
     this.ff.on('exit', (code, signal) => {
-      const message = `[${this.title}] ffmpeg exited with code: ${code} and signal: ${signal}`;
+      const message = `[${title}] ffmpeg exited with code: ${code} and signal: ${signal}`;
 
       if (code == null || code === 255) {
-        this.log.debug(message + ` (${this.title} Stream stopped!)`);
+        log.debug(message + ` (${title} Stream stopped!)`);
       } else {
-        this.log.error(message + ' (error)');
-
-        if (!started) {
-          if (callback) {
-            callback(new Error(message));
-          }
-        } else {
-          if (controller) {
-            controller.forceStopStreamingSession(sessionId);
-          }
+        log.error(message + ' (error)');
+        delegate.stopStream(sessionId);
+        if (!started && callback) {
+          callback(new Error(message));
+        } else if (controller) {
+          controller.forceStopStreamingSession(sessionId);
         }
       }
     });
@@ -85,5 +80,9 @@ export class FfmpegProcess {
 
   public getStdin(): Writable | null {
     return this.ff.stdin;
+  }
+
+  public getStdout(): Readable | null {
+    return this.ff.stdout;
   }
 }
