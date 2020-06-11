@@ -10,7 +10,7 @@ export class FfmpegProcess {
 
   constructor(
     title: string,
-    command: Array<string>,
+    command: string,
     log: Logging,
     callback: StreamRequestCallback | undefined,
     delegate: StreamingDelegate,
@@ -26,7 +26,7 @@ export class FfmpegProcess {
     }
 
     const videoProcessor = customFfmpeg || pathToFfmpeg || 'ffmpeg';
-    this.ff = spawn(videoProcessor, command, { env: process.env });
+    this.ff = spawn(videoProcessor, command.split(' '), { env: process.env });
 
     if (this.ff.stdin) {
       this.ff.stdin.on('error', (error) => {
