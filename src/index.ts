@@ -151,10 +151,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         audio: {
           codecs: [
             {
-              type: AudioStreamingCodecType.OPUS,
-              samplerate: AudioStreamingSamplerate.KHZ_24,
-            },
-            {
               type: AudioStreamingCodecType.AAC_ELD,
               samplerate: AudioStreamingSamplerate.KHZ_16,
             },
