@@ -21,6 +21,7 @@ let Accessory: typeof PlatformAccessory;
 
 const PLUGIN_NAME = 'homebridge-camera-ffmpeg';
 const PLATFORM_NAME = 'Camera-ffmpeg';
+const mqtt = require("mqtt");
 
 class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logging;
