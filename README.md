@@ -25,13 +25,16 @@ Install via Homebridge Config UI X:
 1. Search for `Camera FFmpeg` on the plugin screen of the [Homebridge UI](https://github.com/oznu/homebridge-config-ui-x).
 2. Install the `homebridge-camera-ffmpeg` and use the form to enter your camera settings.
 
-After restarting Homebridge, each camera you defined will need to be manually paired in the Home app, to do this:
+After paring and restarting Homebridge, each camera you defined will be automatically added into the Home app.
 
-1. Open the Home <img src="https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png" height="16.42px"> app on your device.
-2. Tap the Home tab, then tap <img src="https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png" height="16.42px">.
-3. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan*.
-4. Select the Camera you want to pair.
-5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.
+* To Pair Homebridge:
+	1. Open the Home <img src="https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png" height="16.42px"> app on your device.
+	2. Tap the Home tab, then tap <img src="https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png" height="16.42px">.
+	3. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan*.
+	4. Select Homebridge, this will display as a bridge.
+	5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.
+	6. Your cameras will then be automatically added to HomeKit.
+* For help and examples of common configurations please read the wiki.
 
 ## Configuration
 
@@ -56,7 +59,6 @@ After restarting Homebridge, each camera you defined will need to be manually pa
 
 #### Optional Parameters
 
-* `uploader` enable uploading of snapshots to Google Drive, defaults to `false`. See wiki for more detailed instructions.
 * `motion` enable a dummy switch and motion sensor to trigger picture notifications in iOS 13, defaults to `false`.  See wiki for more detailed instructions.
 * `doorbell` enable doorbell function for this camera (image notifications). When enabled there will be an additional switch that triggers the doorbell event, automate it to use it with other HomeKit switches, HTTP events etc.
 * `manufacturer` set manufacturer name for display in the Home app
