@@ -159,7 +159,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const audio = request.audio;
     const audioPort = audio.port;
 
-    const audioCryptoSuite = video.srtpCryptoSuite; // could be used to support multiple crypto suite (or support no suite for debugging)
+    const audioCryptoSuite = audio.srtpCryptoSuite; // could be used to support multiple crypto suite (or support no suite for debugging)
     const audioSrtpKey = audio.srtp_key;
     const audioSrtpSalt = audio.srtp_salt;
 
@@ -244,7 +244,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         if (videoMaxBitrate > this.ffmpegOpt.maxBitrate) {
           videoMaxBitrate = this.ffmpegOpt.maxBitrate;
         }
-        let audioMaxBitrate = video.max_bit_rate;
+        let audioMaxBitrate = audio.max_bit_rate;
         if (audioMaxBitrate > this.ffmpegOpt.maxBitrate) {
           audioMaxBitrate = this.ffmpegOpt.maxBitrate;
         }
