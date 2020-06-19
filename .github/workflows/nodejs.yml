@@ -18,16 +18,15 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2.2.0
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2-beta
         with:
           node-version: ${{ matrix.node-version }}
-      - name: npm install, build and test
+      - name: npm install and build
         run: |
           npm ci
           npm run build --if-present
-          npm test
         env:
           CI: true
 
@@ -40,8 +39,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v2.2.0
+      - uses: actions/setup-node@v2-beta
         with:
           node-version: 10 # use the minimum required version
           registry-url: https://registry.npmjs.org/
