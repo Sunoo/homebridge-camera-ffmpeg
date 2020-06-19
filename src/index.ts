@@ -171,6 +171,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   didFinishLaunching(): void {
     if (this.config.cameras) {
       const cameras = this.config.cameras;
+      
       cameras.forEach((cameraConfig: any) => {
         const cameraName = cameraConfig.name;
         const videoConfig = cameraConfig.videoConfig;
