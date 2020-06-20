@@ -164,10 +164,14 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     streamingDelegate.controller = cameraController;
 
     cameraAccessory.configureController(cameraController);
-
+    self.cameranamelist[cameraConfig.name]=cameraAccessory;
     this.accessories.push(cameraAccessory);
   }
-
+  _mqttHandler(value, self):void {
+    if (value in self.cameranamelist){
+      const accessory = self.cameranamelist[value];
+      accessory.getService(Service.Switch).setCharacteristic(Characteristic.On, true);}
+    }
   didFinishLaunching(): void {
     if (this.config.cameras) {
       const cameras = this.config.cameras;
