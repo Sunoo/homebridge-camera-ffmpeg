@@ -164,12 +164,12 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     streamingDelegate.controller = cameraController;
 
     cameraAccessory.configureController(cameraController);
-    self.cameranamelist[cameraConfig.name]=cameraAccessory;
+    this.cameranamelist[cameraConfig.name]=cameraAccessory;
     this.accessories.push(cameraAccessory);
   }
-  _mqttHandler(value, self):void {
-    if (value in self.cameranamelist){
-      const accessory = self.cameranamelist[value];
+  _mqttHandler(value, this):void {
+    if (value in this.cameranamelist){
+      const accessory = this.cameranamelist[value];
       accessory.getService(Service.Switch).setCharacteristic(Characteristic.On, true);}
     }
   didFinishLaunching(): void {
@@ -185,10 +185,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
                 const partsThree = parts[2];
                 this.log("MQTT state message received:", status);
                 const name = partsThree.replace('_',' ');
-                _mqttHandler(name,self);
+                _mqttHandler(name,this);
             });
       client.subscribe(topics);
-      self.cameranamelist = {};
+      this.cameranamelist = {};
       
       cameras.forEach((cameraConfig: any) => {
         const cameraName = cameraConfig.name;
