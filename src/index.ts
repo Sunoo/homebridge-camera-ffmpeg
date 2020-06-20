@@ -179,7 +179,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
                 const status = topic.toString();
                 const parts = status.split('/');
                 const partsThree = parts[2];
-                console.log("MQTT state message received:", status);
+                this.log("MQTT state message received:", status);
                 const name = partsThree.replace('_',' ');
                 _mqttHandler(name,self);
             });
