@@ -171,6 +171,20 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   didFinishLaunching(): void {
     if (this.config.cameras) {
       const cameras = this.config.cameras;
+      const servermqtt = this.config.mqtt || '127.0.0.1';
+      const port = this.config.portmqtt || '1883';
+      const topics = this.config.topics || 'homebridge/motion/#';
+      const client = mqtt.connect("mqtt://"+servermqtt+":"+port);
+      client.on('message', function (topic, message) {
+                const status = topic.toString();
+                const parts = status.split('/');
+                const partsThree = parts[2];
+                console.log("MQTT state message received:", status);
+                const name = partsThree.replace('_',' ');
+                _mqttHandler(name,self);
+            });
+      client.subscribe(topics);
+      self.cameranamelist = {};
       
       cameras.forEach((cameraConfig: any) => {
         const cameraName = cameraConfig.name;
