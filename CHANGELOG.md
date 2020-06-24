@@ -2,13 +2,7 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
-## v2.X.X (2020-XX-XX)
-
-### Changes
-
-* Add MQTT support for Motion Detect, thanks to [fennec622](https://github.com/fennec622).
-
-## v2.0.0 (2020-06-19)
+## v2.0.0 (2020-XX-XX)
 
 ### Breaking Changes
 
@@ -24,26 +18,6 @@ All notable changes to this project will be documented in this file. This projec
 #### Other Changes
 
 * Google Drive Upload has been removed in this update. PRs are welcome for other Video Cloud Options.
-
-## v1.3.0 (2020-06-18)
-
-### Changes
-* Update ffmpeg-for-homebridge to 0.0.6.
-
-## v1.2.2 (2020-05-28)
-
-### Changes
-* Fix for Fake Motion Sensor, it was not reseting after Motion Events.
-
-## v1.2.1 (2020-05-28)
-
-### Changes
-* Fixes [#522](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/issues/522), Cleans Up and Condenses the code around the motion switch.
-
-## v1.2.0 (2020-05-27)
-
-### Changes
-* Update ffmpeg-for-homebridge to 0.0.5.
 
 ## v1.1.1 (2020-05-14)
 
