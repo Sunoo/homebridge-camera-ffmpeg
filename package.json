@@ -18,7 +18,8 @@
   },
   "keywords": [
     "homebridge-plugin",
-    "meross",
+    "camera",
+    "ffmpeg",
     "homebridge"
   ],
   "repository": {
@@ -33,8 +34,17 @@
     "homebridge": ">=1.0.0"
   },
   "files": [
+    "CHANGELOG.md",
+    "README.md",
     "LICENSE",
+    "jest.config.js",
+    "package-lock.json",
+    "package.json",
+    "tsconfig.json",
+    ".prettierrc",
+    ".eslintrc.js",
     "dist/**/*",
+    "src/**/*",
     "config.schema.json"
   ],
   "devDependencies": {

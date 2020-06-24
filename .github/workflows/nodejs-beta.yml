@@ -12,7 +12,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v2.2.0
+=======
+      - uses: actions/checkout@v2.3.1
+>>>>>>> c03bdafc63a198a046f6330fea055ca003b56004
       - uses: actions/setup-node@v2-beta
         with:
           node-version: 10
@@ -31,7 +35,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v2.2.0
+=======
+      - uses: actions/checkout@v2.3.1
+>>>>>>> c03bdafc63a198a046f6330fea055ca003b56004
       - uses: actions/setup-node@v2-beta
         with:
           node-version: 10
