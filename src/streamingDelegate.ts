@@ -20,7 +20,7 @@ import ip from 'ip';
 import { FfmpegProcess } from './ffmpeg';
 import { spawn } from 'child_process';
 
-const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
+let pathToFfmpeg: string | undefined = require('ffmpeg-for-homebridge')
 
 type SessionInfo = {
   address: string; // address of the HAP controller
