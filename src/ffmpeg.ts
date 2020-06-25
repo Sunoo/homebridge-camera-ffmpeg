@@ -46,7 +46,7 @@ export class FfmpegProcess {
         }
 
         if (ffmpegDebugOutput) {
-          log(`${title}: ${String(data)}`);
+          log.debug(`${title}: ${String(data)}`);
         }
       });
     }
