@@ -15,13 +15,14 @@ import {
   PlatformConfig,
 } from 'homebridge';
 import { StreamingDelegate } from './streamingDelegate';
+import mqtt = require('mqtt');
 
 let hap: HAP;
 let Accessory: typeof PlatformAccessory;
 
 const PLUGIN_NAME = 'homebridge-camera-ffmpeg';
 const PLATFORM_NAME = 'Camera-ffmpeg';
-const mqtt = require("mqtt");
+
 
 class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logging;
@@ -167,7 +168,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.cameranamelist[cameraConfig.name]=cameraAccessory;
     this.accessories.push(cameraAccessory);
   }
-  _mqttHandler(value, this):void {
+  _mqttHandler(value, this) =>  {
     if (value in this.cameranamelist){
       const accessory = this.cameranamelist[value];
       accessory.getService(Service.Switch).setCharacteristic(Characteristic.On, true);}
@@ -178,8 +179,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       const servermqtt = this.config.mqtt || '127.0.0.1';
       const port = this.config.portmqtt || '1883';
       const topics = this.config.topics || 'homebridge/motion/#';
-      const client = mqtt.connect("mqtt://"+servermqtt+":"+port);
-      client.on('message', function (topic, message) {
+      var client = mqtt.connect("mqtt://"+servermqtt+":"+port);
+      client.on('message', (topic: string, message: Buffer, packet: any) => {
                 const status = topic.toString();
                 const parts = status.split('/');
                 const partsThree = parts[2];
