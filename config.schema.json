@@ -13,6 +13,18 @@
       "title": "Video Processor",
       "type": "string"
     },
+      "mqtt": {
+      "title": "Server MQTT",
+      "type": "string"
+    },
+    "portmqtt": {
+      "title": "Port MQTT",
+      "type": "integer"
+    },
+    "topic": {
+      "title": "Topic MQTT",
+      "type": "string"
+    },
     "cameras": {
       "type": "array",
       "items": {
