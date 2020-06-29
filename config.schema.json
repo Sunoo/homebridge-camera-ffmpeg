@@ -226,6 +226,9 @@
       "expanded": false,
       "items": [
         "videoProcessor"
+        "mqtt",
+        "portmqtt",
+        "topic"
       ]
     }
   ]
