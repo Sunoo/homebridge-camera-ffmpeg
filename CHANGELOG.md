@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v2.X.X (2020-XX-XX)
+
+  ### Changes
+
+  * Add MQTT support for Motion Detect (#572), thanks to [fennec622](https://github.com/fennec622).
+
 ## v2.0.1 (2020-06-28)
 
   ### Changes
