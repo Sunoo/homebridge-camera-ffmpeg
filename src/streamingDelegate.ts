@@ -381,7 +381,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           callback,
           this,
           sessionId,
-          false,
+          this.debug,
           this.videoProcessor,
         );
 

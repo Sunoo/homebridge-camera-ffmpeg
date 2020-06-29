@@ -22,7 +22,7 @@ export class FfmpegProcess {
     const controller = delegate.controller;
 
     if (ffmpegDebugOutput) {
-      log(`${title} command: ffmpeg ${command}`);
+      log.debug(`${title} command: ffmpeg ${command}`);
     }
 
     const videoProcessor = customFfmpeg || pathToFfmpeg || 'ffmpeg';
@@ -46,7 +46,7 @@ export class FfmpegProcess {
         }
 
         if (ffmpegDebugOutput) {
-          log(`${title}: ${String(data)}`);
+          log.debug(`${title}: ${String(data)}`);
         }
       });
     }

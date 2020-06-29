@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Camera FFmpeg",
   "name": "homebridge-camera-ffmpeg",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "ffmpeg plugin for homebridge: https://github.com/homebridge/homebridge",
   "main": "dist/index.js",
   "license": "ISC",
@@ -50,8 +50,8 @@
   "devDependencies": {
     "nodemon": ">=2.0.2",
     "@types/ip": "^1.1.0",
-    "@types/jest": "^25.2.1",
-    "@types/node": "14.0.1",
+    "@types/jest": "^26.0.3",
+    "@types/node": "14.0.14",
     "@typescript-eslint/eslint-plugin": "^2.31.0",
     "@typescript-eslint/parser": "^2.31.0",
     "eslint": "^6.8.0",
