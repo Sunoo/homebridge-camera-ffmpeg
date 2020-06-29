@@ -2,17 +2,11 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
-## v2.X.X (2020-XX-XX)
+## v2.0.1 (2020-06-28)
 
   ### Changes
 
-  * Add MQTT support for Motion Detect, thanks to [fennec622](https://github.com/fennec622).
-
-## v2.X.X (2020-XX-XX)
-
-  ### Changes
-
-  * Enable FFMPEG debug log
+  * Enable FFMPEG debug logging with Homebridge `-D`.
 
 ## v2.0.0 (2020-06-19)
 
