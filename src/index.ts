@@ -21,7 +21,7 @@ let hap: HAP;
 let Accessory: typeof PlatformAccessory;
 
 const PLUGIN_NAME = 'homebridge-camera-ffmpeg';
-const PLATFORM_NAME = 'Camera-ffmpeg';
+const PLATFORM_NAME = 'camera-ffmpeg';
 
 class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logging;
