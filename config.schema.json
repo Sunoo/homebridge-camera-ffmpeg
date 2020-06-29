@@ -225,7 +225,7 @@
       "expandable": true,
       "expanded": false,
       "items": [
-        "videoProcessor"
+        "videoProcessor",
         "mqtt",
         "portmqtt",
         "topic"
