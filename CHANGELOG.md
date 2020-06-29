@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. This projec
   ### Changes
 
   * Enable FFMPEG debug logging with Homebridge `-D`.
+  * Update Dependencies.
 
 ## v2.0.0 (2020-06-19)
 
