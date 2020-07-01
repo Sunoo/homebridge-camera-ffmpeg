@@ -53,9 +53,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     const cameraConfig = cameraAccessory.context.cameraConfig;
 
     const motion = cameraAccessory.getService(hap.Service.MotionSensor);
-    const doorbellSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'DoorbellTrigger');
-    const motionSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
     const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
+    const doorbellSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'DoorbellTrigger');
 
     if (motion) {
       cameraAccessory.removeService(motion);
@@ -65,9 +64,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
     if (doorbellSwitch) {
       cameraAccessory.removeService(doorbellSwitch);
-    }
-    if (motionSwitch) {
-      cameraAccessory.removeService(motionSwitch);
     }
 
     if (cameraConfig.doorbell) {
@@ -84,21 +80,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
                 hap.Characteristic.ProgrammableSwitchEvent,
                 hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
               );
-
-              setTimeout(function () {
-                switchService.getCharacteristic(hap.Characteristic.On).updateValue(false);
-              }, 1000);
             }
           }
           callback(null, state);
         });
 
-      cameraAccessory.addService(switchService);
     }
     if (cameraConfig.motion) {
-      const button = new hap.Service.Switch(cameraConfig.name, 'MotionTrigger');
-      cameraAccessory.addService(button);
-
       const motion = new hap.Service.MotionSensor(cameraConfig.name);
       cameraAccessory.addService(motion);
       const log = this.log;
@@ -110,15 +98,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
           if (motionService) {
             motionService.setCharacteristic(hap.Characteristic.MotionDetected, on ? 1 : 0);
-            if (on) {
-              setTimeout(function () {
-                log.info(`Setting ${cameraAccessory.displayName} Button to false`);
-                const switchService = cameraAccessory.getService(hap.Service.Switch);
-                if (switchService) {
-                  switchService.setCharacteristic(hap.Characteristic.On, false);
-                }
-              }, 5000);
-            }
           }
           callback(null, on);
         });
@@ -171,11 +150,11 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   mqttHandler(): void {
     this.accessories.forEach((accessory: PlatformAccessory) => {
       if (accessory.displayName == this.name) {
-        this.log('Switch Motion Detect On :', accessory.displayName);
-        const motionSwitch = accessory.getService(hap.Service.Switch);
-        if (motionSwitch) {
-          motionSwitch.setCharacteristic(hap.Characteristic.On, true);
-        }
+        this.log('Motion Detected :', accessory.displayName);
+        const motionMqtt = accessory.getService(hap.Service.MotionSensor);
+        if (motionMqtt) {
+            motion.setCharacteristic(hap.Characteristic.MotionDetected, on ? 1 : 0);
+          }
       }
     });
   }
