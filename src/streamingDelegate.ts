@@ -54,6 +54,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private ffmpegOpt: any;
   private stillProcessor = '';
   private videoProcessor = '';
+  private interfaceName = '';
   private name = '';
   controller?: CameraController;
 
