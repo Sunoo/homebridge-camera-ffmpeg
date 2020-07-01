@@ -65,7 +65,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private mapaudio = '';
   private videoFilter = '';
   private additionalCommandline = '';
-  private interfaceName = '';
   private name = '';
   controller?: CameraController;
 
@@ -95,7 +94,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.mapvideo = this.ffmpegOpt.mapvideo || "0:0";
     this.mapaudio = this.ffmpegOpt.mapaudio || "0:1";
     this.videoFilter = this.ffmpegOpt.videoFilter || null; // null is a valid discrete value
-    this.interfaceName = interfaceName;
     this.debug = this.ffmpegOpt.debug;
     
     if (!this.ffmpegOpt.source) {
