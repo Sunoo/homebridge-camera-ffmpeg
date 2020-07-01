@@ -183,9 +183,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.accessories.forEach((accessory: PlatformAccessory) => {
       if (accessory.displayName == this.name) {
         this.log('Switch Motion Detect On :', accessory.displayName);
-        const motionSwitch = accessory.getService(hap.Service.Switch);
-        if (motionSwitch) {
-          motionSwitch.setCharacteristic(hap.Characteristic.On, true);
+        const motionSenSor = accessory.getService(hap.Service.MotionSensor);
+        if (motionSenSor) {
+          motionSenSor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
         }
       }
     });
