@@ -62,6 +62,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private minBitrate = '';
   private vflip = '';
   private hflip = '';
+  private mapvideo = '';
+  private mapaudio = '';
+  private videoFilter = '';
   private interfaceName = '';
   private name = '';
   controller?: CameraController;
