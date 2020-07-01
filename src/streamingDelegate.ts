@@ -52,7 +52,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly log: Logging;
   private debug = false;
   private ffmpegOpt: any;
-  private stillProcessor = '';
   private videoProcessor = '';
   private audio = '';
   private acodec = '';
@@ -65,6 +64,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private mapvideo = '';
   private mapaudio = '';
   private videoFilter = '';
+  private additionalCommandline = '';
   private interfaceName = '';
   private name = '';
   controller?: CameraController;
@@ -78,11 +78,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.log = log;
     this.ffmpegOpt = cameraConfig.videoConfig;
     this.name = cameraConfig.name;
-    this.stillProcessor = stillProcessor || pathToFfmpeg || 'ffmpeg';
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
     this.audio = this.ffmpegOpt.audio;
     this.acodec = this.ffmpegOpt.acodec;
-    this.packetsize = this.ffmpegOpt.packetSize;
+    this.packetSize = this.ffmpegOpt.packetSize;
     this.fps = this.ffmpegOpt.maxFPS || 10;
     this.maxBitrate = this.ffmpegOpt.maxBitrate || 300;
     this.minBitrate = this.ffmpegOpt.minBitrate || 0;
