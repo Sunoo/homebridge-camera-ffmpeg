@@ -60,14 +60,38 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
 
-  constructor(hap: HAP, cameraConfig: any, log: Logging, videoProcessor: string) {
+  constructor(hap: HAP, cameraConfig: any, log: Logging, stillProcessor, videoProcessor: string) {
     this.hap = hap;
     this.log = log;
     this.ffmpegOpt = cameraConfig.videoConfig;
     this.name = cameraConfig.name;
+    this.stillProcessor = stillProcessor || pathToFfmpeg || 'ffmpeg';
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
+    this.audio = ffmpegOpt.audio;
+    this.acodec = ffmpegOpt.acodec;
+    this.packetsize = ffmpegOpt.packetSize;
+    this.fps = ffmpegOpt.maxFPS || 10;
+    this.maxBitrate = ffmpegOpt.maxBitrate || 300;
+    this.minBitrate = ffmpegOpt.minBitrate || 0;
+    if (this.minBitrate > this.maxBitrate) {
+      this.minBitrate = this.maxBitrate;
+    }
+    this.debug = ffmpegOpt.debug;
+    this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
+    this.vflip = ffmpegOpt.vflip || false;
+    this.hflip = ffmpegOpt.hflip || false;
+    this.mapvideo = ffmpegOpt.mapvideo || "0:0";
+    this.mapaudio = ffmpegOpt.mapaudio || "0:1";
+    this.videoFilter = ffmpegOpt.videoFilter || null; // null is a valid discrete value
+    this.interfaceName = interfaceName;
     this.debug = this.ffmpegOpt.debug;
 
+    this.uploader = cameraConfig.uploader || false;
+    if ( this.uploader )		  if (this.uploader) {
+      { this.drive = new drive(); }		    this.cameraConfig = cameraConfig;
+      this.gphoto = new Gphoto(cameraConfig);
+    }
+    
     if (!this.ffmpegOpt.source) {
       throw new Error('Missing source for camera.');
     }
