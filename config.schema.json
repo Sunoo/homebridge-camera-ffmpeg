@@ -72,6 +72,10 @@
             "title": "Enable Motion/Doorbell Switch",
             "type": "boolean"
           },
+          "doorbellSwitch": {
+            "title": "Enable Doorbell Button",
+            "type": "boolean"
+          },
           "videoConfig": {
             "title": "Video Configuration",
             "type": "object",
@@ -218,6 +222,7 @@
             "cameras[].videoConfig.audio",
             "cameras[].motion",
             "cameras[].doorbell",
+            "cameras[].doorbellSwitch",
             "cameras[].switches",
             "cameras[].videoConfig.debug",
             {
