@@ -54,6 +54,14 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private ffmpegOpt: any;
   private stillProcessor = '';
   private videoProcessor = '';
+  private audio = '';
+  private acodec = '';
+  private packetSize = '';
+  private fps = '';
+  private maxBitrate = '';
+  private minBitrate = '';
+  private vflip = '';
+  private hflip = '';
   private interfaceName = '';
   private name = '';
   controller?: CameraController;
