@@ -185,7 +185,8 @@
               },
               "debug": {
                 "title": "Enable Debug Mode",
-                "type": "boolean"
+                "type": "boolean",
+                "default": true
               }
             }
           }
