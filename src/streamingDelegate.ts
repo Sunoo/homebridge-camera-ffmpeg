@@ -69,22 +69,22 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.name = cameraConfig.name;
     this.stillProcessor = stillProcessor || pathToFfmpeg || 'ffmpeg';
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
-    this.audio = ffmpegOpt.audio;
-    this.acodec = ffmpegOpt.acodec;
-    this.packetsize = ffmpegOpt.packetSize;
-    this.fps = ffmpegOpt.maxFPS || 10;
-    this.maxBitrate = ffmpegOpt.maxBitrate || 300;
-    this.minBitrate = ffmpegOpt.minBitrate || 0;
+    this.audio = this.ffmpegOpt.audio;
+    this.acodec = this.ffmpegOpt.acodec;
+    this.packetsize = this.ffmpegOpt.packetSize;
+    this.fps = this.ffmpegOpt.maxFPS || 10;
+    this.maxBitrate = this.ffmpegOpt.maxBitrate || 300;
+    this.minBitrate = this.ffmpegOpt.minBitrate || 0;
     if (this.minBitrate > this.maxBitrate) {
       this.minBitrate = this.maxBitrate;
     }
-    this.debug = ffmpegOpt.debug;
-    this.additionalCommandline = ffmpegOpt.additionalCommandline || '-tune zerolatency';
-    this.vflip = ffmpegOpt.vflip || false;
-    this.hflip = ffmpegOpt.hflip || false;
-    this.mapvideo = ffmpegOpt.mapvideo || "0:0";
-    this.mapaudio = ffmpegOpt.mapaudio || "0:1";
-    this.videoFilter = ffmpegOpt.videoFilter || null; // null is a valid discrete value
+    this.debug = this.ffmpegOpt.debug;
+    this.additionalCommandline = this.ffmpegOpt.additionalCommandline || '-tune zerolatency';
+    this.vflip = this.ffmpegOpt.vflip || false;
+    this.hflip = this.ffmpegOpt.hflip || false;
+    this.mapvideo = this.ffmpegOpt.mapvideo || "0:0";
+    this.mapaudio = this.ffmpegOpt.mapaudio || "0:1";
+    this.videoFilter = this.ffmpegOpt.videoFilter || null; // null is a valid discrete value
     this.interfaceName = interfaceName;
     this.debug = this.ffmpegOpt.debug;
     
