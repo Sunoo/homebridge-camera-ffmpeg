@@ -11,19 +11,23 @@
     },
     "videoProcessor": {
       "title": "Video Processor",
-      "type": "string"
+      "type": "string",
+      "placeholder": "ffmpeg"
     },
       "mqtt": {
       "title": "Server MQTT",
-      "type": "string"
+      "type": "string",
+      "placeholder": "127.0.0.1"
     },
     "portmqtt": {
       "title": "Port MQTT",
-      "type": "integer"
+      "type": "integer",
+      "placeholder": "1234"
     },
     "topic": {
       "title": "Topic MQTT",
-      "type": "string"
+      "type": "string",
+      "placeholder": "homebridge/motion"
     },
     "cameras": {
       "type": "array",
