@@ -54,7 +54,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private ffmpegOpt: any;
   private stillProcessor = '';
   private videoProcessor = '';
-  private ffmpegOpt = '';
   private name = '';
   controller?: CameraController;
 
@@ -87,12 +86,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.videoFilter = ffmpegOpt.videoFilter || null; // null is a valid discrete value
     this.interfaceName = interfaceName;
     this.debug = this.ffmpegOpt.debug;
-
-    this.uploader = cameraConfig.uploader || false;
-    if ( this.uploader )		  if (this.uploader) {
-      { this.drive = new drive(); }		    this.cameraConfig = cameraConfig;
-      this.gphoto = new Gphoto(cameraConfig);
-    }
     
     if (!this.ffmpegOpt.source) {
       throw new Error('Missing source for camera.');
