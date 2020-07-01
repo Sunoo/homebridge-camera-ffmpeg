@@ -171,11 +171,11 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   mqttHandler(): void {
     this.accessories.forEach((accessory: PlatformAccessory) => {
       if (accessory.displayName == this.name) {
-        this.log('Motion Detected :', accessory.displayName);
-        const motion = accessory.getService(hap.Service.MotionSensor);
-        if (motion) {
-            motion.setCharacteristic(hap.Characteristic.MotionDetected, on ? 1 : 0);
-          }
+        this.log('Switch Motion Detect On :', accessory.displayName);
+        const motionSwitch = accessory.getService(hap.Service.Switch);
+        if (motionSwitch) {
+          motionSwitch.setCharacteristic(hap.Characteristic.On, true);
+        }
       }
     });
   }
