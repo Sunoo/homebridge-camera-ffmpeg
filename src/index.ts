@@ -73,55 +73,57 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     if (cameraConfig.doorbell) {
       const doorbellService = new hap.Service.Doorbell(`${cameraConfig.name} Doorbell`);
       cameraAccessory.addService(doorbellService);
-      const switchService = new hap.Service.Switch(`${cameraConfig.name} Doorbell Trigger`, 'DoorbellTrigger');
-      switchService
-        .getCharacteristic(hap.Characteristic.On)
-        .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
-          if (state) {
-            const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
-            if (doorbell) {
-              doorbell.updateCharacteristic(
-                hap.Characteristic.ProgrammableSwitchEvent,
-                hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
-              );
+      if (cameraConfig.switches) {
+        const switchService = new hap.Service.Switch(`${cameraConfig.name} Doorbell Trigger`, 'DoorbellTrigger');
+        switchService
+          .getCharacteristic(hap.Characteristic.On)
+          .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
+            if (state) {
+              const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
+              if (doorbell) {
+                doorbell.updateCharacteristic(
+                  hap.Characteristic.ProgrammableSwitchEvent,
+                  hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
+                );
 
-              setTimeout(function () {
-                switchService.getCharacteristic(hap.Characteristic.On).updateValue(false);
-              }, 1000);
+                setTimeout(function () {
+                  switchService.getCharacteristic(hap.Characteristic.On).updateValue(false);
+                }, 1000);
+              }
             }
-          }
-          callback(null, state);
-        });
-
-      cameraAccessory.addService(switchService);
+            callback(null, state);
+          });
+        cameraAccessory.addService(switchService);
+      }
     }
     if (cameraConfig.motion) {
-      const button = new hap.Service.Switch(cameraConfig.name, 'MotionTrigger');
-      cameraAccessory.addService(button);
-
       const motion = new hap.Service.MotionSensor(cameraConfig.name);
       cameraAccessory.addService(motion);
       const log = this.log;
 
-      button
-        .getCharacteristic(hap.Characteristic.On)
-        .on(CharacteristicEventTypes.SET, (on: CharacteristicValue, callback: CharacteristicSetCallback) => {
-          log.info(`Setting ${cameraAccessory.displayName} Motion to ${on}`);
-          const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
-          if (motionService) {
-            motionService.setCharacteristic(hap.Characteristic.MotionDetected, on ? 1 : 0);
-            if (on) {
-              setTimeout(function () {
-                log.info(`Setting ${cameraAccessory.displayName} Button to false`);
-                const switchService = cameraAccessory.getService(hap.Service.Switch);
-                if (switchService) {
-                  switchService.setCharacteristic(hap.Characteristic.On, false);
-                }
-              }, 5000);
+      if (cameraConfig.switches) {
+        const button = new hap.Service.Switch(cameraConfig.name, 'MotionTrigger');
+        button
+          .getCharacteristic(hap.Characteristic.On)
+          .on(CharacteristicEventTypes.SET, (on: CharacteristicValue, callback: CharacteristicSetCallback) => {
+            log.info(`Setting ${cameraAccessory.displayName} Motion to ${on}`);
+            const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
+            if (motionService) {
+              motionService.setCharacteristic(hap.Characteristic.MotionDetected, on ? 1 : 0);
+              if (on) {
+                setTimeout(function () {
+                  log.info(`Setting ${cameraAccessory.displayName} Button to false`);
+                  const switchService = cameraAccessory.getService(hap.Service.Switch);
+                  if (switchService) {
+                    switchService.setCharacteristic(hap.Characteristic.On, false);
+                  }
+                }, 5000);
+              }
             }
-          }
-          callback(null, on);
-        });
+            callback(null, on);
+          });
+        cameraAccessory.addService(button);
+      }
     }
 
     const streamingDelegate = new StreamingDelegate(hap, cameraConfig, this.log, this.config.videoProcessor);
