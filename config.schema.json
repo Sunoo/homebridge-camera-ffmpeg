@@ -86,6 +86,20 @@
                 "minimum": 1,
                 "description": "The maximum number of streams that will be generated for this camera"
               },
+              "maxWidth": {		
+                 "title": "Maximum Width",		
+                 "type": "integer",		
+                 "placeholder": 1280,		
+                 "minimum": 1,		
+                 "description": "The maximum width reported to HomeKit"		
+               },
+              "maxHeight": {		
+                 "title": "Maximum Height",		
+                 "type": "integer",		
+                 "placeholder": 720,		
+                 "minimum": 1,		
+                 "description": "The maximum height reported to HomeKit"		
+               },
               "maxFPS": {
                 "title": "Maximum FPS",
                 "type": "integer",
@@ -100,6 +114,17 @@
                 "minimum": 1,
                 "description": "The maximum bit rate of the stream"
               },
+              "preserveRatio": {		
+                 "title": "Preserve Ratio",		
+                 "type": "string",		
+                 "description": "Can be set to either 'W' or 'H' with respective obvious meanings.",		
+                 "typeahead": {		
+                   "source": [		
+                     "W",		
+                     "H"		
+                   ]		
+                 }		
+               },
               "vcodec": {
                 "title": "Video Codec",
                 "type": "string",
@@ -115,6 +140,12 @@
                   ]
                 }
               },
+              "packetSize": {		
+                 "title": "Packet Size",		
+                 "type": "number",		
+                 "placeholder": 1316,		
+                 "multipleOf": 188		
+               },
               "videoFilter": {
                 "title": "Allows a custom video filter to be passed to FFmpeg via -vf",
                 "type": "string",
