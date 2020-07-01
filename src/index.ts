@@ -94,6 +94,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
             callback(null, state);
           });
         cameraAccessory.addService(switchService);
+
+        cameraAccessory
+          .addService(hap.Service.StatelessProgrammableSwitch, 'DoorbellSwitch')
+          .getCharacteristic(hap.Characteristic.ProgrammableSwitchEvent)
+          .setProps({
+            maxValue: hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
+          });
       }
     }
     if (cameraConfig.motion) {
