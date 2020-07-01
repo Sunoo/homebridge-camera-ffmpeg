@@ -73,7 +73,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
 
-  constructor(hap: HAP, cameraConfig: any, log: Logging, stillProcessor, videoProcessor: string) {
+  constructor(hap: HAP, cameraConfig: any, log: Logging, videoProcessor: string) {
     this.hap = hap;
     this.log = log;
     this.ffmpegOpt = cameraConfig.videoConfig;
