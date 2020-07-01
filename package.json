@@ -37,14 +37,8 @@
     "CHANGELOG.md",
     "README.md",
     "LICENSE",
-    "jest.config.js",
-    "package-lock.json",
     "package.json",
-    "tsconfig.json",
-    ".prettierrc",
-    ".eslintrc.js",
     "dist/**/*",
-    "src/**/*",
     "config.schema.json"
   ],
   "devDependencies": {
@@ -60,14 +54,16 @@
     "eslint-plugin-prettier": "^3.1.3",
     "homebridge": "^1.0.4",
     "jest": "^26.0.1",
-    "ts-jest": "^25.5.1",
+    "ts-jest": "^26.1.1",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "mqtt": "^2.18.2"
   },
   "dependencies": {
     "ffmpeg-for-homebridge": "0.0.6",
     "ip": "^1.1.5",
-    "debug": "^4.1.1"
+    "debug": "^4.1.1",
+    "mqtt": "^2.18.2"
   }
 }
