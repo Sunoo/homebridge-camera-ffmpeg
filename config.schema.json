@@ -275,14 +275,22 @@
     },
     {
       "type": "section",
+      "title": "MQTT Settings",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        "mqtt",
+        "portmqtt",
+        "topic"
+      ]
+    },
+    {
+      "type": "section",
       "title": "Optional Settings",
       "expandable": true,
       "expanded": false,
       "items": [
-        "videoProcessor",
-        "mqtt",
-        "portmqtt",
-        "topic"
+        "videoProcessor"
       ]
     }
   ]
