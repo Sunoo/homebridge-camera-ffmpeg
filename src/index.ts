@@ -80,11 +80,17 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
                 hap.Characteristic.ProgrammableSwitchEvent,
                 hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
               );
+              
+              
+                setTimeout(function () {		
+                 switchService.getCharacteristic(hap.Characteristic.On).updateValue(false);		
+               }, 1000);
             }
           }
           callback(null, state);
         });
 
+      cameraAccessory.addService(switchService);
     }
     if (cameraConfig.motion) {
       const motion = new hap.Service.MotionSensor(cameraConfig.name);
