@@ -14,7 +14,7 @@
       "type": "string",
       "placeholder": "ffmpeg"
     },
-      "mqtt": {
+    "mqtt": {
       "title": "Server MQTT",
       "type": "string",
       "placeholder": "127.0.0.1"
@@ -68,12 +68,12 @@
             "title": "Enable Doorbell",
             "type": "boolean"
           },
-          "switches": {
-            "title": "Enable Motion/Doorbell Switch",
-            "type": "boolean"
-          },
           "doorbellSwitch": {
             "title": "Enable Doorbell Button",
+            "type": "boolean"
+          },
+          "switches": {
+            "title": "Enable Manual Automation Motion and/or Doorbell Switch",
             "type": "boolean"
           },
           "videoConfig": {
@@ -97,20 +97,20 @@
                 "minimum": 1,
                 "description": "The maximum number of streams that will be generated for this camera"
               },
-              "maxWidth": {		
-                 "title": "Maximum Width",		
-                 "type": "integer",		
-                 "placeholder": 1280,		
-                 "minimum": 1,		
-                 "description": "The maximum width reported to HomeKit"		
-               },
-              "maxHeight": {		
-                 "title": "Maximum Height",		
-                 "type": "integer",		
-                 "placeholder": 720,		
-                 "minimum": 1,		
-                 "description": "The maximum height reported to HomeKit"		
-               },
+              "maxWidth": {
+                "title": "Maximum Width",
+                "type": "integer",
+                "placeholder": 1280,
+                "minimum": 1,
+                "description": "The maximum width reported to HomeKit"
+              },
+              "maxHeight": {
+                "title": "Maximum Height",
+                "type": "integer",
+                "placeholder": 720,
+                "minimum": 1,
+                "description": "The maximum height reported to HomeKit"
+              },
               "maxFPS": {
                 "title": "Maximum FPS",
                 "type": "integer",
@@ -125,17 +125,17 @@
                 "minimum": 1,
                 "description": "The maximum bit rate of the stream"
               },
-              "preserveRatio": {		
-                 "title": "Preserve Ratio",		
-                 "type": "string",		
-                 "description": "Can be set to either 'W' or 'H' with respective obvious meanings.",		
-                 "typeahead": {		
-                   "source": [		
-                     "W",		
-                     "H"		
-                   ]		
-                 }		
-               },
+              "preserveRatio": {
+                "title": "Preserve Ratio",
+                "type": "string",
+                "description": "Can be set to either 'W' or 'H' with respective obvious meanings.",
+                "typeahead": {
+                  "source": [
+                    "W",
+                    "H"
+                  ]
+                }
+              },
               "vcodec": {
                 "title": "Video Codec",
                 "type": "string",
@@ -151,12 +151,12 @@
                   ]
                 }
               },
-              "packetSize": {		
-                 "title": "Packet Size",		
-                 "type": "number",		
-                 "placeholder": 1316,		
-                 "multipleOf": 188		
-               },
+              "packetSize": {
+                "title": "Packet Size",
+                "type": "number",
+                "placeholder": 1316,
+                "multipleOf": 188
+              },
               "videoFilter": {
                 "title": "Allows a custom video filter to be passed to FFmpeg via -vf",
                 "type": "string",
@@ -220,11 +220,20 @@
             "cameras[].videoConfig.stillImageSource",
             "cameras[].videoConfig.vcodec",
             "cameras[].videoConfig.audio",
-            "cameras[].motion",
-            "cameras[].doorbell",
-            "cameras[].doorbellSwitch",
-            "cameras[].switches",
             "cameras[].videoConfig.debug",
+            {
+              "key": "cameras[]",
+              "type": "section",
+              "title": "Automation Settings",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "cameras[].motion",
+                "cameras[].doorbell",
+                "cameras[].doorbellSwitch",
+                "cameras[].switches"
+              ]
+            },
             {
               "key": "cameras[]",
               "type": "section",
