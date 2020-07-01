@@ -80,11 +80,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
                 hap.Characteristic.ProgrammableSwitchEvent,
                 hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
               );
-              
-              
-                setTimeout(function () {		
-                 switchService.getCharacteristic(hap.Characteristic.On).updateValue(false);		
-               }, 1000);
+
+              setTimeout(function () {
+                switchService.getCharacteristic(hap.Characteristic.On).updateValue(false);
+              }, 1000);
             }
           }
           callback(null, state);
@@ -96,17 +95,12 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       const motion = new hap.Service.MotionSensor(cameraConfig.name);
       cameraAccessory.addService(motion);
       const log = this.log;
-
-      button
-        .getCharacteristic(hap.Characteristic.On)
-        .on(CharacteristicEventTypes.SET, (on: CharacteristicValue, callback: CharacteristicSetCallback) => {
           log.info(`Setting ${cameraAccessory.displayName} Motion to ${on}`);
           const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
           if (motionService) {
             motionService.setCharacteristic(hap.Characteristic.MotionDetected, on ? 1 : 0);
           }
           callback(null, on);
-        });
     }
 
     const streamingDelegate = new StreamingDelegate(hap, cameraConfig, this.log, this.config.videoProcessor);
