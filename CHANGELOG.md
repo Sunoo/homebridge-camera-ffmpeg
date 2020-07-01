@@ -2,12 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
-## v2.X.X (2020-XX-XX)
+## v2.1.0 (2020-XX-XX)
 
   ### Changes
 
   * Add MQTT support for Motion Detect (#572), thanks to [fennec622](https://github.com/fennec622).
   	* See [MQTT Motion Wiki](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki/MQTT-Motion) for more details.
+  * Add stateless button for doorbell cameras.
+  * Add option to disable manual automation switches.
 
 ## v2.0.1 (2020-06-28)
 
