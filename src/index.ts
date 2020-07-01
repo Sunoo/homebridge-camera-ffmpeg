@@ -202,7 +202,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         this.log('MQTT CONNECTED!');
       });
       client.subscribe(topics);
-      client.on('message', (topic: string, message: Buffer, packet: any) => {
+      client.on('message', (topic: string, message: Buffer) => {
         const mess = message.toString();
         this.log('MQTT state message received:', mess);
         const name = mess.replace('_', ' ');
