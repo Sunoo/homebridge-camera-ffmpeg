@@ -219,7 +219,7 @@
             "cameras[].videoConfig.source",
             "cameras[].videoConfig.stillImageSource",
             "cameras[].videoConfig.vcodec",
-            "cameras[].videoConfig.audio"
+            "cameras[].videoConfig.audio",
             {
               "key": "cameras[]",
               "type": "section",
