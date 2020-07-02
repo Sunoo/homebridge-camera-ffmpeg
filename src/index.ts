@@ -29,7 +29,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   private config: PlatformConfig;
   private cameraConfigs: Map<string, any> = new Map(); // configuration for each camera indexed by uuid
   private readonly accessories: Array<PlatformAccessory> = [];
-  private name = '';
 
   constructor(log: Logging, config: PlatformConfig, api: API) {
     this.log = log;
@@ -203,9 +202,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.accessories.push(cameraAccessory);
   }
 
-  mqttHandler(): void {
+  mqttHandler(name: string): void {
     this.accessories.forEach((accessory: PlatformAccessory) => {
-      if (accessory.displayName == this.name) {
+      if (accessory.displayName == name) {
         this.log('Switch Motion Detect On :', accessory.displayName);
         const motionSenSor = accessory.getService(hap.Service.MotionSensor);
         if (motionSenSor) {
@@ -216,23 +215,24 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   didFinishLaunching(): void {
-    const servermqtt = this.config.mqtt || '127.0.0.1';
-    const port = this.config.portmqtt || '1883';
-    const topics = this.config.topics || 'homebridge/motion';
-    this.log('MQTT state message received:');
-    const client = mqtt.connect('mqtt://' + servermqtt + ':' + port);
-    client.on('connect', () => {
-      this.log('MQTT CONNECTED!');
-    });
-    client.subscribe(topics);
-    client.on('message', (topic: string, message: Buffer) => {
-      const mess = message.toString();
-      this.log('MQTT state message received:', mess);
-      const name = mess.replace('_', ' ');
-      this.name = name;
-      this.log('Motion Camera:', this.name);
-      this.mqttHandler();
-    });
+    if (this.config.mqtt) {
+      this.log('Setting up mqtt connection...');
+      const servermqtt = this.config.mqtt;
+      const port = this.config.portmqtt || '1883';
+      const topics = this.config.topics || 'homebridge/motion';
+      const client = mqtt.connect('mqtt://' + servermqtt + ':' + port);
+      client.on('connect', () => {
+        this.log('MQTT CONNECTED!');
+        client.subscribe(topics);
+      });
+      client.on('message', (topic: string, message: Buffer) => {
+        const mess = message.toString();
+        this.log('MQTT state message received:', mess);
+        const name = mess.replace('_', ' ');
+        this.log('Motion Camera:', name);
+        this.mqttHandler(name);
+      });
+    }
 
     for (const [uuid, cameraConfig] of this.cameraConfigs) {
       const cameraName = cameraConfig.name;
