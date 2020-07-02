@@ -52,19 +52,20 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly log: Logging;
   private debug = false;
   private ffmpegOpt: any;
-  private videoProcessor = '';
-  private audio = '';
-  private acodec = '';
-  private fps = '';
+  private videoProcessor: string;
+  private audio = false;
+  private vcodec: string;
+  private acodec: string;
   private packetSize: number;
-  private maxBitrate = '';
-  private minBitrate = '';
-  private vflip = '';
-  private hflip = '';
-  private mapvideo = '';
-  private mapaudio = '';
-  private videoFilter = '';
-  private additionalCommandline = '';
+  private fps: number;
+  private maxBitrate: number;
+  private minBitrate: number;
+  private vflip = false;
+  private hflip = false;
+  private mapvideo: string;
+  private mapaudio: string;
+  private videoFilter: string;
+  private additionalCommandline: string;
   private name = '';
   controller?: CameraController;
 
@@ -79,7 +80,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.name = cameraConfig.name;
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
     this.audio = this.ffmpegOpt.audio;
-    this.acodec = this.ffmpegOpt.acodec;
+    this.vcodec = this.ffmpegOpt.vcodec || 'libx264';
+    this.acodec = this.ffmpegOpt.acodec || 'libfdk_aac';
     this.packetSize = this.ffmpegOpt.packetSize || 1316;
     this.fps = this.ffmpegOpt.maxFPS || 10;
     this.maxBitrate = this.ffmpegOpt.maxBitrate || 300;
@@ -87,9 +89,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     if (this.minBitrate > this.maxBitrate) {
       this.minBitrate = this.maxBitrate;
     }
-    this.additionalCommandline = this.ffmpegOpt.additionalCommandline || '-tune zerolatency';
-    this.vflip = this.ffmpegOpt.vflip || false;
-    this.hflip = this.ffmpegOpt.hflip || false;
+    this.additionalCommandline = this.ffmpegOpt.additionalCommandline || '-preset ultrafast -tune zerolatency';
+    this.vflip = this.ffmpegOpt.vflip;
+    this.hflip = this.ffmpegOpt.hflip;
     this.mapvideo = this.ffmpegOpt.mapvideo || "0:0";
     this.mapaudio = this.ffmpegOpt.mapaudio || "0:1";
     this.videoFilter = this.ffmpegOpt.videoFilter || null; // null is a valid discrete value
@@ -103,9 +105,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
     const width = request.width > this.ffmpegOpt.maxWidth ? this.ffmpegOpt.maxWidth : request.width;
     const height = request.height > this.ffmpegOpt.maxHeight ? this.ffmpegOpt.maxHeight : request.height;
-    const filter = this.ffmpegOpt.videoFilter || null;
-    const vflip = this.ffmpegOpt.vflip || false;
-    const hflip = this.ffmpegOpt.hflip || false;
+    const filter = this.videoFilter;
+    const vflip = this.vflip;
+    const hflip = this.hflip;
 
     let resolution: string;
     switch (this.ffmpegOpt.preserveRatio) {
@@ -234,11 +236,11 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     switch (request.type) {
       case StreamRequestTypes.START:
-        const vcodec = this.ffmpegOpt.vcodec || 'libx264';
-        const acodec = this.ffmpegOpt.acodec || 'libfdk_aac';
-        const additionalCommandline = this.ffmpegOpt.additionalCommandline || '-preset ultrafast -tune zerolatency';
-        const mapvideo = this.ffmpegOpt.mapvideo || '0:0';
-        const mapaudio = this.ffmpegOpt.mapaudio || '0:1';
+        const vcodec = this.vcodec;
+        const acodec = this.acodec;
+        const additionalCommandline = this.additionalCommandline;
+        const mapvideo = this.mapvideo;
+        const mapaudio = this.mapaudio;
 
         const sessionInfo = this.pendingSessions[sessionId];
         const video: VideoInfo = request.video;
@@ -248,9 +250,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         // const level = FFMPEGH264LevelNames[video.level];
         const width = video.width > this.ffmpegOpt.maxWidth ? this.ffmpegOpt.maxWidth : video.width;
         const height = video.height > this.ffmpegOpt.maxHeight ? this.ffmpegOpt.maxHeight : video.height;
-        const fps = video.fps > this.ffmpegOpt.maxFPS ? this.ffmpegOpt.maxFPS : video.fps;
-        const vflip = this.ffmpegOpt.vflip || false;
-        const hflip = this.ffmpegOpt.hflip || false;
+        const fps = video.fps > this.fps ? this.fps : video.fps;
+        const vflip = this.vflip;
+        const hflip = this.hflip;
 
         let resolution: string;
         switch (this.ffmpegOpt.preserveRatio) {
@@ -268,12 +270,12 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         const videoPayloadType = video.pt;
         const audioPayloadType = audio.pt;
         let videoMaxBitrate = video.max_bit_rate;
-        if (videoMaxBitrate > this.ffmpegOpt.maxBitrate) {
-          videoMaxBitrate = this.ffmpegOpt.maxBitrate;
+        if (videoMaxBitrate > this.maxBitrate) {
+          videoMaxBitrate = this.maxBitrate;
         }
         let audioMaxBitrate = audio.max_bit_rate;
-        if (audioMaxBitrate > this.ffmpegOpt.maxBitrate) {
-          audioMaxBitrate = this.ffmpegOpt.maxBitrate;
+        if (audioMaxBitrate > this.maxBitrate) {
+          audioMaxBitrate = this.maxBitrate;
         }
         // const rtcpInterval = video.rtcp_interval; // usually 0.5
         const sampleRate = audio.sample_rate;
@@ -287,7 +289,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         // const cryptoSuite = sessionInfo.videoCryptoSuite;
         const videoSRTP = sessionInfo.videoSRTP.toString('base64');
         const audioSRTP = sessionInfo.audioSRTP.toString('base64');
-        const filter = this.ffmpegOpt.videoFilter || null;
+        const filter = this.videoFilter;
         const vf = [];
 
         const videoFilter = filter === '' || filter === null ? 'scale=' + resolution : filter; // empty string or null indicates default
@@ -354,7 +356,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         fcmd += ffmpegVideoStream;
 
         // build optional audio arguments
-        if (this.ffmpegOpt.audio) {
+        if (this.audio) {
           const ffmpegAudioArgs =
             ' -map ' +
             mapaudio +
