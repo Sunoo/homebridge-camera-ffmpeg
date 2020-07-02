@@ -305,9 +305,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         let fcmd = this.ffmpegOpt.source;
 
-        this.log.debug(
-          `Starting video stream (${width}x${height}, ${fps} fps, ${videoMaxBitrate} kbps, ${mtu} mtu)...`,
-        );
+        this.log(`Starting video stream (${width}x${height}, ${fps} fps, ${videoMaxBitrate} kbps, ${mtu} mtu)...`);
 
         const ffmpegVideoArgs =
           ' -map ' +
