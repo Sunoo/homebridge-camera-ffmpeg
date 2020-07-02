@@ -305,7 +305,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         let fcmd = this.ffmpegOpt.source;
 
-        this.log(`Starting video stream (${width}x${height}, ${fps} fps, ${videoMaxBitrate} kbps, ${mtu} mtu)...`);
+        this.log(`Starting ${this.name} video stream (${width}x${height}, ${fps} fps, ${videoMaxBitrate} kbps, ${mtu} mtu)...`);
 
         const ffmpegVideoArgs =
           ' -map ' +
@@ -436,7 +436,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
       }
       delete this.ongoingSessions[sessionId];
-      this.log('Stopped streaming session!');
+      this.log(`Stopped ${this.name} video stream!`);
     } catch (e) {
       this.log.error('Error occurred terminating the video process!');
       this.log.error(e);
