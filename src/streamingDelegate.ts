@@ -55,8 +55,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private videoProcessor = '';
   private audio = '';
   private acodec = '';
-  private packetSize = '';
   private fps = '';
+  private packetSize: number;
   private maxBitrate = '';
   private minBitrate = '';
   private vflip = '';
@@ -80,7 +80,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
     this.audio = this.ffmpegOpt.audio;
     this.acodec = this.ffmpegOpt.acodec;
-    this.packetSize = this.ffmpegOpt.packetSize;
+    this.packetSize = this.ffmpegOpt.packetSize || 1316;
     this.fps = this.ffmpegOpt.maxFPS || 10;
     this.maxBitrate = this.ffmpegOpt.maxBitrate || 300;
     this.minBitrate = this.ffmpegOpt.minBitrate || 0;
@@ -277,7 +277,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
         // const rtcpInterval = video.rtcp_interval; // usually 0.5
         const sampleRate = audio.sample_rate;
-        const mtu = video.mtu; // maximum transmission unit
+        const mtu = this.packetSize || video.mtu; // maximum transmission unit
 
         const address = sessionInfo.address;
         const videoPort = sessionInfo.videoPort;
