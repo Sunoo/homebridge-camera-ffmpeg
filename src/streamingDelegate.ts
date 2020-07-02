@@ -436,7 +436,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
       }
       delete this.ongoingSessions[sessionId];
-      this.log.debug('Stopped streaming session!');
+      this.log('Stopped streaming session!');
     } catch (e) {
       this.log.error('Error occurred terminating the video process!');
       this.log.error(e);
