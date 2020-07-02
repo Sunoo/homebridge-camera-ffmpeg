@@ -87,7 +87,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     if (this.minBitrate > this.maxBitrate) {
       this.minBitrate = this.maxBitrate;
     }
-    this.debug = this.ffmpegOpt.debug;
     this.additionalCommandline = this.ffmpegOpt.additionalCommandline || '-tune zerolatency';
     this.vflip = this.ffmpegOpt.vflip || false;
     this.hflip = this.ffmpegOpt.hflip || false;
