@@ -22,7 +22,7 @@
     "portmqtt": {
       "title": "Port MQTT",
       "type": "integer",
-      "placeholder": "1234"
+      "placeholder": "1883"
     },
     "topic": {
       "title": "Topic MQTT",
