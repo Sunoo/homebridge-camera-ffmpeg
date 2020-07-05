@@ -27,8 +27,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logging;
   private readonly api: API;
   private config: PlatformConfig;
+  private cameraConfigs: Map<string, any> = new Map(); // configuration for each camera indexed by uuid
   private readonly accessories: Array<PlatformAccessory> = [];
-  private name = '';
 
   constructor(log: Logging, config: PlatformConfig, api: API) {
     this.log = log;
@@ -38,6 +38,28 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     // Need a config or plugin will not start
     if (!config) {
       return;
+    }
+
+    if (this.config.cameras) {
+      // doing some sanity checks and index the camera config by the accessory uuid
+      this.config.cameras.forEach((cameraConfig: any) => {
+        const cameraName = cameraConfig.name;
+        const videoConfig = cameraConfig.videoConfig;
+
+        if (!cameraName || !videoConfig) {
+          this.log("Missing parameters ('name' or 'videoConfig') for camera " + cameraName);
+          return;
+        }
+
+        const uuid = hap.uuid.generate(cameraName);
+        if (this.cameraConfigs.has(uuid)) {
+          // Camera names must be unique
+          this.log(`The camera ${cameraName} seems to be defined more than one time.Ignoring any other occurrences!`);
+          return;
+        }
+
+        this.cameraConfigs.set(uuid, cameraConfig);
+      });
     }
 
     api.on(APIEvent.DID_FINISH_LAUNCHING, this.didFinishLaunching.bind(this));
@@ -50,12 +72,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       this.log(`${cameraAccessory.displayName} identified!`);
     });
 
-    const cameraConfig = cameraAccessory.context.cameraConfig;
+    const cameraConfig = this.cameraConfigs.get(cameraAccessory.UUID) || cameraAccessory.context.cameraConfig;
 
     const motion = cameraAccessory.getService(hap.Service.MotionSensor);
     const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
     const doorbellSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'DoorbellTrigger');
     const motionSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
+    const doorbellSwitchSwitch = cameraAccessory.getServiceById(hap.Service.StatelessProgrammableSwitch, 'DoorbellSwitch');
 
     if (motion) {
       cameraAccessory.removeService(motion);
@@ -68,6 +91,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
     if (motionSwitch) {
       cameraAccessory.removeService(motionSwitch);
+    }
+    if (doorbellSwitchSwitch) {
+      cameraAccessory.removeService(doorbellSwitchSwitch);
     }
 
     if (cameraConfig.doorbell) {
@@ -179,48 +205,59 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
     this.accessories.push(cameraAccessory);
   }
-  mqttHandler(): void {
+
+  mqttHandler(name:string): void  {
+
     this.accessories.forEach((accessory: PlatformAccessory) => {
-      if (accessory.displayName == this.name) {
-        this.log('Switch Motion Detect On :', accessory.displayName);
-        const motionSenSor = accessory.getService(hap.Service.MotionSensor);
-        if (motionSenSor) {
-          motionSenSor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
+        if (
+          accessory.displayName == name
+          )
+         {
+          this.log("Switch Motion Detect On :", accessory.displayName);
+          const motionSenSor = accessory.getService(hap.Service.MotionSensor);
+          const doorbellSenSor = accessory.getService(hap.Service.Doorbell);
+          if (motionSenSor){
+            motionSenSor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
+            setTimeout(function () {
+                  motionSenSor.setCharacteristic(
+                hap.Characteristic.MotionDetected,0);
+                }, 1000);
+          }
+          if (doorbellSenSor) {
+            doorbellSenSor.updateCharacteristic(
+            hap.Characteristic.ProgrammableSwitchEvent,
+            hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
+            );
+            }
         }
-      }
-    });
-  }
+      })
+   }
+
   didFinishLaunching(): void {
-    if (this.config.cameras) {
-      const cameras = this.config.cameras;
-      const servermqtt = this.config.mqtt || '127.0.0.1';
+    if (this.config.mqtt) {
+      this.log('Setting up mqtt connection...');
+      const servermqtt = this.config.mqtt;
       const port = this.config.portmqtt || '1883';
       const topics = this.config.topics || 'homebridge/motion';
-      this.log('MQTT state message received:');
       const client = mqtt.connect('mqtt://' + servermqtt + ':' + port);
       client.on('connect', () => {
         this.log('MQTT CONNECTED!');
+        client.subscribe(topics);
       });
-      client.subscribe(topics);
       client.on('message', (topic: string, message: Buffer) => {
         const mess = message.toString();
         this.log('MQTT state message received:', mess);
         const name = mess.replace('_', ' ');
-        this.name = name;
-        this.log('Motion Camera:', this.name);
-        this.mqttHandler();
+        this.log('Motion Camera:', name);
+        this.mqttHandler(name);
       });
-      cameras.forEach((cameraConfig: any) => {
-        const cameraName = cameraConfig.name;
-        const videoConfig = cameraConfig.videoConfig;
+    }
 
-        if (!cameraName || !videoConfig) {
-          this.log('Missing parameters.');
-          return;
-        }
-        // Camera names must be unique
-        const uuid = hap.uuid.generate(cameraName);
-        cameraConfig.uuid = uuid;
+    for (const [uuid, cameraConfig] of this.cameraConfigs) {
+      const cameraName = cameraConfig.name;
+
+      // Only add new cameras that are not cached
+      if (!this.accessories.find((x: PlatformAccessory) => x.UUID === uuid)) {
         const cameraAccessory = new Accessory(cameraName, uuid);
         cameraAccessory.context.cameraConfig = cameraConfig;
         const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
@@ -239,20 +276,17 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           }
         }
 
-        // Only add new cameras that are not cached
-        if (!this.accessories.find((x: PlatformAccessory) => x.UUID === uuid)) {
-          this.configureAccessory(cameraAccessory); // abusing the configureAccessory here
-          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cameraAccessory]);
-        }
-      });
-
-      // Remove cameras that were not in previous call
-      this.accessories.forEach((accessory: PlatformAccessory) => {
-        if (!cameras.find((x: any) => x.uuid === accessory.context.cameraConfig.uuid)) {
-          this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-        }
-      });
+        this.configureAccessory(cameraAccessory); // abusing the configureAccessory here
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cameraAccessory]);
+      }
     }
+
+    // remove all cameras that are configured but are not listed in the config
+    this.accessories.forEach((accessory: PlatformAccessory) => {
+      if (!this.cameraConfigs.has(accessory.UUID)) {
+        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      }
+    });
   }
 }
 
