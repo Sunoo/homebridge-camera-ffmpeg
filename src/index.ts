@@ -207,30 +207,24 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   mqttHandler(name:string): void  {
-
     this.accessories.forEach((accessory: PlatformAccessory) => {
-        if (
-          accessory.displayName == name
-          )
-         {
-          this.log("Switch Motion Detect On :", accessory.displayName);
-          const motionSenSor = accessory.getService(hap.Service.MotionSensor);
-          const doorbellSenSor = accessory.getService(hap.Service.Doorbell);
-          if (motionSenSor){
-            motionSenSor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-            setTimeout(function () {
-                  motionSenSor.setCharacteristic(
-                hap.Characteristic.MotionDetected,0);
-                }, 1000);
+      if (accessory.displayName == name) {
+        this.log("Switch Motion Detect On:", accessory.displayName);
+        const motionSensor = accessory.getService(hap.Service.MotionSensor);
+        const doorbellSensor = accessory.getService(hap.Service.Doorbell);
+        if (motionSensor) {
+          motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
+          setTimeout(function () {
+              motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
+            }, 1000);
           }
-          if (doorbellSenSor) {
-            doorbellSenSor.updateCharacteristic(
-            hap.Characteristic.ProgrammableSwitchEvent,
-            hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
-            );
-            }
+          if (doorbellSensor) {
+            doorbellSensor.updateCharacteristic(
+              hap.Characteristic.ProgrammableSwitchEvent,
+              hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
+          }
         }
-      })
+      });
    }
 
   didFinishLaunching(): void {
