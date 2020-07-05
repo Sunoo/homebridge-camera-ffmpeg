@@ -76,6 +76,13 @@
             "title": "Enable Manual Automation Motion and/or Doorbell Switch",
             "type": "boolean"
           },
+          "motionTimeout": {
+            "title": "Number of Seconds for Automatic Motion Reset",
+            "type": "integer",
+            "placeholder": 1,
+            "minimum": -1,
+            "description": "Set to -1 to disable."
+          },
           "videoConfig": {
             "title": "Video Configuration",
             "type": "object",
@@ -230,7 +237,8 @@
                 "cameras[].motion",
                 "cameras[].doorbell",
                 "cameras[].doorbellSwitch",
-                "cameras[].switches"
+                "cameras[].switches",
+                "cameras[].motionTimeout"
               ]
             },
             {

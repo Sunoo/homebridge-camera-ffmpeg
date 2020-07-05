@@ -206,19 +206,28 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.accessories.push(cameraAccessory);
   }
 
-  mqttHandler(name:string): void {
+  mqttHandler(name:string, motion:boolean = true): void {
     this.accessories.forEach((accessory: PlatformAccessory) => {
         if (accessory.displayName == name) {
-          this.log("Switch Motion Detect On :", accessory.displayName);
+          this.log('Switch Motion Detect', motion ? 'On:' : 'Off:', accessory.displayName);
           const motionSensor = accessory.getService(hap.Service.MotionSensor);
           const doorbellSensor = accessory.getService(hap.Service.Doorbell);
           if (motionSensor) {
-            motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-            setTimeout(function () {
+            if (motion) {
+              motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
+              const timeout = accessory.context.cameraConfig.motionTimeout || 1;
+              const log = this.log;
+              if (timeout > 0) {
+                setTimeout(function () {
+                  log('Motion Detect Timeout:', accessory.displayName);
                   motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
-                }, 1000);
+                  }, timeout * 1000);
+              }
+            } else {
+              motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
+            }
           }
-          if (doorbellSensor) {
+          if (doorbellSensor && motion) {
             doorbellSensor.updateCharacteristic(
               hap.Characteristic.ProgrammableSwitchEvent,
               hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
@@ -237,11 +246,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       client.on('connect', () => {
         this.log('MQTT CONNECTED!');
         client.subscribe(topics);
+        client.subscribe(topics + '/reset');
       });
       client.on('message', (topic: string, message: Buffer) => {
         const name = message.toString();
         this.log('Motion Camera:', name);
-        this.mqttHandler(name);
+        const motion = !topic.endsWith('/reset');
+        this.mqttHandler(name, motion);
       });
     }
 
