@@ -97,8 +97,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.videoFilter = this.ffmpegOpt.videoFilter || null; // null is a valid discrete value
     this.debug = this.ffmpegOpt.debug;
 
-    this.log(`Constructor for ${this.name}. Debug:`, this.debug);
-
     if (!this.ffmpegOpt.source) {
       throw new Error('Missing source for camera.');
     }
@@ -139,7 +137,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       vf.push(videoFilter); // vflip and hflip filters must precede the scale filter to work
     }
     const imageSource = this.ffmpegOpt.stillImageSource || this.ffmpegOpt.source;
-
     try {
       const ffmpeg = spawn(
         this.videoProcessor,
@@ -307,7 +304,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         let fcmd = this.ffmpegOpt.source;
 
-        this.log(`Starting ${this.name} video stream (${width}x${height}, ${fps} fps, ${videoMaxBitrate} kbps, ${mtu} mtu)...`);
+        this.log(`Starting ${this.name} video stream (${width}x${height}, ${fps} fps, ${videoMaxBitrate} kbps, ${mtu} mtu)...${this.debug && 'debug enabled'}`);
 
         const ffmpegVideoArgs =
           ' -map ' +
@@ -397,10 +394,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
           fcmd += ffmpegAudioArgs;
           fcmd += ffmpegAudioStream;
-        }
-
-        if (this.debug) {
-          fcmd += ' -loglevel debug';
         }
 
         if (this.debug) {
