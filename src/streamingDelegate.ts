@@ -96,7 +96,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.mapaudio = this.ffmpegOpt.mapaudio || "0:1";
     this.videoFilter = this.ffmpegOpt.videoFilter || null; // null is a valid discrete value
     this.debug = this.ffmpegOpt.debug;
-
+    
     if (!this.ffmpegOpt.source) {
       throw new Error('Missing source for camera.');
     }
@@ -137,6 +137,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       vf.push(videoFilter); // vflip and hflip filters must precede the scale filter to work
     }
     const imageSource = this.ffmpegOpt.stillImageSource || this.ffmpegOpt.source;
+
     try {
       const ffmpeg = spawn(
         this.videoProcessor,
