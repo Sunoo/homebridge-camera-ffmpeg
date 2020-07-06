@@ -2,11 +2,26 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
-## v2.0.1 (2020-06-28)
+## v2.1.0 (2020-XX-XX)
 
   ### Changes
 
-  * Enable FFMPEG debug logging with Homebridge `-D`.
+  * Add MQTT support for Motion Detect (#572), thanks to [fennec622](https://github.com/fennec622).
+  	* See [MQTT Motion Wiki](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki/MQTT-Motion) for more details.
+  * Add stateless button for doorbell cameras.
+  * Add option to disable manual automation switches.
+  * Re-Added videoFilter.
+  
+  ### Bug Fixes
+
+  * Fixed most FFmpeg issues where users were receiving issues with ffmpeg exit 1 error.
+  * Fixed Logging.
+  * Fixed most videoFilter configs not working.
+  
+## v2.0.1 (2020-06-28)
+
+  ### Changes
+  
   * Update Dependencies.
 
 ## v2.0.0 (2020-06-19)

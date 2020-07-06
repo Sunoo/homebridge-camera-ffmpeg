@@ -22,7 +22,7 @@ export class FfmpegProcess {
     const controller = delegate.controller;
 
     if (ffmpegDebugOutput) {
-      log.debug(`${title} command: ffmpeg ${command}`);
+      log(`${title} command: ffmpeg ${command}`);
     }
 
     const videoProcessor = customFfmpeg || pathToFfmpeg || 'ffmpeg';
@@ -39,14 +39,14 @@ export class FfmpegProcess {
       this.ff.stderr.on('data', (data) => {
         if (!started) {
           started = true;
-          log.debug(`${title}: received first frame`);
+          log(`${title}: received first frame`);
           if (callback) {
             callback(); // do not forget to execute callback once set up
           }
         }
 
         if (ffmpegDebugOutput) {
-          log.debug(`${title}: ${String(data)}`);
+          log(`${title}: ${String(data)}`);
         }
       });
     }
@@ -61,7 +61,7 @@ export class FfmpegProcess {
       const message = `[${title}] ffmpeg exited with code: ${code} and signal: ${signal}`;
 
       if (code == null || code === 255) {
-        log.debug(message + ` (${title} Stream stopped!)`);
+        log(message + ` (${title} Stream stopped!)`);
       } else {
         log.error(message + ' (error)');
         delegate.stopStream(sessionId);
