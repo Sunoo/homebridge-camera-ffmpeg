@@ -398,7 +398,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         if (this.debug) {
           fcmd += ' -loglevel debug';
-          this.log(`Opening stream ${this.name} with params ${fcmd}`);
         }
 
         const ffmpeg = new FfmpegProcess(
