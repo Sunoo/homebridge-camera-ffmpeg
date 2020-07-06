@@ -96,7 +96,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.mapaudio = this.ffmpegOpt.mapaudio || "0:1";
     this.videoFilter = this.ffmpegOpt.videoFilter || null; // null is a valid discrete value
     this.debug = this.ffmpegOpt.debug;
-    
+
+    this.log(`Constructor for ${this.name}. Debug:`, this.debug);
+
     if (!this.ffmpegOpt.source) {
       throw new Error('Missing source for camera.');
     }
@@ -399,6 +401,11 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         if (this.debug) {
           fcmd += ' -loglevel debug';
+        }
+
+        if (this.debug) {
+          fcmd += ' -loglevel debug';
+          this.log(`Opening stream ${this.name} with params ${fcmd}`);
         }
 
         const ffmpeg = new FfmpegProcess(
