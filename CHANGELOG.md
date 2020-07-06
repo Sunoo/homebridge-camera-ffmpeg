@@ -10,12 +10,18 @@ All notable changes to this project will be documented in this file. This projec
   	* See [MQTT Motion Wiki](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki/MQTT-Motion) for more details.
   * Add stateless button for doorbell cameras.
   * Add option to disable manual automation switches.
+  * Re-Added videoFilter.
+  
+  ### Bug Fixes
 
+  * Fixed most FFmpeg issues where users were receiving issues with ffmpeg exit 1 error.
+  * Fixed Logging.
+  * Fixed most videoFilter configs not working.
+  
 ## v2.0.1 (2020-06-28)
 
   ### Changes
-
-  * Enable FFMPEG debug logging with Homebridge `-D`.
+  
   * Update Dependencies.
 
 ## v2.0.0 (2020-06-19)
