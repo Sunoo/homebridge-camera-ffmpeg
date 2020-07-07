@@ -268,9 +268,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         req.on('end',() => {
         const path = url.parse(req.url,true).query;
         const name = Object.entries(path)[0][1];
-        String(name);
         const motion = true;
-        this.protocolHandler(name, motion);
+        this.protocolHandler(${name}, motion);
         this.log('Motion Camera', name);
       });
     }
