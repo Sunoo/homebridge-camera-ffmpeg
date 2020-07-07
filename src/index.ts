@@ -16,6 +16,8 @@ import {
 } from 'homebridge';
 import { StreamingDelegate } from './streamingDelegate';
 import mqtt = require('mqtt');
+import http = require('http');
+import url = require('url');
 
 let hap: HAP;
 let Accessory: typeof PlatformAccessory;
