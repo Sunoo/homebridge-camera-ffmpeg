@@ -260,10 +260,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     if (this.config.http) {
       this.log('Setting up http listener...');
       const porthttp = this.config.http || ' 5555';
-      const severhttp = http.createServer();
+      const serverhttp = http.createServer();
       serverhttp.listen(port);
       this.log('HTTP Server listening on port' + port);
-      httpserver.on('request', (res, req) => {
+      serverhttp.on('request', (res, req) => {
       if (req.method == 'GET'){
         req.on('end',() => {
         const path = url.parse(req.url,true).query;
