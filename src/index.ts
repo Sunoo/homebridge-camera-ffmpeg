@@ -259,7 +259,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
     if (this.config.http) {
       this.log('Setting up http listener...');
-      const porthttp = this.config.http || ' 5555';
+      const port = this.config.http || ' 5555';
       const serverhttp = http.createServer();
       serverhttp.listen(port);
       this.log('HTTP Server listening on port' + port);
@@ -267,7 +267,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       if (req.method == 'GET'){
         req.on('end',() => {
         const path = url.parse(req.url,true).query;
-        const name = Object.entries(path)[0][1];
+        const name = Object.entries(path)[0][1].toString();
         const motion = true;
         this.protocolHandler(name, motion);
         this.log('Motion Camera', name);
