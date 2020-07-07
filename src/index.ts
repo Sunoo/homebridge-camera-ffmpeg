@@ -271,11 +271,11 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         const motion = true;
         this.protocolHandler(name, motion);
         this.log('Motion Camera', name);
-      })
+      });
     }
     res.writeHead(200, {'Content-Type': 'text/plain'});
     res.end();
-  }
+  });
 }
 
     for (const [uuid, cameraConfig] of this.cameraConfigs) {
