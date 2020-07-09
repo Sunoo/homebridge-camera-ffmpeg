@@ -215,7 +215,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           if (motionSensor) {
             if (motion) {
               motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-              const timeout = accessory.context.cameraConfig.motionTimeout || 1;
+              const timeout = this.cameraConfigs.get(accessory.UUID).motionTimeout || 1;
               const log = this.log;
               if (timeout > 0) {
                 setTimeout(function () {
