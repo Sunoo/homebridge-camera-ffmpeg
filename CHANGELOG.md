@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v2.2.0 (2020-07-08)
+
+  ### Changes
+  
+  * Fix improper caching of MQTT timeout value.
+  * Made the non-MQTT motion and doorbell switches obey the timeout value.
+
 ## v2.1.1 (2020-07-08)
 
   ### Changes
