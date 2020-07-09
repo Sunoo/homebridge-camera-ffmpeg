@@ -79,55 +79,62 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       return;
     }
 
-    const motion = cameraAccessory.getService(hap.Service.MotionSensor);
-    const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
-    const doorbellSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'DoorbellTrigger');
-    const motionSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
-    const doorbellSwitchSwitch = cameraAccessory.getServiceById(hap.Service.StatelessProgrammableSwitch, 'DoorbellSwitch');
+    const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
+    if (cameraAccessoryInfo) {
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || '');
+    }
 
-    if (motion) {
-      cameraAccessory.removeService(motion);
+    const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
+    const doorbellService = cameraAccessory.getService(hap.Service.Doorbell);
+    const doorbellTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'DoorbellTrigger');
+    const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
+    const doorbellSwitchService = cameraAccessory.getServiceById(hap.Service.StatelessProgrammableSwitch, 'DoorbellSwitch');
+
+    if (motionService) {
+      cameraAccessory.removeService(motionService);
     }
-    if (doorbell) {
-      cameraAccessory.removeService(doorbell);
+    if (doorbellService) {
+      cameraAccessory.removeService(doorbellService);
     }
-    if (doorbellSwitch) {
-      cameraAccessory.removeService(doorbellSwitch);
+    if (doorbellTriggerService) {
+      cameraAccessory.removeService(doorbellTriggerService);
     }
-    if (motionSwitch) {
-      cameraAccessory.removeService(motionSwitch);
+    if (motionTriggerService) {
+      cameraAccessory.removeService(motionTriggerService);
     }
-    if (doorbellSwitchSwitch) {
-      cameraAccessory.removeService(doorbellSwitchSwitch);
+    if (doorbellSwitchService) {
+      cameraAccessory.removeService(doorbellSwitchService);
     }
     
-    const configTimeout = cameraConfig.motionTimeout || 1;
-    const timeout = (configTimeout > 0) ? configTimeout : 1;
+    const timeout = (cameraConfig.motionTimeout > 0) ? cameraConfig.motionTimeout : 1;
 
     if (cameraConfig.doorbell) {
       const doorbellService = new hap.Service.Doorbell(`${cameraConfig.name} Doorbell`);
       cameraAccessory.addService(doorbellService);
       if (cameraConfig.switches) {
-        const switchService = new hap.Service.Switch(`${cameraConfig.name} Doorbell Trigger`, 'DoorbellTrigger');
-        switchService
+        const doorbellTriggerService = new hap.Service.Switch(`${cameraConfig.name} Doorbell Trigger`, 'DoorbellTrigger');
+        doorbellTriggerService
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
             if (state) {
-              const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
-              if (doorbell) {
-                doorbell.updateCharacteristic(
+              const doorbellService = cameraAccessory.getService(hap.Service.Doorbell);
+              if (doorbellService) {
+                doorbellService.updateCharacteristic(
                   hap.Characteristic.ProgrammableSwitchEvent,
                   hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
                 );
 
                 setTimeout(function () {
-                  switchService.getCharacteristic(hap.Characteristic.On).updateValue(false);
+                  doorbellTriggerService.getCharacteristic(hap.Characteristic.On).updateValue(false);
                 }, timeout * 1000);
               }
             }
             callback(null, state);
           });
-        cameraAccessory.addService(switchService);
+        cameraAccessory.addService(doorbellTriggerService);
       }
 
       if (cameraConfig.doorbellSwitch) {
@@ -140,13 +147,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       }
     }
     if (cameraConfig.motion) {
-      const motion = new hap.Service.MotionSensor(cameraConfig.name);
-      cameraAccessory.addService(motion);
+      const motionService = new hap.Service.MotionSensor(cameraConfig.name);
+      cameraAccessory.addService(motionService);
       const log = this.log;
 
       if (cameraConfig.switches) {
-        const button = new hap.Service.Switch(cameraConfig.name, 'MotionTrigger');
-        button
+        const motionTriggerService = new hap.Service.Switch(cameraConfig.name, 'MotionTrigger');
+        motionTriggerService
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (on: CharacteristicValue, callback: CharacteristicSetCallback) => {
             log.info(`Setting ${cameraAccessory.displayName} Motion to ${on}`);
@@ -156,16 +163,16 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
               if (on) {
                 setTimeout(function () {
                   log.info(`Setting ${cameraAccessory.displayName} Button to false`);
-                  const switchService = cameraAccessory.getService(hap.Service.Switch);
-                  if (switchService) {
-                    switchService.setCharacteristic(hap.Characteristic.On, false);
+                  const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
+                  if (motionTriggerService) {
+                    motionTriggerService.setCharacteristic(hap.Characteristic.On, false);
                   }
                 }, timeout * 1000);
               }
             }
             callback(null, on);
           });
-        cameraAccessory.addService(button);
+        cameraAccessory.addService(motionTriggerService);
       }
     }
 
@@ -267,22 +274,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       // Only add new cameras that are not cached
       if (!this.accessories.find((x: PlatformAccessory) => x.UUID === uuid)) {
         const cameraAccessory = new Accessory(cameraConfig.name, uuid);
-        const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
-        if (cameraAccessoryInfo) {
-          if (cameraConfig.manufacturer) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer);
-          }
-          if (cameraConfig.model) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model);
-          }
-          if (cameraConfig.serialNumber) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber);
-          }
-          if (cameraConfig.firmwareRevision) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision);
-          }
-        }
-
         this.configureAccessory(cameraAccessory); // abusing the configureAccessory here
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cameraAccessory]);
       }
