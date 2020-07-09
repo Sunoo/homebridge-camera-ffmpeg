@@ -95,6 +95,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     if (doorbellSwitchSwitch) {
       cameraAccessory.removeService(doorbellSwitchSwitch);
     }
+    
+    const configTimeout = cameraConfig.motionTimeout || 1;
+    const timeout = (configTimeout > 0) ? configTimeout : 1;
 
     if (cameraConfig.doorbell) {
       const doorbellService = new hap.Service.Doorbell(`${cameraConfig.name} Doorbell`);
@@ -114,7 +117,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
                 setTimeout(function () {
                   switchService.getCharacteristic(hap.Characteristic.On).updateValue(false);
-                }, 1000);
+                }, timeout * 1000);
               }
             }
             callback(null, state);
@@ -152,7 +155,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
                   if (switchService) {
                     switchService.setCharacteristic(hap.Characteristic.On, false);
                   }
-                }, 5000);
+                }, timeout * 1000);
               }
             }
             callback(null, on);
@@ -215,7 +218,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           if (motionSensor) {
             if (motion) {
               motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-              const timeout = accessory.context.cameraConfig.motionTimeout || 1;
+              const timeout = this.cameraConfigs.get(accessory.UUID).motionTimeout || 1;
               const log = this.log;
               if (timeout > 0) {
                 setTimeout(function () {
