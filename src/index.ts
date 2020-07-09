@@ -47,14 +47,14 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         const videoConfig = cameraConfig.videoConfig;
 
         if (!cameraName || !videoConfig) {
-          this.log("Missing parameters ('name' or 'videoConfig') for camera " + cameraName);
+          this.log.error("Missing parameters ('name' or 'videoConfig') for camera " + cameraName);
           return;
         }
 
         const uuid = hap.uuid.generate(cameraName);
         if (this.cameraConfigs.has(uuid)) {
           // Camera names must be unique
-          this.log(`The camera ${cameraName} seems to be defined more than one time.Ignoring any other occurrences!`);
+          this.log.error(`The camera ${cameraName} seems to be defined more than one time. Ignoring any other occurrences!`);
           return;
         }
 
@@ -72,7 +72,12 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       this.log(`${cameraAccessory.displayName} identified!`);
     });
 
-    const cameraConfig = this.cameraConfigs.get(cameraAccessory.UUID) || cameraAccessory.context.cameraConfig;
+    const cameraConfig = this.cameraConfigs.get(cameraAccessory.UUID);
+
+    if (!cameraConfig) {
+      this.accessories.push(cameraAccessory);
+      return;
+    }
 
     const motion = cameraAccessory.getService(hap.Service.MotionSensor);
     const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
@@ -241,31 +246,27 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
   didFinishLaunching(): void {
     if (this.config.mqtt) {
-      this.log('Setting up mqtt connection...');
+      this.log('Setting up MQTT connection...');
       const servermqtt = this.config.mqtt || '127.0.0.1';
       const port = this.config.portmqtt || '1883';
       const topics = this.config.topics || 'homebridge/motion';
       const client = mqtt.connect('mqtt://' + servermqtt + ':' + port);
       client.on('connect', () => {
-        this.log('MQTT CONNECTED!');
+        this.log('MQTT Connected!');
         client.subscribe(topics);
         client.subscribe(topics + '/reset');
       });
       client.on('message', (topic: string, message: Buffer) => {
         const name = message.toString();
-        this.log('Motion Camera:', name);
         const motion = !topic.endsWith('/reset');
         this.mqttHandler(name, motion);
       });
     }
 
     for (const [uuid, cameraConfig] of this.cameraConfigs) {
-      const cameraName = cameraConfig.name;
-
       // Only add new cameras that are not cached
       if (!this.accessories.find((x: PlatformAccessory) => x.UUID === uuid)) {
-        const cameraAccessory = new Accessory(cameraName, uuid);
-        cameraAccessory.context.cameraConfig = cameraConfig;
+        const cameraAccessory = new Accessory(cameraConfig.name, uuid);
         const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
         if (cameraAccessoryInfo) {
           if (cameraConfig.manufacturer) {
