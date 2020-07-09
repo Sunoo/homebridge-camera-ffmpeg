@@ -79,6 +79,14 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       return;
     }
 
+    const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
+    if (cameraAccessoryInfo) {
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || '');
+    }
+
     const motion = cameraAccessory.getService(hap.Service.MotionSensor);
     const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
     const doorbellSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'DoorbellTrigger');
@@ -267,22 +275,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       // Only add new cameras that are not cached
       if (!this.accessories.find((x: PlatformAccessory) => x.UUID === uuid)) {
         const cameraAccessory = new Accessory(cameraConfig.name, uuid);
-        const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
-        if (cameraAccessoryInfo) {
-          if (cameraConfig.manufacturer) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer);
-          }
-          if (cameraConfig.model) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model);
-          }
-          if (cameraConfig.serialNumber) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber);
-          }
-          if (cameraConfig.firmwareRevision) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision);
-          }
-        }
-
         this.configureAccessory(cameraAccessory); // abusing the configureAccessory here
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cameraAccessory]);
       }
