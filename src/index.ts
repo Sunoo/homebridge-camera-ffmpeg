@@ -109,8 +109,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       cameraAccessory.removeService(doorbellSwitchService);
     }
     
-    const configTimeout = cameraConfig.motionTimeout || 1;
-    const timeout = (configTimeout > 0) ? configTimeout : 1;
+    const timeout = (cameraConfig.motionTimeout > 0) ? cameraConfig.motionTimeout : 1;
 
     if (cameraConfig.doorbell) {
       const doorbellService = new hap.Service.Doorbell(`${cameraConfig.name} Doorbell`);
