@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v2.1.1 (2020-07-08)
+
+  ### Changes
+  
+  * Update Dependencies.
+
+## v2.1.0 (2020-07-06)
+
+  ### Changes
+
+  * Add MQTT support for Motion Detect (#572), thanks to [fennec622](https://github.com/fennec622).
+  	* See [MQTT Motion Wiki](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki/MQTT-Motion) for more details.
+  * Add stateless button for doorbell cameras.
+  * Add option to disable manual automation switches.
+  * Re-Added videoFilter.
+  
+  ### Bug Fixes
+
+  * Fixed most FFmpeg issues where users were receiving issues with ffmpeg exit 1 error.
+  * Fixed Logging.
+  * Fixed most videoFilter configs not working.
+  
+## v2.0.1 (2020-06-28)
+
+  ### Changes
+  
+  * Update Dependencies.
+
+## v2.0.0 (2020-06-19)
+
+### Breaking Changes
+
+* Code has been refactored to typescript, thanks to [Brandawg93](https://github.com/Brandawg93).
+* Plugin requires homebridge >= 1.0.0.
+* Cameras no longer need to be manually added to homebridge
+	* Cameras are now bridged instead of being created as external accessories in homebridge. 
+	* Once you update, you will see two copies of each of your cameras.
+	* You will need to manually remove the old cameras from HomeKit by going into the cameras' settings and choosing "Remove Camera from Home". 
+	* The new bridged cameras will not have this option, and will instead have a "Bridge" button.
+	* You will also need to copy over any automations that you had tied to your cameras, such as motion detection.
+
+#### Other Changes
+
+* Google Drive Upload has been removed in this update. PRs are welcome for other Video Cloud Options.
+
+## v1.3.0 (2020-06-18)
+
+### Changes
+* Update ffmpeg-for-homebridge to 0.0.6.
+
 ## v1.2.2 (2020-05-28)
 
 ### Changes
