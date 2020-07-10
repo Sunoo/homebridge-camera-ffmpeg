@@ -206,7 +206,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.accessories.push(cameraAccessory);
   }
 
-  mqttHandler(name:string, motion:boolean = true): void {
+  protocolHandler(name:string, motion:boolean = true): void {
     this.accessories.forEach((accessory: PlatformAccessory) => {
         if (accessory.displayName == name) {
           this.log('Switch Motion Detect', motion ? 'On:' : 'Off:', accessory.displayName);
@@ -252,9 +252,29 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         const name = message.toString();
         this.log('Motion Camera:', name);
         const motion = !topic.endsWith('/reset');
-        this.mqttHandler(name, motion);
+        this.protocolHandler(name, motion);
       });
     }
+    if (this.config.http) {
+      this.log('Setting up http listener...');
+      const porthttp = this.config.http || ' 5555';
+      const severhttp = http.createServer();
+      serverhttp.listen(port);
+      this.log('HTTP Server listening on port' + port);
+      httpserver.on('request', (res, req) => {
+      if (req.method == 'GET'){
+        req.on('end',() => {
+        const path = url.parse(req.url,true).query;
+        const name = Object.entries(path)[0][1];
+        const motion = true;
+        this.protocolHandler(name, motion);
+        this.log('Motion Camera', name);
+      })
+    }
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end();
+  }
+}
 
     for (const [uuid, cameraConfig] of this.cameraConfigs) {
       const cameraName = cameraConfig.name;
