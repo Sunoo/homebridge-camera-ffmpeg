@@ -29,6 +29,11 @@
       "type": "string",
       "placeholder": "homebridge/motion"
     },
+      "http": {
+      "title": "Port HTTP",
+      "type": "integer",
+      "placeholder": "5555"
+    },
     "cameras": {
       "type": "array",
       "items": {
