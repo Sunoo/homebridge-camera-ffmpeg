@@ -81,9 +81,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
     const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
     if (cameraAccessoryInfo) {
-      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || '');
-      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || '');
-      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || 'Default-Manufacturer');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || 'Default-Model');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || 'Default-SerialNumber');
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || '');
     }
 
