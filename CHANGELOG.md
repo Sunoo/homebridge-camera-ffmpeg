@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v2.2.0 (2020-07-08)
+
+  ### Changes
+  
+  * Now properly allows for changing camera manufacturer, model, etc.
+  * Minor tweaks to configuration UI screen.
+  * Update dependencies.
+  
+  ### Bug Fixes
+  
+  * Fixed a bug when the doorbellSwitch config option was enabled.
+
 ## v2.1.1 (2020-07-08)
 
   ### Changes

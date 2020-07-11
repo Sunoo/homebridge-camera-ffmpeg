@@ -135,13 +135,10 @@
               "preserveRatio": {
                 "title": "Preserve Ratio",
                 "type": "string",
-                "description": "Can be set to either 'W' or 'H' with respective obvious meanings.",
-                "typeahead": {
-                  "source": [
-                    "W",
-                    "H"
-                  ]
-                }
+                "oneOf": [
+                  { "title": "Width", "enum": ["W"] },
+                  { "title": "Height", "enum": ["H"] }
+                ]
               },
               "vcodec": {
                 "title": "Video Codec",

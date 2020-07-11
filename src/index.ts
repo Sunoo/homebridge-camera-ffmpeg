@@ -47,14 +47,14 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         const videoConfig = cameraConfig.videoConfig;
 
         if (!cameraName || !videoConfig) {
-          this.log("Missing parameters ('name' or 'videoConfig') for camera " + cameraName);
+          this.log.error("Missing parameters ('name' or 'videoConfig') for camera " + cameraName);
           return;
         }
 
         const uuid = hap.uuid.generate(cameraName);
         if (this.cameraConfigs.has(uuid)) {
           // Camera names must be unique
-          this.log(`The camera ${cameraName} seems to be defined more than one time.Ignoring any other occurrences!`);
+          this.log.error(`The camera ${cameraName} seems to be defined more than one time. Ignoring any other occurrences!`);
           return;
         }
 
@@ -72,73 +72,89 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       this.log(`${cameraAccessory.displayName} identified!`);
     });
 
-    const cameraConfig = this.cameraConfigs.get(cameraAccessory.UUID) || cameraAccessory.context.cameraConfig;
+    const cameraConfig = this.cameraConfigs.get(cameraAccessory.UUID);
 
-    const motion = cameraAccessory.getService(hap.Service.MotionSensor);
-    const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
-    const doorbellSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'DoorbellTrigger');
-    const motionSwitch = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
-    const doorbellSwitchSwitch = cameraAccessory.getServiceById(hap.Service.StatelessProgrammableSwitch, 'DoorbellSwitch');
+    if (!cameraConfig) {
+      this.accessories.push(cameraAccessory);
+      return;
+    }
 
-    if (motion) {
-      cameraAccessory.removeService(motion);
+    const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
+    if (cameraAccessoryInfo) {
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || '');
     }
-    if (doorbell) {
-      cameraAccessory.removeService(doorbell);
+
+    const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
+    const doorbellService = cameraAccessory.getService(hap.Service.Doorbell);
+    const doorbellTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'DoorbellTrigger');
+    const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
+    const doorbellSwitchService = cameraAccessory.getServiceById(hap.Service.StatelessProgrammableSwitch, 'DoorbellSwitch');
+
+    if (motionService) {
+      cameraAccessory.removeService(motionService);
     }
-    if (doorbellSwitch) {
-      cameraAccessory.removeService(doorbellSwitch);
+    if (doorbellService) {
+      cameraAccessory.removeService(doorbellService);
     }
-    if (motionSwitch) {
-      cameraAccessory.removeService(motionSwitch);
+    if (doorbellTriggerService) {
+      cameraAccessory.removeService(doorbellTriggerService);
     }
-    if (doorbellSwitchSwitch) {
-      cameraAccessory.removeService(doorbellSwitchSwitch);
+    if (motionTriggerService) {
+      cameraAccessory.removeService(motionTriggerService);
     }
+    if (doorbellSwitchService) {
+      cameraAccessory.removeService(doorbellSwitchService);
+    }
+    
+    const timeout = (cameraConfig.motionTimeout > 0) ? cameraConfig.motionTimeout : 1;
 
     if (cameraConfig.doorbell) {
       const doorbellService = new hap.Service.Doorbell(`${cameraConfig.name} Doorbell`);
       cameraAccessory.addService(doorbellService);
       if (cameraConfig.switches) {
-        const switchService = new hap.Service.Switch(`${cameraConfig.name} Doorbell Trigger`, 'DoorbellTrigger');
-        switchService
+        const doorbellTriggerService = new hap.Service.Switch(`${cameraConfig.name} Doorbell Trigger`, 'DoorbellTrigger');
+        doorbellTriggerService
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
             if (state) {
-              const doorbell = cameraAccessory.getService(hap.Service.Doorbell);
-              if (doorbell) {
-                doorbell.updateCharacteristic(
+              const doorbellService = cameraAccessory.getService(hap.Service.Doorbell);
+              if (doorbellService) {
+                doorbellService.updateCharacteristic(
                   hap.Characteristic.ProgrammableSwitchEvent,
                   hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
                 );
 
                 setTimeout(function () {
-                  switchService.getCharacteristic(hap.Characteristic.On).updateValue(false);
-                }, 1000);
+                  doorbellTriggerService.getCharacteristic(hap.Characteristic.On).updateValue(false);
+                }, timeout * 1000);
               }
             }
             callback(null, state);
           });
-        cameraAccessory.addService(switchService);
+        cameraAccessory.addService(doorbellTriggerService);
       }
 
       if (cameraConfig.doorbellSwitch) {
-        cameraAccessory
-          .addService(hap.Service.StatelessProgrammableSwitch, 'DoorbellSwitch')
+        const doorbellSwitchService = new hap.Service.StatelessProgrammableSwitch(`${cameraConfig.name} Doorbell Switch`, 'DoorbellSwitch');
+        doorbellSwitchService
           .getCharacteristic(hap.Characteristic.ProgrammableSwitchEvent)
           .setProps({
             maxValue: hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
           });
+        cameraAccessory.addService(doorbellSwitchService);
       }
     }
     if (cameraConfig.motion) {
-      const motion = new hap.Service.MotionSensor(cameraConfig.name);
-      cameraAccessory.addService(motion);
+      const motionService = new hap.Service.MotionSensor(cameraConfig.name);
+      cameraAccessory.addService(motionService);
       const log = this.log;
 
       if (cameraConfig.switches) {
-        const button = new hap.Service.Switch(cameraConfig.name, 'MotionTrigger');
-        button
+        const motionTriggerService = new hap.Service.Switch(cameraConfig.name, 'MotionTrigger');
+        motionTriggerService
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (on: CharacteristicValue, callback: CharacteristicSetCallback) => {
             log.info(`Setting ${cameraAccessory.displayName} Motion to ${on}`);
@@ -148,16 +164,16 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
               if (on) {
                 setTimeout(function () {
                   log.info(`Setting ${cameraAccessory.displayName} Button to false`);
-                  const switchService = cameraAccessory.getService(hap.Service.Switch);
-                  if (switchService) {
-                    switchService.setCharacteristic(hap.Characteristic.On, false);
+                  const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
+                  if (motionTriggerService) {
+                    motionTriggerService.setCharacteristic(hap.Characteristic.On, false);
                   }
-                }, 5000);
+                }, timeout * 1000);
               }
             }
             callback(null, on);
           });
-        cameraAccessory.addService(button);
+        cameraAccessory.addService(motionTriggerService);
       }
     }
 
@@ -215,7 +231,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           if (motionSensor) {
             if (motion) {
               motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-              const timeout = accessory.context.cameraConfig.motionTimeout || 1;
+              const timeout = this.cameraConfigs.get(accessory.UUID).motionTimeout || 1;
               const log = this.log;
               if (timeout > 0) {
                 setTimeout(function () {
@@ -238,47 +254,27 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
   didFinishLaunching(): void {
     if (this.config.mqtt) {
-      this.log('Setting up mqtt connection...');
+      this.log('Setting up MQTT connection...');
       const servermqtt = this.config.mqtt || '127.0.0.1';
       const port = this.config.portmqtt || '1883';
       const topics = this.config.topics || 'homebridge/motion';
       const client = mqtt.connect('mqtt://' + servermqtt + ':' + port);
       client.on('connect', () => {
-        this.log('MQTT CONNECTED!');
+        this.log('MQTT Connected!');
         client.subscribe(topics);
         client.subscribe(topics + '/reset');
       });
       client.on('message', (topic: string, message: Buffer) => {
         const name = message.toString();
-        this.log('Motion Camera:', name);
         const motion = !topic.endsWith('/reset');
         this.mqttHandler(name, motion);
       });
     }
 
     for (const [uuid, cameraConfig] of this.cameraConfigs) {
-      const cameraName = cameraConfig.name;
-
       // Only add new cameras that are not cached
       if (!this.accessories.find((x: PlatformAccessory) => x.UUID === uuid)) {
-        const cameraAccessory = new Accessory(cameraName, uuid);
-        cameraAccessory.context.cameraConfig = cameraConfig;
-        const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
-        if (cameraAccessoryInfo) {
-          if (cameraConfig.manufacturer) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer);
-          }
-          if (cameraConfig.model) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model);
-          }
-          if (cameraConfig.serialNumber) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber);
-          }
-          if (cameraConfig.firmwareRevision) {
-            cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision);
-          }
-        }
-
+        const cameraAccessory = new Accessory(cameraConfig.name, uuid);
         this.configureAccessory(cameraAccessory); // abusing the configureAccessory here
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cameraAccessory]);
       }
