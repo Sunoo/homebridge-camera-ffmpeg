@@ -138,12 +138,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       }
 
       if (cameraConfig.doorbellSwitch) {
-        cameraAccessory
-          .addService(hap.Service.StatelessProgrammableSwitch, 'DoorbellSwitch')
+        const doorbellSwitchService = new hap.Service.StatelessProgrammableSwitch(`${cameraConfig.name} Doorbell Switch`, 'DoorbellSwitch');
+        doorbellSwitchService
           .getCharacteristic(hap.Characteristic.ProgrammableSwitchEvent)
           .setProps({
             maxValue: hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
           });
+        cameraAccessory.addService(doorbellSwitchService);
       }
     }
     if (cameraConfig.motion) {
