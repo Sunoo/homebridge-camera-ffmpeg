@@ -299,6 +299,15 @@
     },
     {
       "type": "section",
+      "title": "HTTP Settings",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        "http"
+      ]
+    },
+    {
+      "type": "section",
       "title": "Optional Settings",
       "expandable": true,
       "expanded": false,
