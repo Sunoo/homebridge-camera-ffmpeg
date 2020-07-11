@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
-## v2.2.0 (2020-07-08)
+## v2.2.0 (2020-07-11)
 
   ### Changes
   
