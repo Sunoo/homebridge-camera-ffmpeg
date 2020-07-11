@@ -141,7 +141,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     try {
       const ffmpeg = spawn(
         this.videoProcessor,
-        (imageSource + ' -frames:v 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(' '),
+        (imageSource + ' -frames:v 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(/\s+/),
         { env: process.env },
       );
       let imageBuffer = Buffer.alloc(0);

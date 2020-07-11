@@ -26,7 +26,7 @@ export class FfmpegProcess {
     }
 
     const videoProcessor = customFfmpeg || pathToFfmpeg || 'ffmpeg';
-    this.ff = spawn(videoProcessor, command.split(' '), { env: process.env });
+    this.ff = spawn(videoProcessor, command.split(/\s+/), { env: process.env });
 
     if (this.ff.stdin) {
       this.ff.stdin.on('error', (error) => {
