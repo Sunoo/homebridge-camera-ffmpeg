@@ -90,8 +90,8 @@
             "title": "Number of Seconds for Automatic Motion Reset",
             "type": "integer",
             "placeholder": 1,
-            "minimum": -1,
-            "description": "Set to -1 to disable."
+            "minimum": 0,
+            "description": "Set to 0 to disable."
           },
           "videoConfig": {
             "title": "Video Configuration",

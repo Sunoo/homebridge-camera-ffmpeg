@@ -240,7 +240,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         if (motionSensor) {
           if (active) {
             motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-            const timeout = this.cameraConfigs.get(accessory.UUID).motionTimeout || 1;
+            const cameraConfig = this.cameraConfigs.get(accessory.UUID);
+            const timeout = (cameraConfig.motionTimeout === undefined) ? 1 : cameraConfig.motionTimeout;
             const log = this.log;
             if (timeout > 0) {
               setTimeout(function () {
@@ -261,7 +262,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       this.log('Setting up MQTT connection...');
       const servermqtt = this.config.mqtt;
       const portmqtt = this.config.portmqtt || '1883';
-      const mqtttopic = this.config.topic || 'homebridge';
+      const mqtttopic = this.config.topic ? this.config.topic.replace(/\/motion$/, '') : 'homebridge';
       const client = mqtt.connect('mqtt://' + servermqtt + ':' + portmqtt);
       client.on('connect', () => {
         this.log('MQTT Connected!');
