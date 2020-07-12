@@ -16,6 +16,8 @@ import {
 } from 'homebridge';
 import { StreamingDelegate } from './streamingDelegate';
 import mqtt = require('mqtt');
+import http = require('http');
+import url = require('url');
 
 let hap: HAP;
 let Accessory: typeof PlatformAccessory;
@@ -222,7 +224,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.accessories.push(cameraAccessory);
   }
 
-  mqttHandler(name:string, motion:boolean = true): void {
+  automationHandler(name:string, motion:boolean = true): void {
     this.accessories.forEach((accessory: PlatformAccessory) => {
         if (accessory.displayName == name) {
           this.log('Switch Motion Detect', motion ? 'On:' : 'Off:', accessory.displayName);
@@ -256,9 +258,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     if (this.config.mqtt) {
       this.log('Setting up MQTT connection...');
       const servermqtt = this.config.mqtt || '127.0.0.1';
-      const port = this.config.portmqtt || '1883';
+      const portmqtt = this.config.portmqtt || '1883';
       const topics = this.config.topics || 'homebridge/motion';
-      const client = mqtt.connect('mqtt://' + servermqtt + ':' + port);
+      const client = mqtt.connect('mqtt://' + servermqtt + ':' + portmqtt);
       client.on('connect', () => {
         this.log('MQTT Connected!');
         client.subscribe(topics);
@@ -267,7 +269,28 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       client.on('message', (topic: string, message: Buffer) => {
         const name = message.toString();
         const motion = !topic.endsWith('/reset');
-        this.mqttHandler(name, motion);
+        this.automationHandler(name, motion);
+      });
+    }
+    if (this.config.porthttp) {
+      const porthttp = this.config.porthttp || 8080;
+      this.log('Setting up HTTP server on port ' + porthttp + '...');
+      const server = http.createServer();
+      server.listen(porthttp);
+      server.on('request', (req, res) => {
+        const parseurl = url.parse(req.url);
+        const pathname = parseurl.pathname;
+        const query = parseurl.query;
+        if (pathname && query) {
+          const path = pathname.split('/');
+          const name = decodeURIComponent(query);
+          if (path[1] == 'motion') {
+            const motion = path[2] != 'reset';
+            this.automationHandler(name, motion);
+          }
+        }
+        res.writeHead(200);
+        res.end();
       });
     }
 
