@@ -32,7 +32,7 @@
     "topic": {
       "title": "MQTT Topic",
       "type": "string",
-      "placeholder": "homebridge/motion"
+      "placeholder": "homebridge"
     },
       "porthttp": {
       "title": "HTTP Port",
