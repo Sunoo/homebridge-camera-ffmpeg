@@ -259,10 +259,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
   didFinishLaunching(): void {
     if (this.config.mqtt) {
-      this.log('Setting up MQTT connection...');
       const servermqtt = this.config.mqtt;
       const portmqtt = this.config.portmqtt || '1883';
-      const mqtttopic = this.config.topic ? this.config.topic.replace(/\/motion$/, '') : 'homebridge';
+      let mqtttopic:string = 'homebridge';
+      if (this.config.topic && this.config.topic != 'homebridge/motion') {
+        mqtttopic = this.config.topic;
+      }
+      this.log('Setting up MQTT connection with topic ' + mqtttopic + '...');
       const client = mqtt.connect('mqtt://' + servermqtt + ':' + portmqtt);
       client.on('connect', () => {
         this.log('MQTT Connected!');
