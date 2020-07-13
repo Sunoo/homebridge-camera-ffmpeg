@@ -14,6 +14,11 @@
       "type": "string",
       "placeholder": "ffmpeg"
     },
+    "interfaceName": {
+      "title": "Network Interface",
+      "type": "string",
+      "placeholder": "eth0"
+    },
     "mqtt": {
       "title": "Server MQTT",
       "type": "string",
@@ -295,7 +300,8 @@
       "expandable": true,
       "expanded": false,
       "items": [
-        "videoProcessor"
+        "videoProcessor",
+        "interfaceName"
       ]
     }
   ]

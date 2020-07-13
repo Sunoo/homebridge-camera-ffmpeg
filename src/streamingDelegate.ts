@@ -66,6 +66,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private mapaudio: string;
   private videoFilter: string;
   private additionalCommandline: string;
+  private interfaceName: string;
   private name = '';
   controller?: CameraController;
 
@@ -73,7 +74,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
 
-  constructor(hap: HAP, cameraConfig: any, log: Logging, videoProcessor: string) {
+  constructor(hap: HAP, cameraConfig: any, log: Logging, videoProcessor: string, interfaceName: string) {
     this.hap = hap;
     this.log = log;
     this.ffmpegOpt = cameraConfig.videoConfig;
@@ -96,6 +97,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.mapaudio = this.ffmpegOpt.mapaudio || "0:1";
     this.videoFilter = this.ffmpegOpt.videoFilter || null; // null is a valid discrete value
     this.debug = this.ffmpegOpt.debug;
+    this.interfaceName = interfaceName || 'public';
     
     if (!this.ffmpegOpt.source) {
       throw new Error('Missing source for camera.');
@@ -141,7 +143,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     try {
       const ffmpeg = spawn(
         this.videoProcessor,
-        (imageSource + ' -frames:v 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(' '),
+        (imageSource + ' -frames:v 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(/\s+/),
         { env: process.env },
       );
       let imageBuffer = Buffer.alloc(0);
@@ -208,7 +210,14 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       audioSSRC: audioSSRC,
     };
 
-    const currentAddress = ip.address('public', request.addressVersion); // ipAddress version must match
+    let currentAddress:string;
+    try {
+      currentAddress = ip.address(this.interfaceName, request.addressVersion); // ipAddress version must match
+    } catch {
+      this.log.error(`Unable to get ${request.addressVersion} address for ${this.interfaceName}! Falling back to public.`);
+      currentAddress = ip.address('public', request.addressVersion); // ipAddress version must match
+    }
+
     const response: PrepareStreamResponse = {
       address: currentAddress,
       video: {
