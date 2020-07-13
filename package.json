@@ -13,7 +13,7 @@
     "prepare": "npm run build",
     "prepublishOnly": "npm run lint",
     "postpublish": "npm run clean",
-    "watch": "nodemon --watch src --ext ts --exec \"npm run build\""
+    "watch": "npm run clean && tsc --watch"
   },
   "keywords": [
     "homebridge-plugin",

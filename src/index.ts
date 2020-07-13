@@ -18,6 +18,7 @@ import { StreamingDelegate } from './streamingDelegate';
 import mqtt = require('mqtt');
 import http = require('http');
 import url = require('url');
+const version = require('../package.json').version;
 
 let hap: HAP;
 let Accessory: typeof PlatformAccessory;
@@ -86,7 +87,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || 'Default-Manufacturer');
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || 'Default-Model');
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || 'Default-SerialNumber');
-      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || version);
     }
 
     const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
@@ -240,8 +241,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         if (motionSensor) {
           if (active) {
             motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-            const cameraConfig = this.cameraConfigs.get(accessory.UUID);
-            const timeout = (cameraConfig.motionTimeout === undefined) ? 1 : cameraConfig.motionTimeout;
+            const timeout = this.cameraConfigs.get(accessory.UUID).motionTimeout ?? 1;
             const log = this.log;
             if (timeout > 0) {
               setTimeout(function () {
