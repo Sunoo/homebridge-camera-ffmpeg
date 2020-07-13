@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v2.2.2 (2020-07-13)
+
+  ### Changes
+  
+  * Restored ability to specify which network interface to use.
+
+  ### Bug Fixes
+  
+  * Fixed handling of non-printing characters in config.
+
 ## v2.2.1 (2020-07-11)
 
   ### Bug Fixes
