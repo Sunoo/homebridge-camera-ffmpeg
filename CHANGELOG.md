@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v2.3.0 (2020-07-14)
+
+  ### Changes
+  
+  * Added HTTP support for motion detection and doorbells.
+  * Separated MQTT doorbell and motion messages.
+
 ## v2.2.2 (2020-07-13)
 
   ### Changes
