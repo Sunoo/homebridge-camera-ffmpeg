@@ -16,6 +16,9 @@ import {
 } from 'homebridge';
 import { StreamingDelegate } from './streamingDelegate';
 import mqtt = require('mqtt');
+import http = require('http');
+import url = require('url');
+const version = require('../package.json').version;
 
 let hap: HAP;
 let Accessory: typeof PlatformAccessory;
@@ -84,7 +87,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || 'Default-Manufacturer');
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || 'Default-Model');
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || 'Default-SerialNumber');
-      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || '');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || version);
     }
 
     const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
@@ -222,52 +225,85 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.accessories.push(cameraAccessory);
   }
 
-  mqttHandler(name:string, motion:boolean = true): void {
-    this.accessories.forEach((accessory: PlatformAccessory) => {
-        if (accessory.displayName == name) {
-          this.log('Switch Motion Detect', motion ? 'On:' : 'Off:', accessory.displayName);
-          const motionSensor = accessory.getService(hap.Service.MotionSensor);
-          const doorbellSensor = accessory.getService(hap.Service.Doorbell);
-          if (motionSensor) {
-            if (motion) {
-              motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-              const timeout = this.cameraConfigs.get(accessory.UUID).motionTimeout || 1;
-              const log = this.log;
-              if (timeout > 0) {
-                setTimeout(function () {
-                  log('Motion Detect Timeout:', accessory.displayName);
-                  motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
-                  }, timeout * 1000);
-              }
-            } else {
-              motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
+  automationHandler(name:string, doorbell:boolean = false, active:boolean = true): void {
+    const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
+    if (accessory) {
+      this.log('Switch', doorbell ? 'Doorbell' : 'Motion Detect',
+        active ? 'On:' : 'Off:', accessory.displayName);
+      if (doorbell) {
+        const doorbellSensor = accessory.getService(hap.Service.Doorbell);
+        if (doorbellSensor && active) {
+          doorbellSensor.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
+            hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
+        }
+      } else {
+        const motionSensor = accessory.getService(hap.Service.MotionSensor);
+        if (motionSensor) {
+          if (active) {
+            motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
+            const timeout = this.cameraConfigs.get(accessory.UUID).motionTimeout ?? 1;
+            const log = this.log;
+            if (timeout > 0) {
+              setTimeout(function () {
+                log('Motion Detect Timeout:', accessory.displayName);
+                motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
+                }, timeout * 1000);
             }
-          }
-          if (doorbellSensor && motion) {
-            doorbellSensor.updateCharacteristic(
-              hap.Characteristic.ProgrammableSwitchEvent,
-              hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
+          } else {
+            motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
           }
         }
-      });
-   }
+      }
+    }
+  }
 
   didFinishLaunching(): void {
     if (this.config.mqtt) {
-      this.log('Setting up MQTT connection...');
-      const servermqtt = this.config.mqtt || '127.0.0.1';
-      const port = this.config.portmqtt || '1883';
-      const topics = this.config.topics || 'homebridge/motion';
-      const client = mqtt.connect('mqtt://' + servermqtt + ':' + port);
+      const servermqtt = this.config.mqtt;
+      const portmqtt = this.config.portmqtt || '1883';
+      let mqtttopic:string = 'homebridge';
+      if (this.config.topic && this.config.topic != 'homebridge/motion') {
+        mqtttopic = this.config.topic;
+      }
+      this.log('Setting up MQTT connection with topic ' + mqtttopic + '...');
+      const client = mqtt.connect('mqtt://' + servermqtt + ':' + portmqtt);
       client.on('connect', () => {
         this.log('MQTT Connected!');
-        client.subscribe(topics);
-        client.subscribe(topics + '/reset');
+        client.subscribe(mqtttopic + '/motion');
+        client.subscribe(mqtttopic + '/motion/reset');
+        client.subscribe(mqtttopic + '/doorbell');
       });
       client.on('message', (topic: string, message: Buffer) => {
         const name = message.toString();
-        const motion = !topic.endsWith('/reset');
-        this.mqttHandler(name, motion);
+        if (topic.startsWith(mqtttopic + '/motion')) {
+          const active = !topic.endsWith('/reset');
+          this.automationHandler(name, false, active);
+        } else if (topic.startsWith(mqtttopic + '/doorbell')) {
+          this.automationHandler(name, true);
+        }
+      });
+    }
+    if (this.config.porthttp) {
+      const porthttp = this.config.porthttp;
+      this.log('Setting up HTTP server on port ' + porthttp + '...');
+      const server = http.createServer();
+      server.listen(porthttp);
+      server.on('request', (req, res) => {
+        const parseurl = url.parse(req.url);
+        const pathname = parseurl.pathname;
+        const query = parseurl.query;
+        if (pathname && query) {
+          const path = pathname.split('/');
+          const name = decodeURIComponent(query);
+          if (path[1] == 'motion') {
+            const active = path[2] != 'reset';
+            this.automationHandler(name, false, active);
+          } else if (path[1] == 'doorbell') {
+            this.automationHandler(name, true);
+          }
+        }
+        res.writeHead(200);
+        res.end();
       });
     }
 

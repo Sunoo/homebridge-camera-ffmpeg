@@ -20,19 +20,24 @@
       "placeholder": "eth0"
     },
     "mqtt": {
-      "title": "Server MQTT",
+      "title": "MQTT Server",
       "type": "string",
       "placeholder": "127.0.0.1"
     },
     "portmqtt": {
-      "title": "Port MQTT",
+      "title": "MQTT Port",
       "type": "integer",
       "placeholder": "1883"
     },
     "topic": {
-      "title": "Topic MQTT",
+      "title": "MQTT Topic",
       "type": "string",
-      "placeholder": "homebridge/motion"
+      "placeholder": "homebridge"
+    },
+      "porthttp": {
+      "title": "HTTP Port",
+      "type": "integer",
+      "placeholder": "8080"
     },
     "cameras": {
       "type": "array",
@@ -85,8 +90,8 @@
             "title": "Number of Seconds for Automatic Motion Reset",
             "type": "integer",
             "placeholder": 1,
-            "minimum": -1,
-            "description": "Set to -1 to disable."
+            "minimum": 0,
+            "description": "Set to 0 to disable."
           },
           "videoConfig": {
             "title": "Video Configuration",
@@ -285,13 +290,30 @@
     },
     {
       "type": "section",
-      "title": "MQTT Settings",
+      "title": "Automation Settings",
       "expandable": true,
       "expanded": false,
       "items": [
-        "mqtt",
-        "portmqtt",
-        "topic"
+        {
+          "type": "section",
+          "title": "MQTT Client",
+          "expandable": true,
+          "expanded": true,
+          "items": [
+            "mqtt",
+            "portmqtt",
+            "topic"
+          ]
+        },
+        {
+          "type": "section",
+          "title": "HTTP Server",
+          "expandable": true,
+          "expanded": true,
+          "items": [
+            "porthttp"
+          ]
+        }
       ]
     },
     {
