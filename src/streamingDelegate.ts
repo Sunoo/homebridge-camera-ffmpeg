@@ -411,7 +411,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
 
         const ffmpeg = new FfmpegProcess(
-          'FFMPEG',
+          this.name,
           fcmd,
           this.log,
           callback,

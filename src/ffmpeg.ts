@@ -7,6 +7,7 @@ const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @t
 
 export class FfmpegProcess {
   private ff: ChildProcess;
+  private killing: boolean = false;
 
   constructor(
     title: string,
@@ -61,7 +62,9 @@ export class FfmpegProcess {
       const message = `[${title}] ffmpeg exited with code: ${code} and signal: ${signal}`;
 
       if (code == null || code === 255) {
-        log(message + ` (${title} Stream stopped!)`);
+        if (!this.killing || ffmpegDebugOutput) {
+          log(message, this.killing ? '(Expected)' : '(Unexpected)');
+        }
       } else {
         log.error(message + ' (error)');
         delegate.stopStream(sessionId);
@@ -75,6 +78,7 @@ export class FfmpegProcess {
   }
 
   public stop(): void {
+    this.killing = true;
     this.ff.kill('SIGKILL');
   }
 
