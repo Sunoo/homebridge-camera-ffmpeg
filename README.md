@@ -46,7 +46,7 @@ After paring and restarting Homebridge, each camera you defined will be automati
         {
           "name": "Camera Name",
           "videoConfig": {
-            "source": "-re -i rtsp://myfancy_rtsp_stream",
+            "source": "-i rtsp://myfancy_rtsp_stream",
             "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
             "maxStreams": 2,
             "maxWidth": 1280,
@@ -79,7 +79,7 @@ Example with manufacturer, model, serial number and firmware set:
       "serialNumber": "1234567890",
       "firmwareRevision": "1.0",
       "videoConfig": {
-        "source": "-re -i rtsp://myfancy_rtsp_stream",
+        "source": "-i rtsp://myfancy_rtsp_stream",
         "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
         "maxStreams": 2,
         "maxWidth": 1280,
@@ -121,7 +121,7 @@ A somewhat complicated example:
     {
       "name": "Camera Name",
       "videoConfig": {
-        "source": "-re -i rtsp://myfancy_rtsp_stream",
+        "source": "-i rtsp://myfancy_rtsp_stream",
         "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
         "maxStreams": 2,
         "maxWidth": 1280,
