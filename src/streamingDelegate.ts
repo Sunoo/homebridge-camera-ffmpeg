@@ -36,17 +36,6 @@ type SessionInfo = {
   audioSSRC: number;
 };
 
-// const FFMPEGH264ProfileNames = [
-//   'baseline',
-//   'main',
-//   'high'
-// ];
-// const FFMPEGH264LevelNames = [
-//   '3.1',
-//   '3.2',
-//   '4.0'
-// ];
-
 export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly hap: HAP;
   private readonly log: Logging;
@@ -255,8 +244,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         const video: VideoInfo = request.video;
         const audio: AudioInfo = request.audio;
 
-        // const profile = FFMPEGH264ProfileNames[video.profile];
-        // const level = FFMPEGH264LevelNames[video.level];
         const width = video.width > this.ffmpegOpt.maxWidth ? this.ffmpegOpt.maxWidth : video.width;
         const height = video.height > this.ffmpegOpt.maxHeight ? this.ffmpegOpt.maxHeight : video.height;
         const fps = video.fps > this.fps ? this.fps : video.fps;
