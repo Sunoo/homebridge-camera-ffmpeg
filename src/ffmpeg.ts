@@ -63,10 +63,14 @@ export class FfmpegProcess {
 
       if (code == null || code === 255) {
         if (!this.killing || ffmpegDebugOutput) {
-          log(message, this.killing ? '(Expected)' : '(Unexpected)');
+          if (this.killing) {
+            log(message + ' (Expected)');
+          } else {
+            log.error(message + ' (Unexpected)');
+          }
         }
       } else {
-        log.error(message + ' (error)');
+        log.error(message + ' (Error)');
         delegate.stopStream(sessionId);
         if (!started && callback) {
           callback(new Error(message));
