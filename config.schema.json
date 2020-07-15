@@ -150,6 +150,13 @@
                 "minimum": 1,
                 "description": "The maximum bit rate of the stream"
               },
+              "minBitrate": {
+                "title": "Minimum Bitrate",
+                "type": "integer",
+                "placeholder": 0,
+                "minimum": 0,
+                "description": "The minimum bit rate of the stream"
+              },
               "preserveRatio": {
                 "title": "Preserve Ratio",
                 "type": "string",
@@ -281,6 +288,7 @@
                 "cameras[].videoConfig.maxHeight",
                 "cameras[].videoConfig.maxFPS",
                 "cameras[].videoConfig.maxBitrate",
+                "cameras[].videoConfig.minBitrate",
                 "cameras[].videoConfig.preserveRatio",
                 "cameras[].videoConfig.packetSize",
                 "cameras[].videoConfig.videoFilter",

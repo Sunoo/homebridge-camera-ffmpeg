@@ -265,15 +265,16 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         const videoPayloadType = video.pt;
         const audioPayloadType = audio.pt;
-        let videoMaxBitrate = video.max_bit_rate;
-        if (videoMaxBitrate > this.maxBitrate) {
-          videoMaxBitrate = this.maxBitrate;
+        let videoBitrate = video.max_bit_rate;
+        if (videoBitrate > this.maxBitrate) {
+          videoBitrate = this.maxBitrate;
+        } else if (videoBitrate < this.minBitrate) {
+          videoBitrate = this.minBitrate;
         }
-        let audioMaxBitrate = audio.max_bit_rate;
-        if (audioMaxBitrate > this.maxBitrate) {
-          audioMaxBitrate = this.maxBitrate;
+        let audioBitrate = audio.max_bit_rate;
+        if (audioBitrate > this.maxBitrate) {
+          audioBitrate = this.maxBitrate;
         }
-        // const rtcpInterval = video.rtcp_interval; // usually 0.5
         const sampleRate = audio.sample_rate;
         const mtu = this.packetSize || video.mtu; // maximum transmission unit
 
@@ -282,7 +283,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         const audioPort = sessionInfo.audioPort;
         const videoSsrc = sessionInfo.videoSSRC;
         const audioSsrc = sessionInfo.audioSSRC;
-        // const cryptoSuite = sessionInfo.videoCryptoSuite;
         const videoSRTP = sessionInfo.videoSRTP.toString('base64');
         const audioSRTP = sessionInfo.audioSRTP.toString('base64');
         const filter = this.videoFilter;
@@ -301,7 +301,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         let fcmd = this.ffmpegOpt.source;
 
-        this.log(`Starting ${this.name} video stream (${width}x${height}, ${fps} fps, ${videoMaxBitrate} kbps, ${mtu} mtu)...`, this.debug ? 'debug enabled' : '');
+        this.log(`Starting ${this.name} video stream (${width}x${height}, ${fps} fps, ${videoBitrate} kbps, ${mtu} mtu)...`, this.debug ? 'debug enabled' : '');
 
         const ffmpegVideoArgs =
           ' -map ' +
@@ -316,13 +316,13 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           additionalCommandline +
           (vf.length > 0 ? ' -vf ' + vf.join(',') : '') +
           ' -b:v ' +
-          videoMaxBitrate +
+          videoBitrate +
           'k' +
           ' -bufsize ' +
-          2 * videoMaxBitrate +
+          2 * videoBitrate +
           'k' +
           ' -maxrate ' +
-          videoMaxBitrate +
+          videoBitrate +
           'k' +
           ' -payload_type ' +
           videoPayloadType;
@@ -363,10 +363,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
             sampleRate +
             'k' +
             ' -b:a ' +
-            audioMaxBitrate +
+            audioBitrate +
             'k' +
             ' -bufsize ' +
-            audioMaxBitrate +
+            audioBitrate +
             'k' +
             ' -ac 1' +
             ' -payload_type ' +
