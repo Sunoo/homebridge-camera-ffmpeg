@@ -29,6 +29,14 @@
       "type": "integer",
       "placeholder": "1883"
     },
+    "usermqtt": {
+      "title": "MQTT Username",
+      "type": "string"
+    },
+    "passmqtt": {
+      "title": "MQTT Password",
+      "type": "string"
+    },
     "topic": {
       "title": "MQTT Topic",
       "type": "string",
@@ -302,6 +310,8 @@
           "items": [
             "mqtt",
             "portmqtt",
+            "usermqtt",
+            "passmqtt",
             "topic"
           ]
         },
