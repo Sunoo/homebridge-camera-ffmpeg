@@ -108,7 +108,7 @@
               "source": {
                 "title": "Source",
                 "type": "string",
-                "placeholder": "-re -i rtsp://myfancy_rtsp_stream",
+                "placeholder": "-i rtsp://myfancy_rtsp_stream",
                 "required": true
               },
               "stillImageSource": {
@@ -168,7 +168,7 @@
               "vcodec": {
                 "title": "Video Codec",
                 "type": "string",
-                "placeholder": "copy",
+                "placeholder": "libx264",
                 "description": "The ffmpeg video processing codec to use.",
                 "typeahead": {
                   "source": [

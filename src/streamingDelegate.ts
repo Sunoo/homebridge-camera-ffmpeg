@@ -73,10 +73,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.vcodec = this.ffmpegOpt.vcodec || 'libx264';
     this.acodec = this.ffmpegOpt.acodec || 'libfdk_aac';
     this.packetSize = this.ffmpegOpt.packetSize || 1316;
-    this.fps = this.ffmpegOpt.maxFPS || 10;
-    this.maxBitrate = this.ffmpegOpt.maxBitrate || 300;
-    this.minBitrate = this.ffmpegOpt.minBitrate || 0;
-    if (this.minBitrate > this.maxBitrate) {
+    this.fps = this.ffmpegOpt.maxFPS;
+    this.maxBitrate = this.ffmpegOpt.maxBitrate;
+    this.minBitrate = this.ffmpegOpt.minBitrate;
+    if (this.maxBitrate && this.minBitrate > this.maxBitrate) {
       this.minBitrate = this.maxBitrate;
     }
     this.additionalCommandline = this.ffmpegOpt.additionalCommandline || '-preset ultrafast -tune zerolatency';
@@ -266,13 +266,13 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         const videoPayloadType = video.pt;
         const audioPayloadType = audio.pt;
         let videoBitrate = video.max_bit_rate;
-        if (videoBitrate > this.maxBitrate) {
+        if (this.maxBitrate && videoBitrate > this.maxBitrate) {
           videoBitrate = this.maxBitrate;
-        } else if (videoBitrate < this.minBitrate) {
+        } else if (this.minBitrate && videoBitrate < this.minBitrate) {
           videoBitrate = this.minBitrate;
         }
         let audioBitrate = audio.max_bit_rate;
-        if (audioBitrate > this.maxBitrate) {
+        if (this.maxBitrate && audioBitrate > this.maxBitrate) {
           audioBitrate = this.maxBitrate;
         }
         const sampleRate = audio.sample_rate;
@@ -304,46 +304,25 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         this.log(`Starting ${this.name} video stream (${width}x${height}, ${fps} fps, ${videoBitrate} kbps, ${mtu} mtu)...`, this.debug ? 'debug enabled' : '');
 
         const ffmpegVideoArgs =
-          ' -map ' +
-          mapvideo +
-          ' -vcodec ' +
-          vcodec +
+          ' -map ' + mapvideo +
+          ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +
-          ' -r ' +
-          fps +
+          ' -r ' + fps +
           ' -f rawvideo' +
-          ' ' +
-          additionalCommandline +
+          ' ' + additionalCommandline +
           (vf.length > 0 ? ' -vf ' + vf.join(',') : '') +
-          ' -b:v ' +
-          videoBitrate +
-          'k' +
-          ' -bufsize ' +
-          2 * videoBitrate +
-          'k' +
-          ' -maxrate ' +
-          videoBitrate +
-          'k' +
-          ' -payload_type ' +
-          videoPayloadType;
+          ' -b:v ' + videoBitrate + 'k' +
+          ' -bufsize ' + 2 * videoBitrate + 'k' +
+          ' -maxrate ' + videoBitrate + 'k' +
+          ' -payload_type ' + videoPayloadType;
 
         const ffmpegVideoStream =
-          ' -ssrc ' +
-          videoSsrc +
+          ' -ssrc ' + videoSsrc +
           ' -f rtp' +
           ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-          ' -srtp_out_params ' +
-          videoSRTP +
-          ' srtp://' +
-          address +
-          ':' +
-          videoPort +
-          '?rtcpport=' +
-          videoPort +
-          '&localrtcpport=' +
-          videoPort +
-          '&pkt_size=' +
-          mtu;
+          ' -srtp_out_params ' + videoSRTP +
+          ' srtp://' + address + ':' + videoPort +
+          '?rtcpport=' + videoPort +'&localrtcpport=' + videoPort + '&pkt_size=' + mtu;
 
         // build required video arguments
         fcmd += ffmpegVideoArgs;
@@ -352,42 +331,24 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         // build optional audio arguments
         if (this.audio) {
           const ffmpegAudioArgs =
-            ' -map ' +
-            mapaudio +
-            ' -acodec ' +
-            acodec +
+            ' -map ' + mapaudio +
+            ' -acodec ' + acodec +
             ' -profile:a aac_eld' +
             ' -flags +global_header' +
             ' -f null' +
-            ' -ar ' +
-            sampleRate +
-            'k' +
-            ' -b:a ' +
-            audioBitrate +
-            'k' +
-            ' -bufsize ' +
-            audioBitrate +
-            'k' +
+            ' -ar ' + sampleRate + 'k' +
+            ' -b:a ' + audioBitrate + 'k' +
+            ' -bufsize ' + audioBitrate + 'k' +
             ' -ac 1' +
-            ' -payload_type ' +
-            audioPayloadType;
+            ' -payload_type ' + audioPayloadType;
 
           const ffmpegAudioStream =
-            ' -ssrc ' +
-            audioSsrc +
+            ' -ssrc ' + audioSsrc +
             ' -f rtp' +
             ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-            ' -srtp_out_params ' +
-            audioSRTP +
-            ' srtp://' +
-            address +
-            ':' +
-            audioPort +
-            '?rtcpport=' +
-            audioPort +
-            '&localrtcpport=' +
-            audioPort +
-            '&pkt_size=188';
+            ' -srtp_out_params ' + audioSRTP +
+            ' srtp://' + address + ':' + audioPort +
+            '?rtcpport=' + audioPort + '&localrtcpport=' + audioPort + '&pkt_size=188';
 
           fcmd += ffmpegAudioArgs;
           fcmd += ffmpegAudioStream;
