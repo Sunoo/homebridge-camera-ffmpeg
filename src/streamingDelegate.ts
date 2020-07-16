@@ -36,17 +36,6 @@ type SessionInfo = {
   audioSSRC: number;
 };
 
-// const FFMPEGH264ProfileNames = [
-//   'baseline',
-//   'main',
-//   'high'
-// ];
-// const FFMPEGH264LevelNames = [
-//   '3.1',
-//   '3.2',
-//   '4.0'
-// ];
-
 export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly hap: HAP;
   private readonly log: Logging;
@@ -84,10 +73,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.vcodec = this.ffmpegOpt.vcodec || 'libx264';
     this.acodec = this.ffmpegOpt.acodec || 'libfdk_aac';
     this.packetSize = this.ffmpegOpt.packetSize || 1316;
-    this.fps = this.ffmpegOpt.maxFPS || 10;
-    this.maxBitrate = this.ffmpegOpt.maxBitrate || 300;
-    this.minBitrate = this.ffmpegOpt.minBitrate || 0;
-    if (this.minBitrate > this.maxBitrate) {
+    this.fps = this.ffmpegOpt.maxFPS;
+    this.maxBitrate = this.ffmpegOpt.maxBitrate;
+    this.minBitrate = this.ffmpegOpt.minBitrate;
+    if (this.maxBitrate && this.minBitrate > this.maxBitrate) {
       this.minBitrate = this.maxBitrate;
     }
     this.additionalCommandline = this.ffmpegOpt.additionalCommandline || '-preset ultrafast -tune zerolatency';
@@ -149,7 +138,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       let imageBuffer = Buffer.alloc(0);
       this.log(`Snapshot from ${this.name} at ${resolution}`);
       if (this.debug) {
-        this.log(`ffmpeg ${imageSource} -frames:v 1${vf.length > 0 ? ' -vf ' + vf.join(',') : ''} -f image2 -`);
+        this.log(`${this.name} snapshot command: ffmpeg ${imageSource} -frames:v 1${vf.length > 0 ? ' -vf ' + vf.join(',') : ''} -f image2 -`);
       }
       ffmpeg.stdout.on('data', function (data: any) {
         imageBuffer = Buffer.concat([imageBuffer, data]);
@@ -255,8 +244,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         const video: VideoInfo = request.video;
         const audio: AudioInfo = request.audio;
 
-        // const profile = FFMPEGH264ProfileNames[video.profile];
-        // const level = FFMPEGH264LevelNames[video.level];
         const width = video.width > this.ffmpegOpt.maxWidth ? this.ffmpegOpt.maxWidth : video.width;
         const height = video.height > this.ffmpegOpt.maxHeight ? this.ffmpegOpt.maxHeight : video.height;
         const fps = video.fps > this.fps ? this.fps : video.fps;
@@ -278,15 +265,16 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         const videoPayloadType = video.pt;
         const audioPayloadType = audio.pt;
-        let videoMaxBitrate = video.max_bit_rate;
-        if (videoMaxBitrate > this.maxBitrate) {
-          videoMaxBitrate = this.maxBitrate;
+        let videoBitrate = video.max_bit_rate;
+        if (this.maxBitrate && videoBitrate > this.maxBitrate) {
+          videoBitrate = this.maxBitrate;
+        } else if (this.minBitrate && videoBitrate < this.minBitrate) {
+          videoBitrate = this.minBitrate;
         }
-        let audioMaxBitrate = audio.max_bit_rate;
-        if (audioMaxBitrate > this.maxBitrate) {
-          audioMaxBitrate = this.maxBitrate;
+        let audioBitrate = audio.max_bit_rate;
+        if (this.maxBitrate && audioBitrate > this.maxBitrate) {
+          audioBitrate = this.maxBitrate;
         }
-        // const rtcpInterval = video.rtcp_interval; // usually 0.5
         const sampleRate = audio.sample_rate;
         const mtu = this.packetSize || video.mtu; // maximum transmission unit
 
@@ -295,7 +283,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         const audioPort = sessionInfo.audioPort;
         const videoSsrc = sessionInfo.videoSSRC;
         const audioSsrc = sessionInfo.audioSSRC;
-        // const cryptoSuite = sessionInfo.videoCryptoSuite;
         const videoSRTP = sessionInfo.videoSRTP.toString('base64');
         const audioSRTP = sessionInfo.audioSRTP.toString('base64');
         const filter = this.videoFilter;
@@ -314,49 +301,28 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         let fcmd = this.ffmpegOpt.source;
 
-        this.log(`Starting ${this.name} video stream (${width}x${height}, ${fps} fps, ${videoMaxBitrate} kbps, ${mtu} mtu)...`, this.debug ? 'debug enabled' : '');
+        this.log(`Starting ${this.name} video stream (${width}x${height}, ${fps} fps, ${videoBitrate} kbps, ${mtu} mtu)...`, this.debug ? 'debug enabled' : '');
 
         const ffmpegVideoArgs =
-          ' -map ' +
-          mapvideo +
-          ' -vcodec ' +
-          vcodec +
+          ' -map ' + mapvideo +
+          ' -vcodec ' + vcodec +
           ' -pix_fmt yuv420p' +
-          ' -r ' +
-          fps +
+          ' -r ' + fps +
           ' -f rawvideo' +
-          ' ' +
-          additionalCommandline +
+          ' ' + additionalCommandline +
           (vf.length > 0 ? ' -vf ' + vf.join(',') : '') +
-          ' -b:v ' +
-          videoMaxBitrate +
-          'k' +
-          ' -bufsize ' +
-          2 * videoMaxBitrate +
-          'k' +
-          ' -maxrate ' +
-          videoMaxBitrate +
-          'k' +
-          ' -payload_type ' +
-          videoPayloadType;
+          ' -b:v ' + videoBitrate + 'k' +
+          ' -bufsize ' + 2 * videoBitrate + 'k' +
+          ' -maxrate ' + videoBitrate + 'k' +
+          ' -payload_type ' + videoPayloadType;
 
         const ffmpegVideoStream =
-          ' -ssrc ' +
-          videoSsrc +
+          ' -ssrc ' + videoSsrc +
           ' -f rtp' +
           ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-          ' -srtp_out_params ' +
-          videoSRTP +
-          ' srtp://' +
-          address +
-          ':' +
-          videoPort +
-          '?rtcpport=' +
-          videoPort +
-          '&localrtcpport=' +
-          videoPort +
-          '&pkt_size=' +
-          mtu;
+          ' -srtp_out_params ' + videoSRTP +
+          ' srtp://' + address + ':' + videoPort +
+          '?rtcpport=' + videoPort +'&localrtcpport=' + videoPort + '&pkt_size=' + mtu;
 
         // build required video arguments
         fcmd += ffmpegVideoArgs;
@@ -365,53 +331,35 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         // build optional audio arguments
         if (this.audio) {
           const ffmpegAudioArgs =
-            ' -map ' +
-            mapaudio +
-            ' -acodec ' +
-            acodec +
+            ' -map ' + mapaudio +
+            ' -acodec ' + acodec +
             ' -profile:a aac_eld' +
             ' -flags +global_header' +
             ' -f null' +
-            ' -ar ' +
-            sampleRate +
-            'k' +
-            ' -b:a ' +
-            audioMaxBitrate +
-            'k' +
-            ' -bufsize ' +
-            audioMaxBitrate +
-            'k' +
+            ' -ar ' + sampleRate + 'k' +
+            ' -b:a ' + audioBitrate + 'k' +
+            ' -bufsize ' + audioBitrate + 'k' +
             ' -ac 1' +
-            ' -payload_type ' +
-            audioPayloadType;
+            ' -payload_type ' + audioPayloadType;
 
           const ffmpegAudioStream =
-            ' -ssrc ' +
-            audioSsrc +
+            ' -ssrc ' + audioSsrc +
             ' -f rtp' +
             ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-            ' -srtp_out_params ' +
-            audioSRTP +
-            ' srtp://' +
-            address +
-            ':' +
-            audioPort +
-            '?rtcpport=' +
-            audioPort +
-            '&localrtcpport=' +
-            audioPort +
-            '&pkt_size=188';
+            ' -srtp_out_params ' + audioSRTP +
+            ' srtp://' + address + ':' + audioPort +
+            '?rtcpport=' + audioPort + '&localrtcpport=' + audioPort + '&pkt_size=188';
 
           fcmd += ffmpegAudioArgs;
           fcmd += ffmpegAudioStream;
         }
 
         if (this.debug) {
-          fcmd += ' -loglevel debug';
+          fcmd += ' -loglevel level+verbose';
         }
 
         const ffmpeg = new FfmpegProcess(
-          'FFMPEG',
+          this.name,
           fcmd,
           this.log,
           callback,

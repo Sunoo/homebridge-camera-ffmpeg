@@ -29,6 +29,14 @@
       "type": "integer",
       "placeholder": "1883"
     },
+    "usermqtt": {
+      "title": "MQTT Username",
+      "type": "string"
+    },
+    "passmqtt": {
+      "title": "MQTT Password",
+      "type": "string"
+    },
     "topic": {
       "title": "MQTT Topic",
       "type": "string",
@@ -100,7 +108,7 @@
               "source": {
                 "title": "Source",
                 "type": "string",
-                "placeholder": "-re -i rtsp://myfancy_rtsp_stream",
+                "placeholder": "-i rtsp://myfancy_rtsp_stream",
                 "required": true
               },
               "stillImageSource": {
@@ -142,6 +150,13 @@
                 "minimum": 1,
                 "description": "The maximum bit rate of the stream"
               },
+              "minBitrate": {
+                "title": "Minimum Bitrate",
+                "type": "integer",
+                "placeholder": 0,
+                "minimum": 0,
+                "description": "The minimum bit rate of the stream"
+              },
               "preserveRatio": {
                 "title": "Preserve Ratio",
                 "type": "string",
@@ -153,7 +168,7 @@
               "vcodec": {
                 "title": "Video Codec",
                 "type": "string",
-                "placeholder": "copy",
+                "placeholder": "libx264",
                 "description": "The ffmpeg video processing codec to use.",
                 "typeahead": {
                   "source": [
@@ -273,6 +288,7 @@
                 "cameras[].videoConfig.maxHeight",
                 "cameras[].videoConfig.maxFPS",
                 "cameras[].videoConfig.maxBitrate",
+                "cameras[].videoConfig.minBitrate",
                 "cameras[].videoConfig.preserveRatio",
                 "cameras[].videoConfig.packetSize",
                 "cameras[].videoConfig.videoFilter",
@@ -302,6 +318,8 @@
           "items": [
             "mqtt",
             "portmqtt",
+            "usermqtt",
+            "passmqtt",
             "topic"
           ]
         },

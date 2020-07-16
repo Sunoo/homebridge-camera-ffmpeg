@@ -27,14 +27,14 @@ Install via Homebridge Config UI X:
 
 After paring and restarting Homebridge, each camera you defined will be automatically added into the Home app.
 
-* To Pair Homebridge:
-	1. Open the Home <img src="https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png" height="16.42px"> app on your device.
-	2. Tap the Home tab, then tap <img src="https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png" height="16.42px">.
-	3. Tap *Add Accessory*, and select *I Don't Have a Code or Cannot Scan*.
-	4. Select Homebridge, this will display as a bridge.
-	5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select *Use Camera* and scan the QR code again.
-	6. Your cameras will then be automatically added to HomeKit.
-* For help and examples of common configurations please read the wiki.
+- To Pair Homebridge:
+  1. Open the Home <img src="https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png" height="16.42px"> app on your device.
+  2. Tap the Home tab, then tap <img src="https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png" height="16.42px">.
+  3. Tap _Add Accessory_, and select _I Don't Have a Code or Cannot Scan_.
+  4. Select Homebridge, this will display as a bridge.
+  5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select _Use Camera_ and scan the QR code again.
+  6. Your cameras will then be automatically added to HomeKit.
+- For help and examples of common configurations please read the wiki.
 
 ## Configuration
 
@@ -46,7 +46,7 @@ After paring and restarting Homebridge, each camera you defined will be automati
         {
           "name": "Camera Name",
           "videoConfig": {
-            "source": "-re -i rtsp://myfancy_rtsp_stream",
+            "source": "-i rtsp://myfancy_rtsp_stream",
             "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
             "maxStreams": 2,
             "maxWidth": 1280,
@@ -59,12 +59,12 @@ After paring and restarting Homebridge, each camera you defined will be automati
 
 #### Optional Parameters
 
-* `motion` enable a dummy switch and motion sensor to trigger picture notifications in iOS 13, defaults to `false`.  See wiki for more detailed instructions.
-* `doorbell` enable doorbell function for this camera (image notifications). When enabled there will be an additional switch that triggers the doorbell event, automate it to use it with other HomeKit switches, HTTP events etc.
-* `manufacturer` set manufacturer name for display in the Home app
-* `model` set model for display in the Home app
-* `serialNumber` set serial number for display in the Home app
-* `firmwareRevision` set firmware revision for display in the Home app
+- `motion` enable a dummy switch and motion sensor to trigger picture notifications in iOS 13, defaults to `false`. See wiki for more detailed instructions.
+- `doorbell` enable doorbell function for this camera (image notifications). When enabled there will be an additional switch that triggers the doorbell event, automate it to use it with other HomeKit switches, HTTP events etc.
+- `manufacturer` set manufacturer name for display in the Home app
+- `model` set model for display in the Home app
+- `serialNumber` set serial number for display in the Home app
+- `firmwareRevision` set firmware revision for display in the Home app
 
 Example with manufacturer, model, serial number and firmware set:
 
@@ -79,7 +79,7 @@ Example with manufacturer, model, serial number and firmware set:
       "serialNumber": "1234567890",
       "firmwareRevision": "1.0",
       "videoConfig": {
-        "source": "-re -i rtsp://myfancy_rtsp_stream",
+        "source": "-i rtsp://myfancy_rtsp_stream",
         "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
         "maxStreams": 2,
         "maxWidth": 1280,
@@ -93,24 +93,24 @@ Example with manufacturer, model, serial number and firmware set:
 
 #### Optional videoConfig Parameters
 
-* `maxStreams` is the maximum number of streams that will be generated for this camera, default 2
-* `maxWidth` is the maximum width reported to HomeKit, default `1280`
-* `maxHeight` is the maximum height reported to HomeKit, default `720`
-* `maxFPS` is the maximum frame rate of the stream, default `10`
-* `minBitrate` is the minimum bit rate of the stream in kbit/s, default `0`
-* `maxBitrate` is the maximum bit rate of the stream in kbit/s, default `300`
-* `preserveRatio` can be set to either `W` or `H` with respective obvious meanings, all other values have no effect
-* `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default `libx264`
-* `audio` can be set to true to enable audio streaming from camera, default `false`.
-* `acodec` Default audio codec is `libfdk_aac` and is enabled in the bundled ffmpeg version.
-* `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default `1316`
-* `vflip` Flips the stream vertically, default `false`
-* `hflip` Flips the stream horizontally, default `false`
-* `mapvideo` Select the stream used for video, default `0:0`
-* `mapaudio` Select the stream used for audio, default `0:1`
-* `videoFilter` Allows a custom video filter to be passed to FFmpeg via `-vf`, defaults to `scale=1280:720`
-* `additionalCommandline` Allows additional of extra command line options to FFmpeg, for example `'-loglevel verbose'`
-* `debug` Show the output of ffmpeg in the log, default `false`
+- `maxStreams` is the maximum number of streams that will be generated for this camera, default 2
+- `maxWidth` is the maximum width reported to HomeKit, default `1280`
+- `maxHeight` is the maximum height reported to HomeKit, default `720`
+- `maxFPS` is the maximum frame rate of the stream, default `10`
+- `minBitrate` is the minimum bit rate of the stream in kbit/s, default `0`
+- `maxBitrate` is the maximum bit rate of the stream in kbit/s, default `300`
+- `preserveRatio` can be set to either `W` or `H` with respective obvious meanings, all other values have no effect
+- `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default `libx264`
+- `audio` can be set to true to enable audio streaming from camera, default `false`.
+- `acodec` Default audio codec is `libfdk_aac` and is enabled in the bundled ffmpeg version.
+- `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default `1316`
+- `vflip` Flips the stream vertically, default `false`
+- `hflip` Flips the stream horizontally, default `false`
+- `mapvideo` Select the stream used for video, default `0:0`
+- `mapaudio` Select the stream used for audio, default `0:1`
+- `videoFilter` Allows a custom video filter to be passed to FFmpeg via `-vf`, defaults to `scale=1280:720`
+- `additionalCommandline` Allows additional of extra command line options to FFmpeg, for example `'-loglevel verbose'`
+- `debug` Show the output of ffmpeg in the log, default `false`
 
 A somewhat complicated example:
 
@@ -121,7 +121,7 @@ A somewhat complicated example:
     {
       "name": "Camera Name",
       "videoConfig": {
-        "source": "-re -i rtsp://myfancy_rtsp_stream",
+        "source": "-i rtsp://myfancy_rtsp_stream",
         "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
         "maxStreams": 2,
         "maxWidth": 1280,
@@ -142,7 +142,7 @@ A somewhat complicated example:
 
 #### Using another Video Processor
 
-* `videoProcessor` is the video processor used to manage videos. eg: ffmpeg (by default) or avconv or /a/path/to/another/ffmpeg. Need to use the same parameters than ffmpeg.
+- `videoProcessor` is the video processor used to manage videos. eg: ffmpeg (by default) or avconv or /a/path/to/another/ffmpeg. Need to use the same parameters than ffmpeg.
 
 ```
 {
@@ -166,7 +166,7 @@ A somewhat complicated example:
 
 #### Setting a source interface, or IP address
 
-* `interfaceName` selects the IP address of a given network interface. The default is to select the first available, and that may not be the same IP address that ffmpeg will use. A mismatch will cause the iOS device to discard the video stream.
+- `interfaceName` selects the IP address of a given network interface. The default is to select the first available, and that may not be the same IP address that ffmpeg will use. A mismatch will cause the iOS device to discard the video stream.
 
 ```
 {
@@ -180,9 +180,9 @@ A somewhat complicated example:
 
 ## Tested configurations
 
-We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).  Also if you have a working configuration that you would like to share, please add it to the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).
+We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki). Also if you have a working configuration that you would like to share, please add it to the [wiki](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki).
 
-https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki
+https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki
 
 ## Credit
 

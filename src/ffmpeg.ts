@@ -7,6 +7,7 @@ const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @t
 
 export class FfmpegProcess {
   private ff: ChildProcess;
+  private killing: boolean = false;
 
   constructor(
     title: string,
@@ -39,7 +40,7 @@ export class FfmpegProcess {
       this.ff.stderr.on('data', (data) => {
         if (!started) {
           started = true;
-          log(`${title}: received first frame`);
+          log.debug(`${title}: received first frame`);
           if (callback) {
             callback(); // do not forget to execute callback once set up
           }
@@ -61,9 +62,15 @@ export class FfmpegProcess {
       const message = `[${title}] ffmpeg exited with code: ${code} and signal: ${signal}`;
 
       if (code == null || code === 255) {
-        log(message + ` (${title} Stream stopped!)`);
+        if (!this.killing || ffmpegDebugOutput) {
+          if (this.killing) {
+            log(message + ' (Expected)');
+          } else {
+            log.error(message + ' (Unexpected)');
+          }
+        }
       } else {
-        log.error(message + ' (error)');
+        log.error(message + ' (Error)');
         delegate.stopStream(sessionId);
         if (!started && callback) {
           callback(new Error(message));
@@ -75,6 +82,7 @@ export class FfmpegProcess {
   }
 
   public stop(): void {
+    this.killing = true;
     this.ff.kill('SIGKILL');
   }
 
