@@ -138,7 +138,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       let imageBuffer = Buffer.alloc(0);
       this.log(`Snapshot from ${this.name} at ${resolution}`);
       if (this.debug) {
-        this.log(`ffmpeg ${imageSource} -frames:v 1${vf.length > 0 ? ' -vf ' + vf.join(',') : ''} -f image2 -`);
+        this.log(`${this.name} snapshot command: ffmpeg ${imageSource} -frames:v 1${vf.length > 0 ? ' -vf ' + vf.join(',') : ''} -f image2 -`);
       }
       ffmpeg.stdout.on('data', function (data: any) {
         imageBuffer = Buffer.concat([imageBuffer, data]);
@@ -355,7 +355,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
 
         if (this.debug) {
-          fcmd += ' -loglevel debug';
+          fcmd += ' -loglevel level+verbose';
         }
 
         const ffmpeg = new FfmpegProcess(
