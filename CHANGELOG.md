@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v2.3.1 (2020-07-16)
+
+### Changes
+
+- Tweaks to logging to reduce confusion and provide more information.
+- Added authentication support to MQTT.
+- Reduced the FFmpeg log level in debug mode.
+
+### Bug Fixes
+
+- The minimum bitrate option is now working again.
+- Maximum bitrate and frame rate are no longer capped below what devices request when not set in the config.
+
 ## v2.3.0 (2020-07-14)
 
 ### Changes
