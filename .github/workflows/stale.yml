@@ -22,6 +22,6 @@ jobs:
         stale-pr-label: 'stale'
         days-before-stale: 15
         days-before-close: 2
-        exempt-issue-labels: 'pin'
+        exempt-issue-labels: 'long running'
         exempt-pr-labels: 'awaiting-approval,work-in-progress'
         remove-stale-when-updated: true
