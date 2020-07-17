@@ -24,7 +24,7 @@ jobs:
           CI: true
 
   publish-npm:
-    if: github.repository == 'homebridge-plugins/homebridge-camera-ffmpeg'
+    if: github.repository == 'Sunoo/homebridge-camera-ffmpeg'
 
     needs: build
 
