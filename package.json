@@ -53,7 +53,8 @@
     "homebridge": "^1.0.4",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "get-port": "^5.1.1"
   },
   "dependencies": {
     "ffmpeg-for-homebridge": "0.0.6",

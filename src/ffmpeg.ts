@@ -2,12 +2,14 @@ import { ChildProcess, spawn } from 'child_process';
 import { Logging, StreamRequestCallback } from 'homebridge';
 import { StreamingDelegate } from './streamingDelegate';
 import { Readable, Writable } from 'stream';
+import { createSocket } from 'dgram';
 
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export class FfmpegProcess {
   private ff: ChildProcess;
   private killing: boolean = false;
+  private timeout?: NodeJS.Timeout;
 
   constructor(
     title: string,
@@ -16,6 +18,7 @@ export class FfmpegProcess {
     callback: StreamRequestCallback | undefined,
     delegate: StreamingDelegate,
     sessionId: string,
+    returnPort: number,
     ffmpegDebugOutput: boolean,
     customFfmpeg?: string,
   ) {
@@ -25,6 +28,22 @@ export class FfmpegProcess {
     if (ffmpegDebugOutput) {
       log(`${title} command: ffmpeg ${command}`);
     }
+
+    const socket = createSocket('udp4');
+    socket.on('error', (err) => {
+      log.error(`[${title}] socket error: ${err}`);
+      delegate.stopStream(sessionId);
+    });
+    socket.on('message', () => {
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+      this.timeout = setTimeout(() => {
+        log(`${title} appears to be inactive for over 5 seconds. Stopping stream.`);
+        delegate.stopStream(sessionId);
+      }, 5000)
+    });
+    socket.bind(returnPort);
 
     const videoProcessor = customFfmpeg || pathToFfmpeg || 'ffmpeg';
     this.ff = spawn(videoProcessor, command.split(/\s+/), { env: process.env });
@@ -83,6 +102,9 @@ export class FfmpegProcess {
 
   public stop(): void {
     this.killing = true;
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
     this.ff.kill('SIGKILL');
   }
 

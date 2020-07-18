@@ -21,6 +21,7 @@ import {
 import ip from 'ip';
 import { FfmpegProcess } from './ffmpeg';
 import { spawn } from 'child_process';
+import getPort from 'get-port';
 
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
@@ -28,11 +29,13 @@ type SessionInfo = {
   address: string; // address of the HAP controller
 
   videoPort: number;
+  videoReturnPort: number,
   videoCryptoSuite: SRTPCryptoSuites; // should be saved if multiple suites are supported
   videoSRTP: Buffer; // key and salt concatenated
   videoSSRC: number; // rtp synchronisation source
 
   audioPort: number;
+  audioReturnPort: number,
   audioCryptoSuite: SRTPCryptoSuites;
   audioSRTP: Buffer;
   audioSSRC: number;
@@ -169,13 +172,14 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     }
   }
 
-  prepareStream(request: PrepareStreamRequest, callback: PrepareStreamCallback): void {
+  async prepareStream(request: PrepareStreamRequest, callback: PrepareStreamCallback): Promise<void> {
     const sessionId: StreamSessionIdentifier = request.sessionID;
     const targetAddress = request.targetAddress;
 
     //video stuff
     const video = request.video;
     const videoPort = video.port;
+    const videoReturnPort = await getPort();
 
     const videoCryptoSuite = video.srtpCryptoSuite; // could be used to support multiple crypto suite (or support no suite for debugging)
     const videoSrtpKey = video.srtp_key;
@@ -186,6 +190,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     //audio stuff
     const audio = request.audio;
     const audioPort = audio.port;
+    const audioReturnPort = await getPort();
 
     const audioCryptoSuite = audio.srtpCryptoSuite; // could be used to support multiple crypto suite (or support no suite for debugging)
     const audioSrtpKey = audio.srtp_key;
@@ -197,11 +202,13 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       address: targetAddress,
 
       videoPort: videoPort,
+      videoReturnPort: videoReturnPort,
       videoCryptoSuite: videoCryptoSuite,
       videoSRTP: Buffer.concat([videoSrtpKey, videoSrtpSalt]),
       videoSSRC: videoSSRC,
 
       audioPort: audioPort,
+      audioReturnPort: audioReturnPort,
       audioCryptoSuite: audioCryptoSuite,
       audioSRTP: Buffer.concat([audioSrtpKey, audioSrtpSalt]),
       audioSSRC: audioSSRC,
@@ -218,14 +225,14 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const response: PrepareStreamResponse = {
       address: currentAddress,
       video: {
-        port: videoPort,
+        port: videoReturnPort,
         ssrc: videoSSRC,
 
         srtp_key: videoSrtpKey,
         srtp_salt: videoSrtpSalt,
       },
       audio: {
-        port: audioPort,
+        port: audioReturnPort,
         ssrc: audioSSRC,
 
         srtp_key: audioSrtpKey,
@@ -289,6 +296,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         const address = sessionInfo.address;
         const videoPort = sessionInfo.videoPort;
         const audioPort = sessionInfo.audioPort;
+        const returnPort = sessionInfo.videoReturnPort;
         const videoSsrc = sessionInfo.videoSSRC;
         const audioSsrc = sessionInfo.audioSSRC;
         const videoSRTP = sessionInfo.videoSRTP.toString('base64');
@@ -373,6 +381,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           callback,
           this,
           sessionId,
+          returnPort,
           this.debug,
           this.videoProcessor,
         );
