@@ -1,4 +1,6 @@
 import {
+  API,
+  APIEvent,
   CameraController,
   CameraStreamingDelegate,
   HAP,
@@ -63,7 +65,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
 
-  constructor(hap: HAP, cameraConfig: any, log: Logging, videoProcessor: string, interfaceName: string) {
+  constructor(hap: HAP, cameraConfig: any, log: Logging, videoProcessor: string, interfaceName: string, api: API) {
     this.hap = hap;
     this.log = log;
     this.ffmpegOpt = cameraConfig.videoConfig;
@@ -91,6 +93,12 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     if (!this.ffmpegOpt.source) {
       throw new Error('Missing source for camera.');
     }
+
+    api.on(APIEvent.SHUTDOWN, () => {
+      for (const session in this.ongoingSessions) {
+        this.stopStream(session);
+      }
+    })
   }
 
   handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
