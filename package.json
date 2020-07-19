@@ -23,10 +23,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/homebridge-plugins/homebridge-camera-ffmpeg.git"
+    "url": "git://github.com/Sunoo/homebridge-camera-ffmpeg.git"
   },
   "bugs": {
-    "url": "http://github.com/homebridge-plugins/homebridge-camera-ffmpeg/issues"
+    "url": "http://github.com/Sunoo/homebridge-camera-ffmpeg/issues"
   },
   "engines": {
     "node": ">=10",
@@ -58,6 +58,7 @@
   "dependencies": {
     "ffmpeg-for-homebridge": "0.0.6",
     "ip": "^1.1.5",
-    "mqtt": "^4.1.0"
+    "mqtt": "^4.1.0",
+    "get-port": "^5.1.1"
   }
 }
