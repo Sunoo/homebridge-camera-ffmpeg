@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## v2.3.2 (2020-07-19)
+
+### Bug Fixes
+
+- FFmpeg processes are now killed when the iOS device goes inactive and when stopping Homebridge.
+
 ## v2.3.1 (2020-07-16)
 
 ### Changes

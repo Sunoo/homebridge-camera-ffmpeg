@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Camera FFmpeg",
   "name": "homebridge-camera-ffmpeg",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "ffmpeg plugin for homebridge: https://github.com/homebridge/homebridge",
   "main": "dist/index.js",
   "license": "ISC",
