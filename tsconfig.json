@@ -10,14 +10,13 @@
     ],
     "sourceMap": true,
     "outDir": "dist",
+    "rootDir": "src",
     "allowJs": true,
     "strict": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "./src/**/*",
-    "./package.json"
+    "./src/**/*"
   ]
 }

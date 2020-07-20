@@ -18,7 +18,7 @@ import { StreamingDelegate } from './streamingDelegate';
 import mqtt = require('mqtt');
 import http = require('http');
 import url = require('url');
-import packageInfo = require('../package.json');
+const version = require('../package.json').version; // eslint-disable-line @typescript-eslint/no-var-requires
 
 let hap: HAP;
 let Accessory: typeof PlatformAccessory;
@@ -87,7 +87,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || 'Default-Manufacturer');
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || 'Default-Model');
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || 'Default-SerialNumber');
-      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || packageInfo.version);
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || version);
     }
 
     const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
