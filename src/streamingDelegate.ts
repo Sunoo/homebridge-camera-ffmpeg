@@ -48,7 +48,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly videoProcessor: string;
   private readonly audio = false;
   private readonly vcodec: string;
-  private readonly acodec: string;
   private readonly packetSize: number;
   private readonly fps: number;
   private readonly maxBitrate: number;
@@ -75,7 +74,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
     this.audio = this.ffmpegOpt.audio;
     this.vcodec = this.ffmpegOpt.vcodec || 'libx264';
-    this.acodec = this.ffmpegOpt.acodec || 'libfdk_aac';
     this.packetSize = this.ffmpegOpt.packetSize || 1316;
     this.fps = this.ffmpegOpt.maxFPS;
     this.maxBitrate = this.ffmpegOpt.maxBitrate;
@@ -252,7 +250,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     switch (request.type) {
       case StreamRequestTypes.START: {
         const vcodec = this.vcodec;
-        const acodec = this.acodec;
         const additionalCommandline = this.additionalCommandline;
         const mapvideo = this.mapvideo;
         const mapaudio = this.mapaudio;
@@ -353,7 +350,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         if (this.audio) {
           const ffmpegAudioArgs =
             ' -map ' + mapaudio +
-            ' -acodec ' + acodec +
+            ' -acodec libfdk_aac' +
             ' -profile:a aac_eld' +
             ' -flags +global_header' +
             ' -f null' +

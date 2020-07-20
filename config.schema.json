@@ -2,7 +2,7 @@
   "pluginAlias": "Camera-ffmpeg",
   "pluginType": "platform",
   "singular": true,
-  "headerDisplay": "Plugin Providing FFmpeg-based Camera Support to Homebridge.\n\nFor examples of common configurations please check the [wiki](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/Tested-Configurations).",
+  "headerDisplay": "Homebridge Plugin Providing FFmpeg-based Camera Support.\n\nFor examples of common configurations please check the [wiki](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/Tested-Configurations).",
   "footerDisplay": "The **ffmpeg** binary must be installed on your system for this plugin to work. If you are using a custom compiled FFmpeg, it must compiled with libfdk-aac enabled for audio to work.",
   "schema": {
     "name": {
@@ -58,9 +58,6 @@
             "title": "Name",
             "type": "string",
             "required": true
-          },
-          "uploader": {
-            "type": "boolean"
           },
           "manufacturer": {
             "name": "Manufacturer",
@@ -192,6 +189,7 @@
               "additionalCommandline": {
                 "title": "Additional of extra command line options",
                 "type": "string",
+                "placeholder": "-preset ultrafast -tune zerolatency",
                 "description": "Additional of extra command line options to use with FFmpeg"
               },
               "mapvideo": {
