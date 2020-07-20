@@ -16,7 +16,7 @@ import {
   StreamRequestTypes,
   StreamSessionIdentifier,
   VideoInfo,
-  AudioInfo,
+  AudioInfo
 } from 'homebridge';
 import ip from 'ip';
 import { FfmpegProcess } from './ffmpeg';
@@ -29,13 +29,13 @@ type SessionInfo = {
   address: string; // address of the HAP controller
 
   videoPort: number;
-  videoReturnPort: number,
+  videoReturnPort: number;
   videoCryptoSuite: SRTPCryptoSuites; // should be saved if multiple suites are supported
   videoSRTP: Buffer; // key and salt concatenated
   videoSSRC: number; // rtp synchronisation source
 
   audioPort: number;
-  audioReturnPort: number,
+  audioReturnPort: number;
   audioCryptoSuite: SRTPCryptoSuites;
   audioSRTP: Buffer;
   audioSSRC: number;
@@ -44,24 +44,24 @@ type SessionInfo = {
 export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly hap: HAP;
   private readonly log: Logging;
-  private debug = false;
-  private ffmpegOpt: any;
-  private videoProcessor: string;
-  private audio = false;
-  private vcodec: string;
-  private acodec: string;
-  private packetSize: number;
-  private fps: number;
-  private maxBitrate: number;
-  private minBitrate: number;
-  private vflip = false;
-  private hflip = false;
-  private mapvideo: string;
-  private mapaudio: string;
-  private videoFilter: string;
-  private additionalCommandline: string;
-  private interfaceName: string;
-  private name = '';
+  private readonly debug = false;
+  private readonly ffmpegOpt: any;
+  private readonly videoProcessor: string;
+  private readonly audio = false;
+  private readonly vcodec: string;
+  private readonly acodec: string;
+  private readonly packetSize: number;
+  private readonly fps: number;
+  private readonly maxBitrate: number;
+  private readonly minBitrate: number;
+  private readonly vflip = false;
+  private readonly hflip = false;
+  private readonly mapvideo: string;
+  private readonly mapaudio: string;
+  private readonly videoFilter: string;
+  private readonly additionalCommandline: string;
+  private readonly interfaceName: string;
+  private readonly name = '';
   controller?: CameraController;
 
   // keep track of sessions
@@ -87,12 +87,12 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.additionalCommandline = this.ffmpegOpt.additionalCommandline || '-preset ultrafast -tune zerolatency';
     this.vflip = this.ffmpegOpt.vflip;
     this.hflip = this.ffmpegOpt.hflip;
-    this.mapvideo = this.ffmpegOpt.mapvideo || "0:0";
-    this.mapaudio = this.ffmpegOpt.mapaudio || "0:1";
+    this.mapvideo = this.ffmpegOpt.mapvideo || '0:0';
+    this.mapaudio = this.ffmpegOpt.mapaudio || '0:1';
     this.videoFilter = this.ffmpegOpt.videoFilter || null; // null is a valid discrete value
     this.debug = this.ffmpegOpt.debug;
     this.interfaceName = interfaceName || 'public';
-    
+
     if (!this.ffmpegOpt.source) {
       throw new Error('Missing source for camera.');
     }
@@ -101,7 +101,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       for (const session in this.ongoingSessions) {
         this.stopStream(session);
       }
-    })
+    });
   }
 
   handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
@@ -113,15 +113,18 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     let resolution: string;
     switch (this.ffmpegOpt.preserveRatio) {
-      case 'W':
+      case 'W': {
         resolution = width + ':-1';
         break;
-      case 'H':
+      }
+      case 'H': {
         resolution = '-1:' + height;
         break;
-      default:
+      }
+      default: {
         resolution = width + ':' + height;
         break;
+      }
     }
 
     const vf = [];
@@ -144,27 +147,27 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       const ffmpeg = spawn(
         this.videoProcessor,
         (imageSource + ' -frames:v 1' + (vf.length > 0 ? ' -vf ' + vf.join(',') : '') + ' -f image2 -').split(/\s+/),
-        { env: process.env },
+        { env: process.env }
       );
       let imageBuffer = Buffer.alloc(0);
       this.log(`Snapshot from ${this.name} at ${resolution}`);
       if (this.debug) {
         this.log(`${this.name} snapshot command: ffmpeg ${imageSource} -frames:v 1${vf.length > 0 ? ' -vf ' + vf.join(',') : ''} -f image2 -`);
       }
-      ffmpeg.stdout.on('data', function (data: any) {
+      ffmpeg.stdout.on('data', function(data: any) {
         imageBuffer = Buffer.concat([imageBuffer, data]);
       });
       const log = this.log;
       const debug = this.debug;
-      ffmpeg.on('error', function (error: any) {
+      ffmpeg.on('error', function(error: any) {
         log('An error occurred while making snapshot request');
         debug ? log(error) : null;
       });
       ffmpeg.on(
         'close',
-        function (): void {
+        function(): void {
           callback(undefined, imageBuffer);
-        }.bind(this),
+        }.bind(this)
       );
     } catch (err) {
       this.log.error(err);
@@ -211,10 +214,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       audioReturnPort: audioReturnPort,
       audioCryptoSuite: audioCryptoSuite,
       audioSRTP: Buffer.concat([audioSrtpKey, audioSrtpSalt]),
-      audioSSRC: audioSSRC,
+      audioSSRC: audioSSRC
     };
 
-    let currentAddress:string;
+    let currentAddress: string;
     try {
       currentAddress = ip.address(this.interfaceName, request.addressVersion); // ipAddress version must match
     } catch {
@@ -229,15 +232,15 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         ssrc: videoSSRC,
 
         srtp_key: videoSrtpKey,
-        srtp_salt: videoSrtpSalt,
+        srtp_salt: videoSrtpSalt
       },
       audio: {
         port: audioReturnPort,
         ssrc: audioSSRC,
 
         srtp_key: audioSrtpKey,
-        srtp_salt: audioSrtpSalt,
-      },
+        srtp_salt: audioSrtpSalt
+      }
     };
 
     this.pendingSessions[sessionId] = sessionInfo;
@@ -248,7 +251,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const sessionId = request.sessionID;
 
     switch (request.type) {
-      case StreamRequestTypes.START:
+      case StreamRequestTypes.START: {
         const vcodec = this.vcodec;
         const acodec = this.acodec;
         const additionalCommandline = this.additionalCommandline;
@@ -267,15 +270,18 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
         let resolution: string;
         switch (this.ffmpegOpt.preserveRatio) {
-          case 'W':
+          case 'W': {
             resolution = width + ':-1';
             break;
-          case 'H':
+          }
+          case 'H': {
             resolution = '-1:' + height;
             break;
-          default:
+          }
+          default: {
             resolution = width + ':' + height;
             break;
+          }
         }
 
         const videoPayloadType = video.pt;
@@ -383,21 +389,24 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           sessionId,
           returnPort,
           this.debug,
-          this.videoProcessor,
+          this.videoProcessor
         );
 
         this.ongoingSessions[sessionId] = ffmpeg;
         delete this.pendingSessions[sessionId];
         break;
-      case StreamRequestTypes.RECONFIGURE:
+      }
+      case StreamRequestTypes.RECONFIGURE: {
         // not implemented
         this.log.debug('Received (unsupported) request to reconfigure to: ' + JSON.stringify(request.video));
         callback();
         break;
-      case StreamRequestTypes.STOP:
+      }
+      case StreamRequestTypes.STOP: {
         this.stopStream(sessionId);
         callback();
         break;
+      }
     }
   }
 

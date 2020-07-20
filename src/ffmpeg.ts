@@ -7,8 +7,8 @@ import { createSocket } from 'dgram';
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export class FfmpegProcess {
-  private ff: ChildProcess;
-  private killing: boolean = false;
+  private readonly ff: ChildProcess;
+  private killing = false;
   private timeout?: NodeJS.Timeout;
 
   constructor(
@@ -20,7 +20,7 @@ export class FfmpegProcess {
     sessionId: string,
     returnPort: number,
     ffmpegDebugOutput: boolean,
-    customFfmpeg?: string,
+    customFfmpeg?: string
   ) {
     let started = false;
     const controller = delegate.controller;
@@ -41,7 +41,7 @@ export class FfmpegProcess {
       this.timeout = setTimeout(() => {
         log(`${title} appears to be inactive for over 5 seconds. Stopping stream.`);
         delegate.stopStream(sessionId);
-      }, 5000)
+      }, 5000);
     });
     socket.bind(returnPort);
 

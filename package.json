@@ -8,10 +8,11 @@
   "scripts": {
     "clean": "rimraf ./dist ./coverage",
     "build": "rimraf ./dist ./coverage && tsc",
-    "format": "prettier --write \"src/**/*.ts\"",
+    "format": "prettier --write \"*.md\"",
     "lint": "eslint **/*.ts --fix",
+    "lint-check": "eslint **/*.ts",
     "prepare": "npm run build",
-    "prepublishOnly": "npm run lint",
+    "prepublishOnly": "npm run lint-check",
     "postpublish": "npm run clean",
     "watch": "npm run clean && tsc --watch"
   },

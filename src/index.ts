@@ -12,7 +12,7 @@ import {
   Logging,
   PlatformAccessory,
   PlatformAccessoryEvent,
-  PlatformConfig,
+  PlatformConfig
 } from 'homebridge';
 import { StreamingDelegate } from './streamingDelegate';
 import mqtt = require('mqtt');
@@ -29,8 +29,8 @@ const PLATFORM_NAME = 'Camera-ffmpeg';
 class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logging;
   private readonly api: API;
-  private config: PlatformConfig;
-  private cameraConfigs: Map<string, any> = new Map(); // configuration for each camera indexed by uuid
+  private readonly config: PlatformConfig;
+  private readonly cameraConfigs: Map<string, any> = new Map(); // configuration for each camera indexed by uuid
   private readonly accessories: Array<PlatformAccessory> = [];
 
   constructor(log: Logging, config: PlatformConfig, api: API) {
@@ -50,7 +50,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         const videoConfig = cameraConfig.videoConfig;
 
         if (!cameraName || !videoConfig) {
-          this.log.error("Missing parameters ('name' or 'videoConfig') for camera " + cameraName);
+          this.log.error('Missing parameters (\'name\' or \'videoConfig\') for camera ' + cameraName);
           return;
         }
 
@@ -111,8 +111,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     if (doorbellSwitchService) {
       cameraAccessory.removeService(doorbellSwitchService);
     }
-    
-    const timeout = (cameraConfig.motionTimeout > 0) ? cameraConfig.motionTimeout : 1;
+
+    const timeout = cameraConfig.motionTimeout > 0 ? cameraConfig.motionTimeout : 1;
 
     if (cameraConfig.doorbell) {
       const doorbellService = new hap.Service.Doorbell(`${cameraConfig.name} Doorbell`);
@@ -127,10 +127,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
               if (doorbellService) {
                 doorbellService.updateCharacteristic(
                   hap.Characteristic.ProgrammableSwitchEvent,
-                  hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
+                  hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
                 );
 
-                setTimeout(function () {
+                setTimeout(() => {
                   doorbellTriggerService.getCharacteristic(hap.Characteristic.On).updateValue(false);
                 }, timeout * 1000);
               }
@@ -145,7 +145,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         doorbellSwitchService
           .getCharacteristic(hap.Characteristic.ProgrammableSwitchEvent)
           .setProps({
-            maxValue: hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS,
+            maxValue: hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
           });
         cameraAccessory.addService(doorbellSwitchService);
       }
@@ -165,7 +165,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
             if (motionService) {
               motionService.setCharacteristic(hap.Characteristic.MotionDetected, on ? 1 : 0);
               if (on) {
-                setTimeout(function () {
+                setTimeout(() => {
                   log.info(`Setting ${cameraAccessory.displayName} Button to false`);
                   const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
                   if (motionTriggerService) {
@@ -199,22 +199,22 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
             [1280, 720, 30],
             [1280, 960, 30],
             [1920, 1080, 30],
-            [1600, 1200, 30],
+            [1600, 1200, 30]
           ],
           codec: {
             profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
-            levels: [hap.H264Level.LEVEL3_1, hap.H264Level.LEVEL3_2, hap.H264Level.LEVEL4_0],
-          },
+            levels: [hap.H264Level.LEVEL3_1, hap.H264Level.LEVEL3_2, hap.H264Level.LEVEL4_0]
+          }
         },
         audio: {
           codecs: [
             {
               type: AudioStreamingCodecType.AAC_ELD,
-              samplerate: AudioStreamingSamplerate.KHZ_16,
-            },
-          ],
-        },
-      },
+              samplerate: AudioStreamingSamplerate.KHZ_16
+            }
+          ]
+        }
+      }
     };
 
     const cameraController = new hap.CameraController(options);
@@ -225,7 +225,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.accessories.push(cameraAccessory);
   }
 
-  automationHandler(name:string, doorbell:boolean = false, active:boolean = true): void {
+  automationHandler(name: string, doorbell = false, active = true): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
       this.log('Switch', doorbell ? 'Doorbell' : 'Motion Detect',
@@ -244,10 +244,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
             const timeout = this.cameraConfigs.get(accessory.UUID).motionTimeout ?? 1;
             const log = this.log;
             if (timeout > 0) {
-              setTimeout(function () {
+              setTimeout(() => {
                 log('Motion Detect Timeout:', accessory.displayName);
                 motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
-                }, timeout * 1000);
+              }, timeout * 1000);
             }
           } else {
             motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
@@ -261,7 +261,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     if (this.config.mqtt) {
       const servermqtt = this.config.mqtt;
       const portmqtt = this.config.portmqtt || '1883';
-      let mqtttopic:string = 'homebridge';
+      let mqtttopic = 'homebridge';
       if (this.config.topic && this.config.topic != 'homebridge/motion') {
         mqtttopic = this.config.topic;
       }
