@@ -2,7 +2,7 @@ name: NodeJS
 
 on:
   push:
-    branches: master
+    branches: '**'
   pull_request:
   release: # Run when release is created
     types: [created]
