@@ -3,7 +3,6 @@ import { Logging, StreamRequestCallback } from 'homebridge';
 import { StreamingDelegate } from './streamingDelegate';
 import { Readable, Writable } from 'stream';
 import { createSocket } from 'dgram';
-
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export class FfmpegProcess {

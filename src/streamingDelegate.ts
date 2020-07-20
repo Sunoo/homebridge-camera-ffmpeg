@@ -22,7 +22,6 @@ import ip from 'ip';
 import { FfmpegProcess } from './ffmpeg';
 import { spawn } from 'child_process';
 import getPort from 'get-port';
-
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 type SessionInfo = {
@@ -68,7 +67,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
 
-  constructor(hap: HAP, cameraConfig: any, log: Logging, videoProcessor: string, interfaceName: string, api: API) {
+  constructor(hap: HAP, cameraConfig: any, log: Logging, videoProcessor: string, interfaceName: string, api: API) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
     this.hap = hap;
     this.log = log;
     this.ffmpegOpt = cameraConfig.videoConfig;
