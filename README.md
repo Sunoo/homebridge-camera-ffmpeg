@@ -1,13 +1,13 @@
 <!-- markdownlint-disable no-inline-html -->
 <span align="center">
 
-[<img alt="homebridge-verified" src="https://github.com/homebridge/branding/blob/master/logos/homebridge-color-round.svg?sanitize=true" width="140px">](https://github.com/homebridge/verified/blob/master/verified-plugins.json)
+[<img alt="homebridge-verified" src="https://github.com/homebridge/branding/blob/master/logos/homebridge-color-round.svg?sanitize=true" width="140px">](https://github.com/homebridge/verified)
 
 # Homebridge Camera FFmpeg
 
 [![npm](https://badgen.net/npm/v/homebridge-camera-ffmpeg) ![npm](https://badgen.net/npm/dt/homebridge-camera-ffmpeg)](https://www.npmjs.com/package/homebridge-camera-ffmpeg)
 
-[FFmpeg](https://www.ffmpeg.org) plugin for [Homebridge](https://homebridge.io)
+Plugin Providing [FFmpeg](https://www.ffmpeg.org)-based Camera Support to [Homebridge](https://homebridge.io)
 
 </span>
 <!-- markdownlint-enable no-inline-html -->
@@ -16,28 +16,13 @@
 
 Basic Installation:
 
-1. Install this plugin using: `npm install -g --unsafe-perm homebridge-camera-ffmpeg`
+1. Install this plugin using: `sudo npm install -g --unsafe-perm homebridge-camera-ffmpeg`.
 2. Edit `config.json` and add the camera.
 
 Install via Homebridge Config UI X:
 
-1. Search for `Camera FFmpeg` on the plugin screen of the [Homebridge UI](https://github.com/oznu/homebridge-config-ui-x).
-2. Install the `homebridge-camera-ffmpeg` and use the form to enter your camera settings.
-
-After paring and restarting Homebridge, each camera you defined will be automatically added into the Home app.
-
-<!-- markdownlint-disable no-inline-html -->
-- To Pair Homebridge:
-
-  1. Open the Home <img src="https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png" height="16.42px"> app on your device.
-  2. Tap the Home tab, then tap <img src="https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png" height="16.42px">.
-  3. Tap _Add Accessory_, and select _I Don't Have a Code or Cannot Scan_.
-  4. Select Homebridge, this will display as a bridge.
-  5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select _Use Camera_ and scan the QR code again.
-  6. Your cameras will then be automatically added to HomeKit.
-
-- For help and examples of common configurations please read the wiki.
-<!-- markdownlint-enable no-inline-html -->
+1. Search for `Camera FFmpeg` on the plugin screen of [Config UI X](https://github.com/oznu/homebridge-config-ui-x).
+2. Install the `Homebridge Camera FFmpeg` plugin and use the form to enter your camera settings.
 
 ## Configuration
 
