@@ -1,17 +1,16 @@
+<!-- markdownlint-disable no-inline-html -->
 <span align="center">
 
-<a href="https://github.com/homebridge/verified/blob/master/verified-plugins.json"><img alt="homebridge-verified" src="https://github.com/homebridge/branding/blob/master/logos/homebridge-color-round.svg?sanitize=true" width="140px"></a>
+[<img alt="homebridge-verified" src="https://github.com/homebridge/branding/blob/master/logos/homebridge-color-round.svg?sanitize=true" width="140px">](https://github.com/homebridge/verified/blob/master/verified-plugins.json)
 
 # Homebridge Camera FFmpeg
 
-<a href="https://www.npmjs.com/package/homebridge-camera-ffmpeg"><img title="npm version" src="https://badgen.net/npm/v/homebridge-camera-ffmpeg" ></a>
-<a href="https://www.npmjs.com/package/homebridge-camera-ffmpeg"><img title="npm downloads" src="https://badgen.net/npm/dt/homebridge-camera-ffmpeg" ></a>
+[![npm](https://badgen.net/npm/v/homebridge-camera-ffmpeg) ![npm](https://badgen.net/npm/dt/homebridge-camera-ffmpeg)](https://www.npmjs.com/package/homebridge-camera-ffmpeg)
 
-<p><a href="https://www.ffmpeg.org">FFmpeg</a> plugin for
-  <a href="https://homebridge.io">Homebridge</a>.
-</p>
+[FFmpeg](https://www.ffmpeg.org) plugin for [Homebridge](https://homebridge.io)
 
 </span>
+<!-- markdownlint-enable no-inline-html -->
 
 ## Installation
 
@@ -27,19 +26,24 @@ Install via Homebridge Config UI X:
 
 After paring and restarting Homebridge, each camera you defined will be automatically added into the Home app.
 
+<!-- markdownlint-disable no-inline-html -->
 - To Pair Homebridge:
+
   1. Open the Home <img src="https://user-images.githubusercontent.com/3979615/78010622-4ea1d380-738e-11ea-8a17-e6a465eeec35.png" height="16.42px"> app on your device.
   2. Tap the Home tab, then tap <img src="https://user-images.githubusercontent.com/3979615/78010869-9aed1380-738e-11ea-9644-9f46b3633026.png" height="16.42px">.
   3. Tap _Add Accessory_, and select _I Don't Have a Code or Cannot Scan_.
   4. Select Homebridge, this will display as a bridge.
   5. Enter the Homebridge PIN, this can be found under the QR code in Homebridge UI or your Homebridge logs, alternatively you can select _Use Camera_ and scan the QR code again.
   6. Your cameras will then be automatically added to HomeKit.
+
 - For help and examples of common configurations please read the wiki.
+<!-- markdownlint-enable no-inline-html -->
 
 ## Configuration
 
-#### Config.json Example
+### Config.json Example
 
+```json
     {
       "platform": "Camera-ffmpeg",
       "cameras": [
@@ -56,6 +60,7 @@ After paring and restarting Homebridge, each camera you defined will be automati
         }
       ]
     }
+```
 
 #### Optional Parameters
 
@@ -68,7 +73,7 @@ After paring and restarting Homebridge, each camera you defined will be automati
 
 Example with manufacturer, model, serial number and firmware set:
 
-```
+```json
 {
   "platform": "Camera-ffmpeg",
   "cameras": [
@@ -114,7 +119,7 @@ Example with manufacturer, model, serial number and firmware set:
 
 A somewhat complicated example:
 
-```
+```json
 {
   "platform": "Camera-ffmpeg",
   "cameras": [
@@ -144,7 +149,7 @@ A somewhat complicated example:
 
 - `videoProcessor` is the video processor used to manage videos. eg: ffmpeg (by default) or avconv or /a/path/to/another/ffmpeg. Need to use the same parameters than ffmpeg.
 
-```
+```json
 {
   "platform": "Camera-ffmpeg",
   "videoProcessor": "avconv",
@@ -154,7 +159,7 @@ A somewhat complicated example:
 }
 ```
 
-```
+```json
 {
   "platform": "Camera-ffmpeg",
   "videoProcessor": "/my/own/compiled/ffmpeg",
@@ -168,7 +173,7 @@ A somewhat complicated example:
 
 - `interfaceName` selects the IP address of a given network interface. The default is to select the first available, and that may not be the same IP address that ffmpeg will use. A mismatch will cause the iOS device to discard the video stream.
 
-```
+```json
 {
   "platform": "Camera-ffmpeg",
   "interfaceName": "bond0",
@@ -182,7 +187,7 @@ A somewhat complicated example:
 
 We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki). Also if you have a working configuration that you would like to share, please add it to the [wiki](https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki).
 
-https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki
+<https://github.com/homebridge-plugins/homebridge-camera-ffmpeg/wiki>
 
 ## Credit
 

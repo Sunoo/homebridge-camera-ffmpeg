@@ -1,0 +1,6 @@
+{
+  "default": true,
+  "line_length": false,
+  "no-duplicate-heading": false,
+  "first-line-heading": false
+}
