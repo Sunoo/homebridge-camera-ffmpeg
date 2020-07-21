@@ -3,7 +3,6 @@ import { Logging, StreamRequestCallback } from 'homebridge';
 import { StreamingDelegate } from './streamingDelegate';
 import { Readable, Writable } from 'stream';
 import { createSocket } from 'dgram';
-const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 export class FfmpegProcess {
   private readonly ff: ChildProcess;
@@ -19,7 +18,7 @@ export class FfmpegProcess {
     sessionId: string,
     returnPort: number,
     ffmpegDebugOutput: boolean,
-    customFfmpeg?: string
+    videoProcessor: string
   ) {
     let started = false;
     const controller = delegate.controller;
@@ -44,7 +43,6 @@ export class FfmpegProcess {
     });
     socket.bind(returnPort);
 
-    const videoProcessor = customFfmpeg || pathToFfmpeg || 'ffmpeg';
     this.ff = spawn(videoProcessor, command.split(/\s+/), { env: process.env });
 
     if (this.ff.stdin) {
