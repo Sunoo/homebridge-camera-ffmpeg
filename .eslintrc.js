@@ -13,7 +13,6 @@ module.exports = {
   rules: {
     '@typescript-eslint/array-type': ['error', {default: 'generic'}],
     '@typescript-eslint/brace-style': 'error',
-    '@typescript-eslint/camelcase': 'off',
     '@typescript-eslint/comma-spacing': 'error',
     '@typescript-eslint/explicit-function-return-type': 'error',
     '@typescript-eslint/func-call-spacing': 'error',

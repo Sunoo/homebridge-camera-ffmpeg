@@ -28,7 +28,7 @@ Other users have been sharing configurations that work for them in [our wiki](ht
 
 - `platform`: _(Required)_ Must always be set to `Config-ffmpeg`.
 - `name`: _(Required)_ Set the camera name for display in the Home app.
-- `source`: _(Required)_ FFmpeg options on where to find and how to decode your camera's video stream. The most basic form is `-i` followed by your URL.
+- `source`: _(Required)_ FFmpeg options on where to find and how to decode your camera's video stream. The most basic form is `-i` followed by your camera's URL.
 - `stillImageSource`: If your camera also provides a URL for a still image, that can be defined here with the same syntax as `source`. If not set, the plugin will grab one frame from `source`.
 
 #### Config Example
@@ -56,7 +56,7 @@ Other users have been sharing configurations that work for them in [our wiki](ht
 
 - `motion`: Exposes the motion sensor for this camera. This can be triggered with the dummy switches, MQTT messages, or via HTTP, depending on what features are enabled in the config. (Default: `false`)
 - `doorbell`: Exposes the doorbell device for this camera. This can be triggered with the dummy switches, MQTT messages, or via HTTP, depending on what features are enabled in the config. (Default: `false`)
-- `doorbellSwitch`: Exposes the statelss switch representing the doorbell button for this camera. (Default: `false`)
+- `doorbellSwitch`: Exposes the stateless switch representing the doorbell button for this camera. (Default: `false`)
 - `switches`: Enables dummy switches to trigger motion and/or doorbell, if either of those are enabled. When enabled there will be an additional switch that triggers the motion or doorbell event. See wiki for [more detailed instructions](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/iOS-13-and-Photo-Notifications). (Default: `false`)
 - `motionTimeout`: The number of seconds after triggering to reset the motion sensor. Set to 0 to disable resetting of motion trigger for MQTT or HTTP. (Default: `1`)
 - `manufacturer`: Set the manufacturer name for display in the Home app.
