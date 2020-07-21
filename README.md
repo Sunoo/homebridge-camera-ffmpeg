@@ -140,10 +140,10 @@ Other users have been sharing configurations that work for them in [our wiki](ht
 ### Automation Parameters
 
 - `mqtt`: Defines the hostname or IP of the MQTT broker to connect to for MQTT-based automation. If not set, MQTT support is not started. See the wiki for [more information on using MQTT](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/MQTT-Motion).
-- `portmqtt`: The port of the MQTT broker. (Default: `1883`) 
+- `portmqtt`: The port of the MQTT broker. (Default: `1883`)
 - `usermqtt`: The username used to connect to your MQTT broker. If not set, no authentication is used.
 - `passmqtt`: The password used to connect to your MQTT broker. If not set, no authentication is used.
-- `topic`: The base MQTT topic to subscribe to.
+- `topic`: The base MQTT topic to subscribe to. (Default: `homebridge`)
 - `httpport`: The port to listen on for HTTP-based automation. If not set, HTTP support is not started. See the wiki for [more information on using HTTP](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/HTTP-Motion).
 
 #### Automation Example
@@ -154,9 +154,7 @@ Other users have been sharing configurations that work for them in [our wiki](ht
   "mqtt": "127.0.0.1",
   "topic": "homebridge",
   "porthttp": "8080",
-  "cameras": [
-    ...
-  ]
+  "cameras": []
 }
 ```
 
@@ -172,9 +170,7 @@ Other users have been sharing configurations that work for them in [our wiki](ht
   "platform": "Camera-ffmpeg",
   "videoProcessor": "/usr/bin/ffmpeg",
   "interfaceName": "eth0",
-  "cameras": [
-    ...
-  ]
+  "cameras": []
 }
 ```
 

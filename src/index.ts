@@ -180,7 +180,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       }
     }
 
-    const streamingDelegate = new StreamingDelegate(hap, cameraConfig, this.log, this.config.videoProcessor, this.config.interfaceName, this.api);
+    const streamingDelegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap, this.config.videoProcessor, this.config.interfaceName);
 
     const options: CameraControllerOptions = {
       cameraStreamCount: cameraConfig.videoConfig.maxStreams || 2, // HomeKit requires at least 2 streams, but 1 is also just fine

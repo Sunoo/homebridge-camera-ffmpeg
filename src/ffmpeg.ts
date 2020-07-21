@@ -11,14 +11,14 @@ export class FfmpegProcess {
 
   constructor(
     title: string,
+    sessionId: string,
+    videoProcessor: string,
     command: string,
     log: Logging,
-    callback: StreamRequestCallback | undefined,
-    delegate: StreamingDelegate,
-    sessionId: string,
     returnPort: number,
     ffmpegDebugOutput: boolean,
-    videoProcessor: string
+    delegate: StreamingDelegate,
+    callback: StreamRequestCallback | undefined
   ) {
     let started = false;
     const controller = delegate.controller;
