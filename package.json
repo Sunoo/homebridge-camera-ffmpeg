@@ -42,7 +42,7 @@
     "README.md"
   ],
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^3.6.1",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
     "@types/ip": "^1.1.0",
     "@types/node": "14.0.24",
