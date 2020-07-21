@@ -1,9 +1,6 @@
 import {
   API,
   APIEvent,
-  AudioStreamingCodecType,
-  AudioStreamingSamplerate,
-  CameraControllerOptions,
   CharacteristicEventTypes,
   CharacteristicSetCallback,
   CharacteristicValue,
@@ -15,6 +12,7 @@ import {
   PlatformConfig
 } from 'homebridge';
 import { StreamingDelegate } from './streamingDelegate';
+import { CameraConfig, FfmpegPlatformConfig } from './configTypes';
 import mqtt = require('mqtt');
 import http = require('http');
 import url = require('url');
@@ -29,14 +27,14 @@ const PLATFORM_NAME = 'Camera-ffmpeg';
 class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logging;
   private readonly api: API;
-  private readonly config: PlatformConfig;
-  private readonly cameraConfigs: Map<string, any> = new Map(); // configuration for each camera indexed by uuid
+  private readonly config: FfmpegPlatformConfig;
+  private readonly cameraConfigs: Map<string, CameraConfig> = new Map(); // configuration for each camera indexed by uuid
   private readonly accessories: Array<PlatformAccessory> = [];
 
   constructor(log: Logging, config: PlatformConfig, api: API) {
     this.log = log;
     this.api = api;
-    this.config = config;
+    this.config = config as unknown as FfmpegPlatformConfig;
 
     // Need a config or plugin will not start
     if (!config) {
@@ -45,19 +43,16 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
     if (this.config.cameras) {
       // doing some sanity checks and index the camera config by the accessory uuid
-      this.config.cameras.forEach((cameraConfig: any) => {
-        const cameraName = cameraConfig.name;
-        const videoConfig = cameraConfig.videoConfig;
-
-        if (!cameraName || !videoConfig) {
-          this.log.error('Missing parameters (\'name\' or \'videoConfig\') for camera ' + cameraName);
+      this.config.cameras.forEach((cameraConfig: CameraConfig) => {
+        if (!cameraConfig.name || ! cameraConfig.videoConfig) {
+          this.log.error('Missing parameters (\'name\' or \'videoConfig\') for camera ' + cameraConfig.name);
           return;
         }
 
-        const uuid = hap.uuid.generate(cameraName);
+        const uuid = hap.uuid.generate(cameraConfig.name);
         if (this.cameraConfigs.has(uuid)) {
           // Camera names must be unique
-          this.log.error(`The camera ${cameraName} seems to be defined more than one time. Ignoring any other occurrences!`);
+          this.log.error(`The camera ${cameraConfig.name} seems to be defined more than one time. Ignoring any other occurrences!`);
           return;
         }
 
@@ -159,12 +154,12 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         const motionTriggerService = new hap.Service.Switch(cameraConfig.name, 'MotionTrigger');
         motionTriggerService
           .getCharacteristic(hap.Characteristic.On)
-          .on(CharacteristicEventTypes.SET, (on: CharacteristicValue, callback: CharacteristicSetCallback) => {
-            log.info(`Setting ${cameraAccessory.displayName} Motion to ${on}`);
+          .on(CharacteristicEventTypes.SET, (isOn: CharacteristicValue, callback: CharacteristicSetCallback) => {
+            log.info(`Setting ${cameraAccessory.displayName} Motion to ${isOn ? 'On' : 'Off'}`);
             const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
             if (motionService) {
-              motionService.setCharacteristic(hap.Characteristic.MotionDetected, on ? 1 : 0);
-              if (on) {
+              motionService.setCharacteristic(hap.Characteristic.MotionDetected, isOn ? 1 : 0);
+              if (isOn) {
                 setTimeout(() => {
                   log.info(`Setting ${cameraAccessory.displayName} Button to false`);
                   const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
@@ -174,7 +169,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
                 }, timeout * 1000);
               }
             }
-            callback(null, on);
+            callback(null, isOn);
           });
         cameraAccessory.addService(motionTriggerService);
       }
@@ -182,45 +177,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
     const streamingDelegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap, this.config.videoProcessor, this.config.interfaceName);
 
-    const options: CameraControllerOptions = {
-      cameraStreamCount: cameraConfig.videoConfig.maxStreams || 2, // HomeKit requires at least 2 streams, but 1 is also just fine
-      delegate: streamingDelegate,
-      streamingOptions: {
-        supportedCryptoSuites: [hap.SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
-        video: {
-          resolutions: [
-            [320, 180, 30],
-            [320, 240, 15], // Apple Watch requires this configuration
-            [320, 240, 30],
-            [480, 270, 30],
-            [480, 360, 30],
-            [640, 360, 30],
-            [640, 480, 30],
-            [1280, 720, 30],
-            [1280, 960, 30],
-            [1920, 1080, 30],
-            [1600, 1200, 30]
-          ],
-          codec: {
-            profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
-            levels: [hap.H264Level.LEVEL3_1, hap.H264Level.LEVEL3_2, hap.H264Level.LEVEL4_0]
-          }
-        },
-        audio: {
-          codecs: [
-            {
-              type: AudioStreamingCodecType.AAC_ELD,
-              samplerate: AudioStreamingSamplerate.KHZ_16
-            }
-          ]
-        }
-      }
-    };
-
-    const cameraController = new hap.CameraController(options);
-    streamingDelegate.controller = cameraController;
-
-    cameraAccessory.configureController(cameraController);
+    cameraAccessory.configureController(streamingDelegate.controller);
 
     this.accessories.push(cameraAccessory);
   }
@@ -241,7 +198,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         if (motionSensor) {
           if (active) {
             motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-            const timeout = this.cameraConfigs.get(accessory.UUID).motionTimeout ?? 1;
+            const timeout = this.cameraConfigs.get(accessory.UUID)?.motionTimeout ?? 1;
             const log = this.log;
             if (timeout > 0) {
               setTimeout(() => {

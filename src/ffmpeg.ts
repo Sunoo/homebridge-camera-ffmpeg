@@ -29,7 +29,7 @@ export class FfmpegProcess {
 
     const socket = createSocket('udp4');
     socket.on('error', (err) => {
-      log.error(`[${title}] socket error: ${err}`);
+      log.error(`[${title}] socket error: ${err.name}`);
       delegate.stopStream(sessionId);
     });
     socket.on('message', () => {

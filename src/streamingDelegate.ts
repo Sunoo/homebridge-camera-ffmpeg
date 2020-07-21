@@ -1,7 +1,10 @@
 import {
   API,
   APIEvent,
+  AudioStreamingCodecType,
+  AudioStreamingSamplerate,
   CameraController,
+  CameraControllerOptions,
   CameraStreamingDelegate,
   HAP,
   Logging,
@@ -19,6 +22,7 @@ import {
 } from 'homebridge';
 import ip from 'ip';
 import { FfmpegProcess } from './ffmpeg';
+import { CameraConfig, VideoConfig } from './configTypes';
 import { spawn } from 'child_process';
 import getPort from 'get-port';
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -39,23 +43,31 @@ type SessionInfo = {
   audioSSRC: number;
 };
 
+type ResolutionInfo = {
+  width: number;
+  height: number;
+  videoFilter: Array<string>;
+};
+
 export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly hap: HAP;
   private readonly log: Logging;
-  private readonly videoConfig: any;
+  private readonly name: string;
+  private readonly videoConfig: VideoConfig;
   private readonly videoProcessor: string;
   private readonly interfaceName: string;
-  controller?: CameraController;
+  controller: CameraController;
 
   // keep track of sessions
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
 
-  constructor(log: Logging, cameraConfig: any, api: API, hap: HAP,  videoProcessor: string, interfaceName: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+  constructor(log: Logging, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string, interfaceName: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
     this.log = log;
     this.videoConfig = cameraConfig.videoConfig;
     this.hap = hap;
 
+    this.name = cameraConfig.name;
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
     this.interfaceName = interfaceName || 'public';
 
@@ -68,9 +80,46 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         this.stopStream(session);
       }
     });
+
+    const options: CameraControllerOptions = {
+      cameraStreamCount: cameraConfig.videoConfig.maxStreams || 2, // HomeKit requires at least 2 streams, but 1 is also just fine
+      delegate: this,
+      streamingOptions: {
+        supportedCryptoSuites: [hap.SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
+        video: {
+          resolutions: [
+            [320, 180, 30],
+            [320, 240, 15], // Apple Watch requires this configuration
+            [320, 240, 30],
+            [480, 270, 30],
+            [480, 360, 30],
+            [640, 360, 30],
+            [640, 480, 30],
+            [1280, 720, 30],
+            [1280, 960, 30],
+            [1920, 1080, 30],
+            [1600, 1200, 30]
+          ],
+          codec: {
+            profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
+            levels: [hap.H264Level.LEVEL3_1, hap.H264Level.LEVEL3_2, hap.H264Level.LEVEL4_0]
+          }
+        },
+        audio: {
+          codecs: [
+            {
+              type: AudioStreamingCodecType.AAC_ELD,
+              samplerate: AudioStreamingSamplerate.KHZ_16
+            }
+          ]
+        }
+      }
+    };
+
+    this.controller = new hap.CameraController(options);
   }
 
-  private determineResolution(request: SnapshotRequest | VideoInfo): any {
+  private determineResolution(request: SnapshotRequest | VideoInfo): ResolutionInfo {
     const width = request.width > this.videoConfig.maxWidth ? this.videoConfig.maxWidth : request.width;
     const height = request.height > this.videoConfig.maxHeight ? this.videoConfig.maxHeight : request.height;
 
@@ -87,8 +136,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         break;
     }
 
-
-    const vf = [];
+    const vf: Array<string> = [];
     const configFilter = this.videoConfig.videoFilter || null; // null is a valid discrete value
     const videoFilter = configFilter === '' || configFilter === null ? 'scale=' + resolution : configFilter; // empty string or null indicates default
     // In the case of null, skip entirely
@@ -124,16 +172,16 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         { env: process.env }
       );
       let imageBuffer = Buffer.alloc(0);
-      this.log(`Snapshot from ${this.videoConfig.name} (${resolution.width}x${resolution.height})`);
+      this.log(`Snapshot from ${this.name} (${resolution.width}x${resolution.height})`);
       if (this.videoConfig.debug) {
-        this.log(`${this.videoConfig.name} snapshot command: ffmpeg ${fcmd}`);
+        this.log(`${this.name} snapshot command: ffmpeg ${fcmd}`);
       }
-      ffmpeg.stdout.on('data', function(data: any) {
+      ffmpeg.stdout.on('data', function(data: Uint8Array) {
         imageBuffer = Buffer.concat([imageBuffer, data]);
       });
       const log = this.log;
       const debug = this.videoConfig.debug;
-      ffmpeg.on('error', function(error: any) {
+      ffmpeg.on('error', function(error: string) {
         log('An error occurred while making snapshot request');
         debug ? log(error) : null;
       });
@@ -224,29 +272,29 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     let fcmd = this.videoConfig.source;
 
-    this.log(`Starting ${this.videoConfig.name} video stream(${resolution.width}x${resolution.height}, ${fps} fps, ${videoBitrate} kbps, ${mtu} mtu)...`,
+    this.log(`Starting ${this.name} video stream(${resolution.width}x${resolution.height}, ${fps} fps, ${videoBitrate} kbps, ${mtu} mtu)...`,
       this.videoConfig.debug ? 'debug enabled' : '');
 
     const ffmpegVideoArgs =
-          ' -map ' + mapvideo +
-          ' -vcodec ' + vcodec +
-          ' -pix_fmt yuv420p' +
-          ' -r ' + fps +
-          ' -f rawvideo' +
-          ' ' + additionalCommandline +
-          (resolution.videoFilter.length > 0 ? ' -vf ' + resolution.videoFilter.join(',') : '') +
-          ' -b:v ' + videoBitrate + 'k' +
-          ' -bufsize ' + 2 * videoBitrate + 'k' +
-          ' -maxrate ' + videoBitrate + 'k' +
-          ' -payload_type ' + request.video.pt;
+      ' -map ' + mapvideo +
+      ' -vcodec ' + vcodec +
+      ' -pix_fmt yuv420p' +
+      ' -r ' + fps +
+      ' -f rawvideo' +
+      ' ' + additionalCommandline +
+      (resolution.videoFilter.length > 0 ? ' -vf ' + resolution.videoFilter.join(',') : '') +
+      ' -b:v ' + videoBitrate + 'k' +
+      ' -bufsize ' + 2 * videoBitrate + 'k' +
+      ' -maxrate ' + videoBitrate + 'k' +
+      ' -payload_type ' + request.video.pt;
 
     const ffmpegVideoStream =
-          ' -ssrc ' + sessionInfo.videoSSRC +
-          ' -f rtp' +
-          ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-          ' -srtp_out_params ' + sessionInfo.videoSRTP.toString('base64') +
-          ' srtp://' + sessionInfo.address + ':' + sessionInfo.videoPort +
-          '?rtcpport=' + sessionInfo.videoPort +'&localrtcpport=' + sessionInfo.videoPort + '&pkt_size=' + mtu;
+      ' -ssrc ' + sessionInfo.videoSSRC +
+      ' -f rtp' +
+      ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+      ' -srtp_out_params ' + sessionInfo.videoSRTP.toString('base64') +
+      ' srtp://' + sessionInfo.address + ':' + sessionInfo.videoPort +
+      '?rtcpport=' + sessionInfo.videoPort +'&localrtcpport=' + sessionInfo.videoPort + '&pkt_size=' + mtu;
 
     // build required video arguments
     fcmd += ffmpegVideoArgs;
@@ -255,24 +303,24 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     // build optional audio arguments
     if (this.videoConfig.audio) {
       const ffmpegAudioArgs =
-            ' -map ' + mapaudio +
-            ' -acodec libfdk_aac' +
-            ' -profile:a aac_eld' +
-            ' -flags +global_header' +
-            ' -f null' +
-            ' -ar ' + request.audio.sample_rate + 'k' +
-            ' -b:a ' + audioBitrate + 'k' +
-            ' -bufsize ' + audioBitrate + 'k' +
-            ' -ac 1' +
-            ' -payload_type ' + request.audio.pt;
+        ' -map ' + mapaudio +
+        ' -acodec libfdk_aac' +
+        ' -profile:a aac_eld' +
+        ' -flags +global_header' +
+        ' -f null' +
+        ' -ar ' + request.audio.sample_rate + 'k' +
+        ' -b:a ' + audioBitrate + 'k' +
+        ' -bufsize ' + audioBitrate + 'k' +
+        ' -ac 1' +
+        ' -payload_type ' + request.audio.pt;
 
       const ffmpegAudioStream =
-            ' -ssrc ' + sessionInfo.audioSSRC +
-            ' -f rtp' +
-            ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-            ' -srtp_out_params ' + sessionInfo.audioSRTP.toString('base64') +
-            ' srtp://' + sessionInfo.address + ':' + sessionInfo.audioPort +
-            '?rtcpport=' + sessionInfo.audioPort + '&localrtcpport=' + sessionInfo.audioPort + '&pkt_size=188';
+        ' -ssrc ' + sessionInfo.audioSSRC +
+        ' -f rtp' +
+        ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+        ' -srtp_out_params ' + sessionInfo.audioSRTP.toString('base64') +
+        ' srtp://' + sessionInfo.address + ':' + sessionInfo.audioPort +
+        '?rtcpport=' + sessionInfo.audioPort + '&localrtcpport=' + sessionInfo.audioPort + '&pkt_size=188';
 
       fcmd += ffmpegAudioArgs;
       fcmd += ffmpegAudioStream;
@@ -283,7 +331,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     }
 
     const ffmpeg = new FfmpegProcess(
-      this.videoConfig.name,
+      this.name,
       request.sessionID,
       this.videoProcessor,
       fcmd,
@@ -324,7 +372,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
       }
       delete this.ongoingSessions[sessionId];
-      this.log(`Stopped ${this.videoConfig.name} video stream!`);
+      this.log(`Stopped ${this.name} video stream!`);
     } catch (e) {
       this.log.error('Error occurred terminating the video process!');
       this.log.error(e);
