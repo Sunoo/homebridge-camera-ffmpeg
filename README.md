@@ -101,8 +101,8 @@ Other users have been sharing configurations that work for them in [our wiki](ht
 - `vcodec`: Set the codec used for encoding video sent to HomeKit, must be h.264-based. If you're running on a Raspberry Pi, you can change to the hardware accelerated video codec with this option. (Default: `libx264`)
 - `audio`: Enables audio streaming from camera. (Default: `false`)
 - `packetSize`: If audio or video is choppy try a smaller value, should be set to a multiple of 188. (Default: `1316`)
-- `vflip`: Flips the stream vertically. (Default: `false`)
-- `hflip`: Flips the stream horizontally. (Default: `false`)
+- `vflip`: Flips the video vertically. (Default: `false`)
+- `hflip`: Flips the video horizontally. (Default: `false`)
 - `mapvideo`: Selects the stream used for video. (Default: `0:0`)
 - `mapaudio`: Selects the stream used for audio. (Default: `0:1`)
 - `videoFilter`: Allows a custom video filter to be passed to FFmpeg via `-vf`.

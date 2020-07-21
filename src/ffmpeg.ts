@@ -21,7 +21,6 @@ export class FfmpegProcess {
     callback: StreamRequestCallback | undefined
   ) {
     let started = false;
-    const controller = delegate.controller;
 
     if (ffmpegDebugOutput) {
       log(`${title} command: ffmpeg ${command}`);
@@ -90,8 +89,8 @@ export class FfmpegProcess {
         delegate.stopStream(sessionId);
         if (!started && callback) {
           callback(new Error(message));
-        } else if (controller) {
-          controller.forceStopStreamingSession(sessionId);
+        } else {
+          delegate.controller.forceStopStreamingSession(sessionId);
         }
       }
     });
