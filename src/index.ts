@@ -190,9 +190,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
       this.log('Switch Doorbell On ' + accessory.displayName);
-      const doorbellSensor = accessory.getService(hap.Service.Doorbell);
-      if (doorbellSensor) {
-        doorbellSensor.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
+      const doorbell = accessory.getService(hap.Service.Doorbell);
+      if (doorbell) {
+        doorbell.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
           hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
       }
     }
@@ -221,7 +221,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
   }
 
-  automationParser(fullpath: string, name: string): void{
+  automationHandler(fullpath: string, name: string): void{
     const path = fullpath.split('/').filter(value => value.length > 0);
     switch (path[0]) {
       case 'motion':
@@ -253,7 +253,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         if (topic.startsWith(mqtttopic)) {
           const path = topic.substr(mqtttopic.length);
           const name = message.toString();
-          this.automationParser(path, name);
+          this.automationHandler(path, name);
         }
       });
     }
@@ -265,7 +265,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         const parseurl = url.parse(req.url);
         if (parseurl.pathname && parseurl.query) {
           const name = decodeURIComponent(parseurl.query);
-          this.automationParser(parseurl.pathname, name);
+          this.automationHandler(parseurl.pathname, name);
         }
         res.writeHead(200);
         res.end();
