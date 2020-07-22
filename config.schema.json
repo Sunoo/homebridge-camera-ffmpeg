@@ -72,16 +72,19 @@
           "manufacturer": {
             "name": "Manufacturer",
             "type": "string",
+            "placeholder": "Homebridge",
             "description": "Set the manufacturer name for display in the Home app."
           },
           "model": {
             "name": "Model",
             "type": "string",
+            "placeholder": "Camera FFmpeg",
             "description": "Set the model for display in the Home app."
           },
           "serialNumber": {
             "name": "Serial Number",
             "type": "string",
+            "placeholder": "SerialNumber",
             "description": "Set the serial number for display in the Home app."
           },
           "firmwareRevision": {

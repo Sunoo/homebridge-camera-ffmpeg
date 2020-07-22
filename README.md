@@ -59,10 +59,10 @@ Other users have been sharing configurations that work for them in [our wiki](ht
 - `doorbellSwitch`: Exposes the stateless switch representing the doorbell button for this camera. (Default: `false`)
 - `switches`: Enables dummy switches to trigger motion and/or doorbell, if either of those are enabled. When enabled there will be an additional switch that triggers the motion or doorbell event. See wiki for [more detailed instructions](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/iOS-13-and-Photo-Notifications). (Default: `false`)
 - `motionTimeout`: The number of seconds after triggering to reset the motion sensor. Set to 0 to disable resetting of motion trigger for MQTT or HTTP. (Default: `1`)
-- `manufacturer`: Set the manufacturer name for display in the Home app.
-- `model`: Set the model for display in the Home app.
-- `serialNumber`: Set the serial number for display in the Home app.
-- `firmwareRevision`: Set the firmware revision for display in the Home app.
+- `manufacturer`: Set the manufacturer name for display in the Home app. (Default: `Homebridge`)
+- `model`: Set the model for display in the Home app. (Default: `Camera FFmpeg`)
+- `serialNumber`: Set the serial number for display in the Home app. (Default: `SerialNumber`)
+- `firmwareRevision`: Set the firmware revision for display in the Home app. (Default: current plugin version)
 
 #### Config Example with Manufacturer and Model Set
 

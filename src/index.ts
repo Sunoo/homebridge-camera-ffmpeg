@@ -44,8 +44,12 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     if (this.config.cameras) {
       // doing some sanity checks and index the camera config by the accessory uuid
       this.config.cameras.forEach((cameraConfig: CameraConfig) => {
-        if (!cameraConfig.name || ! cameraConfig.videoConfig) {
-          this.log.error('Missing parameters (\'name\' or \'videoConfig\') for camera ' + cameraConfig.name);
+        if (!cameraConfig.name) {
+          this.log.error('Missing "name" parameter for camera ' + cameraConfig.name);
+          return;
+        }
+        if (!cameraConfig.videoConfig) {
+          this.log.error('Missing "videoConfig" parameter for camera ' + cameraConfig.name);
           return;
         }
 
@@ -79,9 +83,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
     const cameraAccessoryInfo = cameraAccessory.getService(hap.Service.AccessoryInformation);
     if (cameraAccessoryInfo) {
-      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || 'Default-Manufacturer');
-      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || 'Default-Model');
-      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || 'Default-SerialNumber');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Manufacturer, cameraConfig.manufacturer || 'Homebridge');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.Model, cameraConfig.model || 'Camera FFmpeg');
+      cameraAccessoryInfo.setCharacteristic(hap.Characteristic.SerialNumber, cameraConfig.serialNumber || 'SerialNumber');
       cameraAccessoryInfo.setCharacteristic(hap.Characteristic.FirmwareRevision, cameraConfig.firmwareRevision || version);
     }
 
@@ -182,33 +186,36 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.accessories.push(cameraAccessory);
   }
 
-  automationHandler(name: string, doorbell = false, active = true): void {
+  doorbellHandler(name: string): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
-      this.log('Switch', doorbell ? 'Doorbell' : 'Motion Detect',
-        active ? 'On:' : 'Off:', accessory.displayName);
-      if (doorbell) {
-        const doorbellSensor = accessory.getService(hap.Service.Doorbell);
-        if (doorbellSensor && active) {
-          doorbellSensor.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
-            hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
-        }
-      } else {
-        const motionSensor = accessory.getService(hap.Service.MotionSensor);
-        if (motionSensor) {
-          if (active) {
-            motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
-            const timeout = this.cameraConfigs.get(accessory.UUID)?.motionTimeout ?? 1;
-            const log = this.log;
-            if (timeout > 0) {
-              setTimeout(() => {
-                log('Motion Detect Timeout:', accessory.displayName);
-                motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
-              }, timeout * 1000);
-            }
-          } else {
-            motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
+      this.log('Switch Doorbell On', accessory.displayName);
+      const doorbellSensor = accessory.getService(hap.Service.Doorbell);
+      if (doorbellSensor) {
+        doorbellSensor.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
+          hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS);
+      }
+    }
+  }
+
+  motionHandler(name: string, active = true): void {
+    const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
+    if (accessory) {
+      this.log('Switch Motion Detect', active ? 'On:' : 'Off:', accessory.displayName);
+      const motionSensor = accessory.getService(hap.Service.MotionSensor);
+      if (motionSensor) {
+        if (active) {
+          motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 1);
+          const timeout = this.cameraConfigs.get(accessory.UUID)?.motionTimeout ?? 1;
+          const log = this.log;
+          if (timeout > 0) {
+            setTimeout(() => {
+              log('Motion Detect Timeout:', accessory.displayName);
+              motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
+            }, timeout * 1000);
           }
+        } else {
+          motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
         }
       }
     }
@@ -218,10 +225,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     const path = fullpath.split('/').filter(value => value.length > 0);
     switch (path[0]) {
       case 'motion':
-        this.automationHandler(name, false, path[1] != 'reset');
+        this.motionHandler(name, path[1] != 'reset');
         break;
       case 'doorbell':
-        this.automationHandler(name, true);
+        this.doorbellHandler(name);
         break;
     }
   }
