@@ -7,7 +7,6 @@ import {
   CameraControllerOptions,
   CameraStreamingDelegate,
   HAP,
-  Logging,
   PrepareStreamCallback,
   PrepareStreamRequest,
   PrepareStreamResponse,
@@ -20,11 +19,12 @@ import {
   StreamRequestTypes,
   VideoInfo
 } from 'homebridge';
-import ip from 'ip';
-import { FfmpegProcess } from './ffmpeg';
-import { CameraConfig, VideoConfig } from './configTypes';
 import { spawn } from 'child_process';
+import ip from 'ip';
 import getPort from 'get-port';
+import { CameraConfig, VideoConfig } from './configTypes';
+import { FfmpegProcess } from './ffmpeg';
+import { Logger } from './logger';
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 type SessionInfo = {
@@ -51,7 +51,7 @@ type ResolutionInfo = {
 
 export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly hap: HAP;
-  private readonly log: Logging;
+  private readonly log: Logger;
   private readonly name: string;
   private readonly videoConfig: VideoConfig;
   private readonly videoProcessor: string;
@@ -62,7 +62,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
 
-  constructor(log: Logging, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string, interfaceName: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+  constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string, interfaceName: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
     this.log = log;
     this.videoConfig = cameraConfig.videoConfig;
     this.hap = hap;
@@ -172,27 +172,18 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         { env: process.env }
       );
       let imageBuffer = Buffer.alloc(0);
-      this.log('Snapshot from ' + this.name + ' (' + resolution.width + 'x' + resolution.height+ ')');
-      if (this.videoConfig.debug) {
-        this.log(this.name + ' snapshot command: ffmpeg ' + fcmd);
-      }
-      ffmpeg.stdout.on('data', function(data: Uint8Array) {
+      this.log.info('Snapshot from ' + this.name + ' (' + resolution.width + 'x' + resolution.height+ ')');
+      this.log.debug(this.name + ' snapshot command: ffmpeg ' + fcmd, this.videoConfig.debug);
+      ffmpeg.stdout.on('data', (data: Uint8Array) => {
         imageBuffer = Buffer.concat([imageBuffer, data]);
       });
       const log = this.log;
-      const debug = this.videoConfig.debug;
-      ffmpeg.on('error', function(error: string) {
-        log('An error occurred while making snapshot request');
-        if (debug) {
-          log(error);
-        }
+      ffmpeg.on('error', (error: string) => {
+        log.error('An error occurred while making snapshot request: ' + error);
       });
-      ffmpeg.on(
-        'close',
-        function(): void {
-          callback(undefined, imageBuffer);
-        }.bind(this)
-      );
+      ffmpeg.on('close', () => {
+        callback(undefined, imageBuffer);
+      });
     } catch (err) {
       this.log.error(err);
       callback(err);
@@ -274,7 +265,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     let fcmd = this.videoConfig.source;
 
-    this.log('Starting ' + this.name + ' video stream (' + resolution.width + 'x' + resolution.height + ', ' +
+    this.log.info('Starting ' + this.name + ' video stream (' + resolution.width + 'x' + resolution.height + ', ' +
       fps + ' fps, ' + videoBitrate + ' kbps, ' + mtu + ' mtu)...' + (this.videoConfig.debug ? 'debug enabled' : ''));
 
     const ffmpegVideoArgs =
@@ -374,7 +365,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
       }
       delete this.ongoingSessions[sessionId];
-      this.log('Stopped ' + this.name + ' video stream!');
+      this.log.info('Stopped ' + this.name + ' video stream!');
     } catch (e) {
       this.log.error('Error occurred terminating the video process!');
       this.log.error(e);

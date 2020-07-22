@@ -1,8 +1,9 @@
 import { ChildProcess, spawn } from 'child_process';
-import { Logging, StreamRequestCallback } from 'homebridge';
-import { StreamingDelegate } from './streamingDelegate';
-import { Readable, Writable } from 'stream';
 import { createSocket } from 'dgram';
+import { StreamRequestCallback } from 'homebridge';
+import { Readable, Writable } from 'stream';
+import { Logger } from './logger';
+import { StreamingDelegate } from './streamingDelegate';
 
 export class FfmpegProcess {
   private readonly process: ChildProcess;
@@ -14,17 +15,15 @@ export class FfmpegProcess {
     sessionId: string,
     videoProcessor: string,
     command: string,
-    log: Logging,
+    log: Logger,
     returnPort: number,
-    ffmpegDebugOutput: boolean,
+    cameraDebug: boolean,
     delegate: StreamingDelegate,
     callback: StreamRequestCallback | undefined
   ) {
     let started = false;
 
-    if (ffmpegDebugOutput) {
-      log(title + 'command: ffmpeg ' + command);
-    }
+    log.debug(title + 'command: ffmpeg ' + command, cameraDebug);
 
     const socket = createSocket('udp4');
     socket.on('error', (err) => {
@@ -36,7 +35,7 @@ export class FfmpegProcess {
         clearTimeout(this.timeout);
       }
       this.timeout = setTimeout(() => {
-        log(title + ' appears to be inactive for over 5 seconds. Stopping stream.');
+        log.info(title + ' appears to be inactive for over 5 seconds. Stopping stream.');
         delegate.stopStream(sessionId);
       }, 5000);
     });
@@ -61,9 +60,7 @@ export class FfmpegProcess {
           }
         }
 
-        if (ffmpegDebugOutput) {
-          log(title + ': ' + data);
-        }
+        log.debug(title + ': ' + data, cameraDebug);
       });
     }
     this.process.on('error', (error) => {
@@ -77,12 +74,10 @@ export class FfmpegProcess {
       const message = '[' + title + '] ffmpeg exited with code: ' + code + ' and signal: ' + signal;
 
       if (code == null || code === 255) {
-        if (!this.killing || ffmpegDebugOutput) {
-          if (this.killing) {
-            log(message + ' (Expected)');
-          } else {
-            log.error(message + ' (Unexpected)');
-          }
+        if (this.killing) {
+          log.debug(message + ' (Expected)', cameraDebug);
+        } else {
+          log.error(message + ' (Unexpected)');
         }
       } else {
         log.error(message + ' (Error)');

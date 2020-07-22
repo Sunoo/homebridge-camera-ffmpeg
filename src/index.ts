@@ -11,11 +11,12 @@ import {
   PlatformAccessoryEvent,
   PlatformConfig
 } from 'homebridge';
-import { StreamingDelegate } from './streamingDelegate';
+import http from 'http';
+import mqtt from 'mqtt';
+import url from 'url';
 import { CameraConfig, FfmpegPlatformConfig } from './configTypes';
-import mqtt = require('mqtt');
-import http = require('http');
-import url = require('url');
+import { Logger } from './logger';
+import { StreamingDelegate } from './streamingDelegate';
 const version = require('../package.json').version; // eslint-disable-line @typescript-eslint/no-var-requires
 
 let hap: HAP;
@@ -25,14 +26,14 @@ const PLUGIN_NAME = 'homebridge-camera-ffmpeg';
 const PLATFORM_NAME = 'Camera-ffmpeg';
 
 class FfmpegPlatform implements DynamicPlatformPlugin {
-  private readonly log: Logging;
+  private readonly log: Logger;
   private readonly api: API;
   private readonly config: FfmpegPlatformConfig;
   private readonly cameraConfigs: Map<string, CameraConfig> = new Map(); // configuration for each camera indexed by uuid
   private readonly accessories: Array<PlatformAccessory> = [];
 
   constructor(log: Logging, config: PlatformConfig, api: API) {
-    this.log = log;
+    this.log = new Logger(log);
     this.api = api;
     this.config = config as unknown as FfmpegPlatformConfig;
 
@@ -68,10 +69,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   configureAccessory(cameraAccessory: PlatformAccessory): void {
-    this.log('Configuring accessory ' + cameraAccessory.displayName);
+    this.log.info('Configuring accessory ' + cameraAccessory.displayName);
 
     cameraAccessory.on(PlatformAccessoryEvent.IDENTIFY, () => {
-      this.log(cameraAccessory.displayName + ' identified!');
+      this.log.info(cameraAccessory.displayName + ' identified!');
     });
 
     const cameraConfig = this.cameraConfigs.get(cameraAccessory.UUID);
@@ -189,7 +190,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   doorbellHandler(name: string): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
-      this.log('Switch Doorbell On ' + accessory.displayName);
+      this.log.info('Switch Doorbell On ' + accessory.displayName);
       const doorbell = accessory.getService(hap.Service.Doorbell);
       if (doorbell) {
         doorbell.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
@@ -201,7 +202,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   motionHandler(name: string, active = true): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
-      this.log('Switch Motion Detect ' + (active ? 'On: ' : 'Off: ') + accessory.displayName);
+      this.log.info('Switch Motion Detect ' + (active ? 'On: ' : 'Off: ') + accessory.displayName);
       const motionSensor = accessory.getService(hap.Service.MotionSensor);
       if (motionSensor) {
         if (active) {
@@ -210,7 +211,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           const log = this.log;
           if (timeout > 0) {
             setTimeout(() => {
-              log('Motion Detect Timeout: ' + accessory.displayName);
+              log.info('Motion Detect Timeout: ' + accessory.displayName);
               motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
             }, timeout * 1000);
           }
@@ -222,7 +223,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   automationHandler(fullpath: string, name: string): void{
-    const path = fullpath.split('/').filter(value => value.length > 0);
+    const path = fullpath.split('/').filter((value) => value.length > 0);
     switch (path[0]) {
       case 'motion':
         this.motionHandler(name, path[1] != 'reset');
@@ -240,13 +241,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       if (this.config.topic && this.config.topic != 'homebridge/motion') {
         mqtttopic = this.config.topic;
       }
-      this.log('Setting up MQTT connection with topic ' + mqtttopic + '...');
+      this.log.info('Setting up MQTT connection with topic ' + mqtttopic + '...');
       const client = mqtt.connect('mqtt://' + this.config.mqtt + ':' + portmqtt, {
         'username': this.config.usermqtt,
         'password': this.config.passmqtt
       });
       client.on('connect', () => {
-        this.log('MQTT Connected!');
+        this.log.info('MQTT Connected!');
         client.subscribe(mqtttopic + '/#');
       });
       client.on('message', (topic: string, message: Buffer) => {
@@ -258,17 +259,19 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       });
     }
     if (this.config.porthttp) {
-      this.log('Setting up HTTP server on port ' + this.config.porthttp + '...');
+      this.log.info('Setting up HTTP server on port ' + this.config.porthttp + '...');
       const server = http.createServer();
       server.listen(this.config.porthttp);
-      server.on('request', (req, res) => {
-        const parseurl = url.parse(req.url);
-        if (parseurl.pathname && parseurl.query) {
-          const name = decodeURIComponent(parseurl.query);
-          this.automationHandler(parseurl.pathname, name);
+      server.on('request', (request: http.IncomingMessage, response: http.ServerResponse) => {
+        if (request.url) {
+          const parseurl = url.parse(request.url);
+          if (parseurl.pathname && parseurl.query) {
+            const name = decodeURIComponent(parseurl.query);
+            this.automationHandler(parseurl.pathname, name);
+          }
         }
-        res.writeHead(200);
-        res.end();
+        response.writeHead(200);
+        response.end();
       });
     }
 
