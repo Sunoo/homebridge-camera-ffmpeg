@@ -56,7 +56,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         const uuid = hap.uuid.generate(cameraConfig.name);
         if (this.cameraConfigs.has(uuid)) {
           // Camera names must be unique
-          this.log.error(`The camera ${cameraConfig.name} seems to be defined more than one time. Ignoring any other occurrences!`);
+          this.log.error('The camera ' + cameraConfig.name + ' seems to be defined more than one time. Ignoring any other occurrences!');
           return;
         }
 
@@ -68,10 +68,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   configureAccessory(cameraAccessory: PlatformAccessory): void {
-    this.log(`Configuring accessory ${cameraAccessory.displayName}`);
+    this.log('Configuring accessory ' + cameraAccessory.displayName);
 
     cameraAccessory.on(PlatformAccessoryEvent.IDENTIFY, () => {
-      this.log(`${cameraAccessory.displayName} identified!`);
+      this.log(cameraAccessory.displayName + ' identified!');
     });
 
     const cameraConfig = this.cameraConfigs.get(cameraAccessory.UUID);
@@ -114,10 +114,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     const timeout = cameraConfig.motionTimeout > 0 ? cameraConfig.motionTimeout : 1;
 
     if (cameraConfig.doorbell) {
-      const doorbellService = new hap.Service.Doorbell(`${cameraConfig.name} Doorbell`);
+      const doorbellService = new hap.Service.Doorbell(cameraConfig.name+ ' Doorbell');
       cameraAccessory.addService(doorbellService);
       if (cameraConfig.switches) {
-        const doorbellTriggerService = new hap.Service.Switch(`${cameraConfig.name} Doorbell Trigger`, 'DoorbellTrigger');
+        const doorbellTriggerService = new hap.Service.Switch(cameraConfig.name + ' Doorbell Trigger', 'DoorbellTrigger');
         doorbellTriggerService
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
@@ -140,7 +140,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       }
 
       if (cameraConfig.doorbellSwitch) {
-        const doorbellSwitchService = new hap.Service.StatelessProgrammableSwitch(`${cameraConfig.name} Doorbell Switch`, 'DoorbellSwitch');
+        const doorbellSwitchService = new hap.Service.StatelessProgrammableSwitch(cameraConfig.name + ' Doorbell Switch', 'DoorbellSwitch');
         doorbellSwitchService
           .getCharacteristic(hap.Characteristic.ProgrammableSwitchEvent)
           .setProps({
@@ -159,13 +159,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         motionTriggerService
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (isOn: CharacteristicValue, callback: CharacteristicSetCallback) => {
-            log.info(`Setting ${cameraAccessory.displayName} Motion to ${isOn ? 'On' : 'Off'}`);
+            log.info('Setting ' + cameraAccessory.displayName + ' Motion to ' + (isOn ? 'On' : 'Off'));
             const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
             if (motionService) {
               motionService.setCharacteristic(hap.Characteristic.MotionDetected, isOn ? 1 : 0);
               if (isOn) {
                 setTimeout(() => {
-                  log.info(`Setting ${cameraAccessory.displayName} Button to false`);
+                  log.info('Setting ' + cameraAccessory.displayName + ' Button to false');
                   const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
                   if (motionTriggerService) {
                     motionTriggerService.setCharacteristic(hap.Characteristic.On, false);
@@ -189,7 +189,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   doorbellHandler(name: string): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
-      this.log('Switch Doorbell On', accessory.displayName);
+      this.log('Switch Doorbell On ' + accessory.displayName);
       const doorbellSensor = accessory.getService(hap.Service.Doorbell);
       if (doorbellSensor) {
         doorbellSensor.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,

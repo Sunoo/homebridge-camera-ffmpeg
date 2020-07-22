@@ -23,12 +23,12 @@ export class FfmpegProcess {
     let started = false;
 
     if (ffmpegDebugOutput) {
-      log(`${title} command: ffmpeg ${command}`);
+      log(title + 'command: ffmpeg ' + command);
     }
 
     const socket = createSocket('udp4');
     socket.on('error', (err) => {
-      log.error(`[${title}] socket error: ${err.name}`);
+      log.error('[' + title + '] socket error: ' + err.name);
       delegate.stopStream(sessionId);
     });
     socket.on('message', () => {
@@ -36,7 +36,7 @@ export class FfmpegProcess {
         clearTimeout(this.timeout);
       }
       this.timeout = setTimeout(() => {
-        log(`${title} appears to be inactive for over 5 seconds. Stopping stream.`);
+        log(title + ' appears to be inactive for over 5 seconds. Stopping stream.');
         delegate.stopStream(sessionId);
       }, 5000);
     });
@@ -55,26 +55,26 @@ export class FfmpegProcess {
       this.process.stderr.on('data', (data) => {
         if (!started) {
           started = true;
-          log.debug(`${title}: received first frame`);
+          log.debug(title + ': received first frame');
           if (callback) {
             callback(); // do not forget to execute callback once set up
           }
         }
 
         if (ffmpegDebugOutput) {
-          log(`${title}: ${String(data)}`);
+          log(title + ': ' + data);
         }
       });
     }
     this.process.on('error', (error) => {
-      log.error(`[${title}] Failed to start stream: ` + error.message);
+      log.error('[' + title + '] Failed to start stream: ' + error.message);
       if (callback) {
         callback(new Error('ffmpeg process creation failed!'));
         delegate.stopStream(sessionId);
       }
     });
     this.process.on('exit', (code, signal) => {
-      const message = `[${title}] ffmpeg exited with code: ${code} and signal: ${signal}`;
+      const message = '[' + title + '] ffmpeg exited with code: ' + code + ' and signal: ' + signal;
 
       if (code == null || code === 255) {
         if (!this.killing || ffmpegDebugOutput) {

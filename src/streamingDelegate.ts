@@ -172,9 +172,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         { env: process.env }
       );
       let imageBuffer = Buffer.alloc(0);
-      this.log(`Snapshot from ${this.name} (${resolution.width}x${resolution.height})`);
+      this.log('Snapshot from ' + this.name + ' (' + resolution.width + 'x' + resolution.height+ ')');
       if (this.videoConfig.debug) {
-        this.log(`${this.name} snapshot command: ffmpeg ${fcmd}`);
+        this.log(this.name + ' snapshot command: ffmpeg ' + fcmd);
       }
       ffmpeg.stdout.on('data', function(data: Uint8Array) {
         imageBuffer = Buffer.concat([imageBuffer, data]);
@@ -183,7 +183,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       const debug = this.videoConfig.debug;
       ffmpeg.on('error', function(error: string) {
         log('An error occurred while making snapshot request');
-        debug ? log(error) : null;
+        if (debug) {
+          log(error);
+        }
       });
       ffmpeg.on(
         'close',
@@ -223,7 +225,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     try {
       currentAddress = ip.address(this.interfaceName, request.addressVersion); // ipAddress version must match
     } catch {
-      this.log.error(`Unable to get ${request.addressVersion} address for ${this.interfaceName}! Falling back to public.`);
+      this.log.error('Unable to get ' + request.addressVersion + ' address for ' + this.interfaceName + '! Falling back to public.');
       currentAddress = ip.address('public', request.addressVersion); // ipAddress version must match
     }
 
@@ -272,8 +274,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     let fcmd = this.videoConfig.source;
 
-    this.log(`Starting ${this.name} video stream(${resolution.width}x${resolution.height}, ${fps} fps, ${videoBitrate} kbps, ${mtu} mtu)...`,
-      this.videoConfig.debug ? 'debug enabled' : '');
+    this.log('Starting ' + this.name + ' video stream (' + resolution.width + 'x' + resolution.height + ', ' +
+      fps + ' fps, ' + videoBitrate + ' kbps, ' + mtu + ' mtu)...' + (this.videoConfig.debug ? 'debug enabled' : ''));
 
     const ffmpegVideoArgs =
       ' -map ' + mapvideo +
@@ -372,7 +374,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
       }
       delete this.ongoingSessions[sessionId];
-      this.log(`Stopped ${this.name} video stream!`);
+      this.log('Stopped ' + this.name + ' video stream!');
     } catch (e) {
       this.log.error('Error occurred terminating the video process!');
       this.log.error(e);

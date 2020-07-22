@@ -25,7 +25,7 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'error',
     '@typescript-eslint/prefer-optional-chain': 'error',
     '@typescript-eslint/prefer-readonly': 'error',
-    '@typescript-eslint/quotes': ['error', 'single'],
+    '@typescript-eslint/quotes': ['error', 'single', {"allowTemplateLiterals": false}],
     '@typescript-eslint/semi': ['error'],
     '@typescript-eslint/space-before-function-paren': ['error', 'never'],
     '@typescript-eslint/type-annotation-spacing': 'error',
