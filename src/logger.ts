@@ -6,9 +6,7 @@ export class Logger {
 
   constructor(log: Logging) {
     this.log = log;
-    log.warn(JSON.stringify(process.argv));
     this.debugMode = process.argv.includes('-D') || process.argv.includes('--debug');
-    log.warn(this.debugMode.toString());
   }
 
   public info(message: string): void {

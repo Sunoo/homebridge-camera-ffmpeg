@@ -125,8 +125,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
             if (state) {
               const doorbellService = cameraAccessory.getService(hap.Service.Doorbell);
               if (doorbellService) {
-                doorbellService.updateCharacteristic(
-                  hap.Characteristic.ProgrammableSwitchEvent,
+                doorbellService.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
                   hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
                 );
 
@@ -180,14 +179,15 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       }
     }
 
-    const streamingDelegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap, this.config.videoProcessor, this.config.interfaceName);
+    const streamingDelegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap,
+      this.config.videoProcessor, this.config.interfaceName);
 
     cameraAccessory.configureController(streamingDelegate.controller);
 
     this.accessories.push(cameraAccessory);
   }
 
-  doorbellHandler(name: string): void {
+  private doorbellHandler(name: string): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
       this.log.info('Switch Doorbell On ' + accessory.displayName);
@@ -199,7 +199,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
   }
 
-  motionHandler(name: string, active = true): void {
+  private motionHandler(name: string, active = true): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
       this.log.info('Switch Motion Detect ' + (active ? 'On: ' : 'Off: ') + accessory.displayName);
@@ -222,7 +222,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
   }
 
-  automationHandler(fullpath: string, name: string): void{
+  private automationHandler(fullpath: string, name: string): void{
     const path = fullpath.split('/').filter((value) => value.length > 0);
     switch (path[0]) {
       case 'motion':

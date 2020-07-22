@@ -166,11 +166,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     fcmd += ffmpegStillArgs;
 
     try {
-      const ffmpeg = spawn(
-        this.videoProcessor,
-        fcmd.split(/\s+/),
-        { env: process.env }
-      );
+      const ffmpeg = spawn(this.videoProcessor, fcmd.split(/\s+/), { env: process.env });
+
       let imageBuffer = Buffer.alloc(0);
       this.log.info('Snapshot from ' + this.name + ' (' + resolution.width + 'x' + resolution.height+ ')');
       this.log.debug(this.name + ' snapshot command: ffmpeg ' + fcmd, this.videoConfig.debug);
@@ -216,7 +213,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     try {
       currentAddress = ip.address(this.interfaceName, request.addressVersion); // ipAddress version must match
     } catch {
-      this.log.error('Unable to get ' + request.addressVersion + ' address for ' + this.interfaceName + '! Falling back to public.');
+      this.log.warn('Unable to get ' + request.addressVersion + ' address for ' + this.interfaceName + '! Falling back to public.');
       currentAddress = ip.address('public', request.addressVersion); // ipAddress version must match
     }
 
@@ -323,17 +320,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       fcmd += ' -loglevel level+verbose';
     }
 
-    const ffmpeg = new FfmpegProcess(
-      this.name,
-      request.sessionID,
-      this.videoProcessor,
-      fcmd,
-      this.log,
-      sessionInfo.videoReturnPort,
-      this.videoConfig.debug,
-      this,
-      callback
-    );
+    const ffmpeg = new FfmpegProcess(this.name, request.sessionID, this.videoProcessor, fcmd, this.log,
+      sessionInfo.videoReturnPort, this.videoConfig.debug, this, callback);
 
     this.ongoingSessions[request.sessionID] = ffmpeg;
     delete this.pendingSessions[request.sessionID];
@@ -366,9 +354,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       }
       delete this.ongoingSessions[sessionId];
       this.log.info('Stopped ' + this.name + ' video stream!');
-    } catch (e) {
-      this.log.error('Error occurred terminating the video process!');
-      this.log.error(e);
+    } catch (err) {
+      this.log.error('Error occurred terminating ' + this.name + ' video process: ' + err);
     }
   }
 }
