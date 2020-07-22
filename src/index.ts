@@ -201,7 +201,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   motionHandler(name: string, active = true): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
-      this.log('Switch Motion Detect', active ? 'On:' : 'Off:', accessory.displayName);
+      this.log('Switch Motion Detect ' + (active ? 'On: ' : 'Off: ') + accessory.displayName);
       const motionSensor = accessory.getService(hap.Service.MotionSensor);
       if (motionSensor) {
         if (active) {
@@ -210,7 +210,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           const log = this.log;
           if (timeout > 0) {
             setTimeout(() => {
-              log('Motion Detect Timeout:', accessory.displayName);
+              log('Motion Detect Timeout: ' + accessory.displayName);
               motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
             }, timeout * 1000);
           }
