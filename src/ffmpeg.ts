@@ -9,15 +9,15 @@ export class FfmpegProcess {
   private killing = false;
   private timeout?: NodeJS.Timeout;
 
-  constructor(title: string, sessionId: string, videoProcessor: string, command: string, log: Logger,
-    returnPort: number, cameraDebug: boolean, delegate: StreamingDelegate, callback: StreamRequestCallback | undefined) {
+  constructor(name: string, sessionId: string, videoProcessor: string, command: string, log: Logger,
+    returnPort: number, debug: boolean, delegate: StreamingDelegate, callback: StreamRequestCallback | undefined) {
     let started = false;
 
-    log.debug(title + 'command: ffmpeg ' + command, cameraDebug);
+    log.debug('Stream command: ' + videoProcessor + ' ' + command, name, debug);
 
     const socket = createSocket('udp4');
-    socket.on('error', (err) => {
-      log.error(title + ': Socket error: ' + err.name);
+    socket.on('error', (err: Error) => {
+      log.error('Socket error: ' + err.name, name);
       delegate.stopStream(sessionId);
     });
     socket.on('message', () => {
@@ -25,7 +25,7 @@ export class FfmpegProcess {
         clearTimeout(this.timeout);
       }
       this.timeout = setTimeout(() => {
-        log.info(title + ' appears to be inactive for over 5 seconds. Stopping stream.');
+        log.info('Device appears to be inactive for over 5 seconds. Stopping stream.', name);
         delegate.stopStream(sessionId);
       }, 5000);
     });
@@ -34,9 +34,9 @@ export class FfmpegProcess {
     this.process = spawn(videoProcessor, command.split(/\s+/), { env: process.env });
 
     if (this.process.stdin) {
-      this.process.stdin.on('error', (error) => {
+      this.process.stdin.on('error', (error: Error) => {
         if (!error.message.includes('EPIPE')) {
-          log.error(error.message);
+          log.error(error.message, name);
         }
       });
     }
@@ -44,33 +44,37 @@ export class FfmpegProcess {
       this.process.stderr.on('data', (data) => {
         if (!started) {
           started = true;
-          log.debug(title + ': Received first frame.', cameraDebug);
+          log.debug('Received first frame.', name, debug);
           if (callback) {
             callback(); // do not forget to execute callback once set up
           }
         }
 
-        log.debug(title + ': ' + data, cameraDebug);
+        if (debug) {
+          data.toString().split(/\n/).forEach((line: string) => {
+            log.debug(line, name, debug);
+          });
+        }
       });
     }
-    this.process.on('error', (error) => {
-      log.error( title + ': Failed to start stream: ' + error.message);
+    this.process.on('error', (error: Error) => {
+      log.error('Failed to start stream: ' + error.message, name);
       if (callback) {
         callback(new Error('ffmpeg process creation failed!'));
         delegate.stopStream(sessionId);
       }
     });
-    this.process.on('exit', (code, signal) => {
-      const message = title + ': ffmpeg exited with code: ' + code + ' and signal: ' + signal;
+    this.process.on('exit', (code: number, signal: NodeJS.Signals) => {
+      const message = 'ffmpeg exited with code: ' + code + ' and signal: ' + signal;
 
       if (code == null || code === 255) {
         if (this.killing) {
-          log.debug(message + ' (Expected)', cameraDebug);
+          log.debug(message + ' (Expected)', name, debug);
         } else {
-          log.error(message + ' (Unexpected)');
+          log.error(message + ' (Unexpected)', name);
         }
       } else {
-        log.error(message + ' (Error)');
+        log.error(message + ' (Error)', name);
         delegate.stopStream(sessionId);
         if (!started && callback) {
           callback(new Error(message));

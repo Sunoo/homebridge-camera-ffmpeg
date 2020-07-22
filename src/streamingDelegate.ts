@@ -169,20 +169,21 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       const ffmpeg = spawn(this.videoProcessor, fcmd.split(/\s+/), { env: process.env });
 
       let imageBuffer = Buffer.alloc(0);
-      this.log.info('Snapshot from ' + this.name + ' (' + resolution.width + 'x' + resolution.height+ ')');
-      this.log.debug(this.name + ' snapshot command: ffmpeg ' + fcmd, this.videoConfig.debug);
+      this.log.debug('Snapshot requested: ' + request.width + 'x' + request.height, this.name, this.videoConfig.debug);
+      this.log.info('Sending snapshot: ' + resolution.width + 'x' + resolution.height, this.name);
+      this.log.debug('Snapshot command: ' + this.videoProcessor + ' ' + fcmd, this.name, this.videoConfig.debug);
       ffmpeg.stdout.on('data', (data: Uint8Array) => {
         imageBuffer = Buffer.concat([imageBuffer, data]);
       });
       const log = this.log;
       ffmpeg.on('error', (error: string) => {
-        log.error('An error occurred while making snapshot request: ' + error);
+        log.error('An error occurred while making snapshot request: ' + error, this.name);
       });
       ffmpeg.on('close', () => {
         callback(undefined, imageBuffer);
       });
     } catch (err) {
-      this.log.error(err);
+      this.log.error(err, this.name);
       callback(err);
     }
   }
@@ -213,7 +214,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     try {
       currentAddress = ip.address(this.interfaceName, request.addressVersion); // ipAddress version must match
     } catch {
-      this.log.warn('Unable to get ' + request.addressVersion + ' address for ' + this.interfaceName + '! Falling back to public.');
+      this.log.warn('Unable to get ' + request.addressVersion + ' address for ' + this.interfaceName +
+        '! Falling back to public.', this.name);
       currentAddress = ip.address('public', request.addressVersion); // ipAddress version must match
     }
 
@@ -262,8 +264,11 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     let fcmd = this.videoConfig.source;
 
-    this.log.info('Starting ' + this.name + ' video stream (' + resolution.width + 'x' + resolution.height + ', ' +
-      fps + ' fps, ' + videoBitrate + ' kbps, ' + mtu + ' mtu)...' + (this.videoConfig.debug ? 'debug enabled' : ''));
+    this.log.debug('Video stream requested: ' + request.video.width + 'x' + request.video.width + ', ' +
+      request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.name, this.videoConfig.debug);
+
+    this.log.info('Starting video stream: ' + resolution.width + 'x' + resolution.height + ', ' +
+      fps + ' fps, ' + videoBitrate + ' kbps', this.name);
 
     const ffmpegVideoArgs =
       ' -map ' + mapvideo +
@@ -334,7 +339,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         break;
       case StreamRequestTypes.RECONFIGURE:
         // not implemented
-        this.log.debug('Received (unsupported) request to reconfigure to: ' + JSON.stringify(request.video));
+        this.log.debug('Received request to reconfigure: ' + request.video.width + 'x' + request.video.width + ', ' +
+          request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.name, this.videoConfig.debug);
         callback();
         break;
       case StreamRequestTypes.STOP:
@@ -353,9 +359,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
       }
       delete this.ongoingSessions[sessionId];
-      this.log.info('Stopped ' + this.name + ' video stream!');
+      this.log.info('Stopped video stream.', this.name);
     } catch (err) {
-      this.log.error('Error occurred terminating ' + this.name + ' video process: ' + err);
+      this.log.error('Error occurred terminating video process: ' + err, this.name);
     }
   }
 }

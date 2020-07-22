@@ -46,18 +46,18 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       // doing some sanity checks and index the camera config by the accessory uuid
       this.config.cameras.forEach((cameraConfig: CameraConfig) => {
         if (!cameraConfig.name) {
-          this.log.error('Missing "name" parameter for camera ' + cameraConfig.name);
+          this.log.error('Missing "name" parameter.');
           return;
         }
         if (!cameraConfig.videoConfig) {
-          this.log.error('Missing "videoConfig" parameter for camera ' + cameraConfig.name);
+          this.log.error('Missing "videoConfig" parameter.', cameraConfig.name);
           return;
         }
 
         const uuid = hap.uuid.generate(cameraConfig.name);
         if (this.cameraConfigs.has(uuid)) {
           // Camera names must be unique
-          this.log.error('The camera ' + cameraConfig.name + ' seems to be defined more than one time. Ignoring any other occurrences!');
+          this.log.warn('Camera seems to be defined more than one time. Ignoring any other occurrences.', cameraConfig.name);
           return;
         }
 
@@ -69,10 +69,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   configureAccessory(cameraAccessory: PlatformAccessory): void {
-    this.log.info('Configuring accessory ' + cameraAccessory.displayName);
+    this.log.info('Configuring accessory...', cameraAccessory.displayName);
 
     cameraAccessory.on(PlatformAccessoryEvent.IDENTIFY, () => {
-      this.log.info(cameraAccessory.displayName + ' identified!');
+      this.log.info('Identify requested.', cameraAccessory.displayName);
     });
 
     const cameraConfig = this.cameraConfigs.get(cameraAccessory.UUID);
@@ -159,13 +159,12 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         motionTriggerService
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (isOn: CharacteristicValue, callback: CharacteristicSetCallback) => {
-            log.info('Setting ' + cameraAccessory.displayName + ' Motion to ' + (isOn ? 'On' : 'Off'));
+            log.info('Switch motion detect ' + (isOn ? 'on.' : 'off.'), cameraAccessory.displayName);
             const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
             if (motionService) {
               motionService.setCharacteristic(hap.Characteristic.MotionDetected, isOn ? 1 : 0);
               if (isOn) {
                 setTimeout(() => {
-                  log.info('Setting ' + cameraAccessory.displayName + ' Button to false');
                   const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
                   if (motionTriggerService) {
                     motionTriggerService.setCharacteristic(hap.Characteristic.On, false);
@@ -190,7 +189,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   private doorbellHandler(name: string): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
-      this.log.info('Switch Doorbell On ' + accessory.displayName);
+      this.log.info('Switch doorbell on.', accessory.displayName);
       const doorbell = accessory.getService(hap.Service.Doorbell);
       if (doorbell) {
         doorbell.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
@@ -202,7 +201,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   private motionHandler(name: string, active = true): void {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
-      this.log.info('Switch Motion Detect ' + (active ? 'On: ' : 'Off: ') + accessory.displayName);
+      this.log.info('Switch motion detect ' + (active ? 'on.' : 'off.'), accessory.displayName);
       const motionSensor = accessory.getService(hap.Service.MotionSensor);
       if (motionSensor) {
         if (active) {
@@ -211,7 +210,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           const log = this.log;
           if (timeout > 0) {
             setTimeout(() => {
-              log.info('Motion Detect Timeout: ' + accessory.displayName);
+              log.debug('Motion detect timeout.', accessory.displayName);
               motionSensor.setCharacteristic(hap.Characteristic.MotionDetected, 0);
             }, timeout * 1000);
           }
@@ -247,7 +246,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         'password': this.config.passmqtt
       });
       client.on('connect', () => {
-        this.log.info('MQTT Connected!');
+        this.log.info('MQTT connected.');
         client.subscribe(mqtttopic + '/#');
       });
       client.on('message', (topic: string, message: Buffer) => {

@@ -9,23 +9,32 @@ export class Logger {
     this.debugMode = process.argv.includes('-D') || process.argv.includes('--debug');
   }
 
-  public info(message: string): void {
-    this.log.info(message);
+  private formatMessage(message: string, device?: string): string {
+    let formatted = '';
+    if (device) {
+      formatted += '[' + device + '] ';
+    }
+    formatted += message;
+    return formatted;
   }
 
-  public warn(message: string): void {
-    this.log.warn(message);
+  public info(message: string, device?: string): void {
+    this.log.info(this.formatMessage(message, device));
   }
 
-  public error(message: string): void {
-    this.log.error(message);
+  public warn(message: string, device?: string): void {
+    this.log.warn(this.formatMessage(message, device));
   }
 
-  public debug(message: string, alwaysLog = false): void {
+  public error(message: string, device?: string): void {
+    this.log.error(this.formatMessage(message, device));
+  }
+
+  public debug(message: string, device?: string, alwaysLog = false): void {
     if (this.debugMode) {
-      this.log.debug(message);
+      this.log.debug(this.formatMessage(message, device));
     } else if (alwaysLog) {
-      this.log.info(message);
+      this.info(message, device);
     }
   }
 }
