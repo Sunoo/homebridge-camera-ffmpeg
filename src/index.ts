@@ -214,53 +214,51 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
   }
 
+  automationParser(fullpath: string, name: string): void{
+    const path = fullpath.split('/').filter(value => value.length > 0);
+    switch (path[0]) {
+      case 'motion':
+        this.automationHandler(name, false, path[1] != 'reset');
+        break;
+      case 'doorbell':
+        this.automationHandler(name, true);
+        break;
+    }
+  }
+
   didFinishLaunching(): void {
     if (this.config.mqtt) {
-      const servermqtt = this.config.mqtt;
       const portmqtt = this.config.portmqtt || '1883';
       let mqtttopic = 'homebridge';
       if (this.config.topic && this.config.topic != 'homebridge/motion') {
         mqtttopic = this.config.topic;
       }
       this.log('Setting up MQTT connection with topic ' + mqtttopic + '...');
-      const client = mqtt.connect('mqtt://' + servermqtt + ':' + portmqtt, {
+      const client = mqtt.connect('mqtt://' + this.config.mqtt + ':' + portmqtt, {
         'username': this.config.usermqtt,
         'password': this.config.passmqtt
       });
       client.on('connect', () => {
         this.log('MQTT Connected!');
-        client.subscribe(mqtttopic + '/motion');
-        client.subscribe(mqtttopic + '/motion/reset');
-        client.subscribe(mqtttopic + '/doorbell');
+        client.subscribe(mqtttopic + '/#');
       });
       client.on('message', (topic: string, message: Buffer) => {
-        const name = message.toString();
-        if (topic.startsWith(mqtttopic + '/motion')) {
-          const active = !topic.endsWith('/reset');
-          this.automationHandler(name, false, active);
-        } else if (topic.startsWith(mqtttopic + '/doorbell')) {
-          this.automationHandler(name, true);
+        if (topic.startsWith(mqtttopic)) {
+          const path = topic.substr(mqtttopic.length);
+          const name = message.toString();
+          this.automationParser(path, name);
         }
       });
     }
     if (this.config.porthttp) {
-      const porthttp = this.config.porthttp;
-      this.log('Setting up HTTP server on port ' + porthttp + '...');
+      this.log('Setting up HTTP server on port ' + this.config.porthttp + '...');
       const server = http.createServer();
-      server.listen(porthttp);
+      server.listen(this.config.porthttp);
       server.on('request', (req, res) => {
         const parseurl = url.parse(req.url);
-        const pathname = parseurl.pathname;
-        const query = parseurl.query;
-        if (pathname && query) {
-          const path = pathname.split('/');
-          const name = decodeURIComponent(query);
-          if (path[1] == 'motion') {
-            const active = path[2] != 'reset';
-            this.automationHandler(name, false, active);
-          } else if (path[1] == 'doorbell') {
-            this.automationHandler(name, true);
-          }
+        if (parseurl.pathname && parseurl.query) {
+          const name = decodeURIComponent(parseurl.query);
+          this.automationParser(parseurl.pathname, name);
         }
         res.writeHead(200);
         res.end();

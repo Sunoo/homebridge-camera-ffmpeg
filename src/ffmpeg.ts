@@ -5,7 +5,7 @@ import { Readable, Writable } from 'stream';
 import { createSocket } from 'dgram';
 
 export class FfmpegProcess {
-  private readonly ff: ChildProcess;
+  private readonly process: ChildProcess;
   private killing = false;
   private timeout?: NodeJS.Timeout;
 
@@ -42,17 +42,17 @@ export class FfmpegProcess {
     });
     socket.bind(returnPort);
 
-    this.ff = spawn(videoProcessor, command.split(/\s+/), { env: process.env });
+    this.process = spawn(videoProcessor, command.split(/\s+/), { env: process.env });
 
-    if (this.ff.stdin) {
-      this.ff.stdin.on('error', (error) => {
+    if (this.process.stdin) {
+      this.process.stdin.on('error', (error) => {
         if (!error.message.includes('EPIPE')) {
           log.error(error.message);
         }
       });
     }
-    if (this.ff.stderr) {
-      this.ff.stderr.on('data', (data) => {
+    if (this.process.stderr) {
+      this.process.stderr.on('data', (data) => {
         if (!started) {
           started = true;
           log.debug(`${title}: received first frame`);
@@ -66,14 +66,14 @@ export class FfmpegProcess {
         }
       });
     }
-    this.ff.on('error', (error) => {
+    this.process.on('error', (error) => {
       log.error(`[${title}] Failed to start stream: ` + error.message);
       if (callback) {
         callback(new Error('ffmpeg process creation failed!'));
         delegate.stopStream(sessionId);
       }
     });
-    this.ff.on('exit', (code, signal) => {
+    this.process.on('exit', (code, signal) => {
       const message = `[${title}] ffmpeg exited with code: ${code} and signal: ${signal}`;
 
       if (code == null || code === 255) {
@@ -101,14 +101,14 @@ export class FfmpegProcess {
     if (this.timeout) {
       clearTimeout(this.timeout);
     }
-    this.ff.kill('SIGKILL');
+    this.process.kill('SIGKILL');
   }
 
   public getStdin(): Writable | null {
-    return this.ff.stdin;
+    return this.process.stdin;
   }
 
   public getStdout(): Readable | null {
-    return this.ff.stdout;
+    return this.process.stdout;
   }
 }
