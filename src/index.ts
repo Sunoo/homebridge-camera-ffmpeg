@@ -45,23 +45,29 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     if (this.config.cameras) {
       // doing some sanity checks and index the camera config by the accessory uuid
       this.config.cameras.forEach((cameraConfig: CameraConfig) => {
+        let error = false;
+
         if (!cameraConfig.name) {
-          this.log.error('Missing "name" parameter.');
-          return;
+          this.log.error('One of your cameras has no name configured. This camera will be skipped.');
+          error = true;
         }
         if (!cameraConfig.videoConfig) {
-          this.log.error('Missing "videoConfig" parameter.', cameraConfig.name);
-          return;
+          this.log.error('The videoConfig section is missing from the config. This camera will be skipped.', cameraConfig.name);
+          error = true;
+        } else if (!cameraConfig.videoConfig.source) {
+          this.log.error('There is no source configured for this camera. This camera will be skipped.', cameraConfig.name);
+          error = true;
         }
 
-        const uuid = hap.uuid.generate(cameraConfig.name);
-        if (this.cameraConfigs.has(uuid)) {
-          // Camera names must be unique
-          this.log.warn('Camera seems to be defined more than one time. Ignoring any other occurrences.', cameraConfig.name);
-          return;
+        if (!error) {
+          const uuid = hap.uuid.generate(cameraConfig.name);
+          if (this.cameraConfigs.has(uuid)) {
+            // Camera names must be unique
+            this.log.warn('Multiple cameras are configured with this name. Duplicate cameras will be skipped.', cameraConfig.name);
+          } else {
+            this.cameraConfigs.set(uuid, cameraConfig);
+          }
         }
-
-        this.cameraConfigs.set(uuid, cameraConfig);
       });
     }
 

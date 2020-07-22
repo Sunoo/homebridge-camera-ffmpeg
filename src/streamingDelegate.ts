@@ -71,10 +71,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
     this.interfaceName = interfaceName || 'public';
 
-    if (!this.videoConfig.source) {
-      throw new Error('Missing source for camera.');
-    }
-
     api.on(APIEvent.SHUTDOWN, () => {
       for (const session in this.ongoingSessions) {
         this.stopStream(session);
@@ -340,7 +336,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       case StreamRequestTypes.RECONFIGURE:
         // not implemented
         this.log.debug('Received request to reconfigure: ' + request.video.width + 'x' + request.video.width + ', ' +
-          request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.name, this.videoConfig.debug);
+          request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps (Ignored)', this.name, this.videoConfig.debug);
         callback();
         break;
       case StreamRequestTypes.STOP:
