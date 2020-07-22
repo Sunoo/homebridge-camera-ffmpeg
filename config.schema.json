@@ -273,33 +273,6 @@
             "cameras[].videoConfig.vcodec",
             "cameras[].videoConfig.audio",
             {
-              "key": "cameras[]",
-              "type": "section",
-              "title": "Automation Settings",
-              "expandable": true,
-              "expanded": false,
-              "items": [
-                "cameras[].motion",
-                "cameras[].doorbell",
-                "cameras[].doorbellSwitch",
-                "cameras[].switches",
-                "cameras[].motionTimeout"
-              ]
-            },
-            {
-              "key": "cameras[]",
-              "type": "section",
-              "title": "Customization Settings",
-              "expandable": true,
-              "expanded": false,
-              "items": [
-                "cameras[].manufacturer",
-                "cameras[].model",
-                "cameras[].serialNumber",
-                "cameras[].firmwareRevision"
-              ]
-            },
-            {
               "key": "cameras[].videoConfig",
               "type": "section",
               "title": "Advanced Settings",
@@ -322,9 +295,46 @@
                 "cameras[].videoConfig.hflip",
                 "cameras[].videoConfig.debug"
               ]
+            },
+            {
+              "key": "cameras[]",
+              "type": "section",
+              "title": "Customization Settings",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "cameras[].manufacturer",
+                "cameras[].model",
+                "cameras[].serialNumber",
+                "cameras[].firmwareRevision"
+              ]
+            },
+            {
+              "key": "cameras[]",
+              "type": "section",
+              "title": "Automation Settings",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "cameras[].motion",
+                "cameras[].doorbell",
+                "cameras[].doorbellSwitch",
+                "cameras[].switches",
+                "cameras[].motionTimeout"
+              ]
             }
           ]
         }
+      ]
+    },
+    {
+      "type": "section",
+      "title": "Optional Settings",
+      "expandable": true,
+      "expanded": false,
+      "items": [
+        "videoProcessor",
+        "interfaceName"
       ]
     },
     {
@@ -355,16 +365,6 @@
             "porthttp"
           ]
         }
-      ]
-    },
-    {
-      "type": "section",
-      "title": "Optional Settings",
-      "expandable": true,
-      "expanded": false,
-      "items": [
-        "videoProcessor",
-        "interfaceName"
       ]
     }
   ]
