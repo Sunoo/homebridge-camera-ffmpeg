@@ -144,7 +144,8 @@ Other users have been sharing configurations that work for them in [our wiki](ht
 - `usermqtt`: The username used to connect to your MQTT broker. If not set, no authentication is used.
 - `passmqtt`: The password used to connect to your MQTT broker. If not set, no authentication is used.
 - `topic`: The base MQTT topic to subscribe to. (Default: `homebridge`)
-- `httpport`: The port to listen on for HTTP-based automation. If not set, HTTP support is not started. See the wiki for [more information on using HTTP](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/HTTP-Motion).
+- `porthttp`: The port to listen on for HTTP-based automation. If not set, HTTP support is not started. See the wiki for [more information on using HTTP](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/HTTP-Motion).
+- `localhttp`: Only allow HTTP calls from localhost. Useful if using helper plugins that translate to HTTP. (Default: `false`)
 
 #### Automation Example
 

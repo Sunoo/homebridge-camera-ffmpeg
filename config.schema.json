@@ -51,11 +51,16 @@
       "placeholder": "homebridge",
       "description": "The base MQTT topic to subscribe to."
     },
-      "porthttp": {
+    "porthttp": {
       "title": "HTTP Port",
       "type": "integer",
       "placeholder": "8080",
       "description": "The port to listen on for HTTP-based automation. If not set, HTTP support is not started."
+    },
+    "localhttp": {
+      "title": "HTTP Localhost Only",
+      "type": "boolean",
+      "description": "Only allow HTTP calls from localhost. Useful if using helper plugins that translate to HTTP."
     },
     "cameras": {
       "type": "array",
@@ -365,7 +370,8 @@
           "expandable": true,
           "expanded": true,
           "items": [
-            "porthttp"
+            "porthttp",
+            "localhttp"
           ]
         }
       ]

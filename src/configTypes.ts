@@ -8,6 +8,7 @@ export type FfmpegPlatformConfig = {
   passmqtt: string;
   topic: string;
   porthttp: number;
+  localhttp: boolean;
   cameras: Array<CameraConfig>;
 };
 
