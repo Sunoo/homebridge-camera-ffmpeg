@@ -1,17 +1,18 @@
 {
   "displayName": "Homebridge Camera FFmpeg",
   "name": "homebridge-camera-ffmpeg",
-  "version": "2.3.2",
-  "description": "ffmpeg plugin for homebridge: https://github.com/homebridge/homebridge",
+  "version": "2.4.0",
+  "description": "Homebridge Plugin Providing FFmpeg-based Camera Support",
   "main": "dist/index.js",
   "license": "ISC",
   "scripts": {
     "clean": "rimraf ./dist ./coverage",
     "build": "rimraf ./dist ./coverage && tsc",
-    "format": "prettier --write \"src/**/*.ts\"",
+    "format": "markdownlint --fix *.md",
     "lint": "eslint **/*.ts --fix",
+    "lint-check": "eslint **/*.ts",
     "prepare": "npm run build",
-    "prepublishOnly": "npm run lint",
+    "prepublishOnly": "npm run lint-check",
     "postpublish": "npm run clean",
     "watch": "npm run clean && tsc --watch"
   },
@@ -34,31 +35,27 @@
   },
   "files": [
     "CHANGELOG.md",
-    "README.md",
+    "config.schema.json",
+    "dist/**/*",
     "LICENSE",
     "package.json",
-    "dist/**/*",
-    "config.schema.json"
+    "README.md"
   ],
   "devDependencies": {
-    "nodemon": ">=2.0.2",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
+    "@typescript-eslint/parser": "^3.7.0",
     "@types/ip": "^1.1.0",
-    "@types/node": "14.0.23",
-    "@typescript-eslint/eslint-plugin": "^2.31.0",
-    "@typescript-eslint/parser": "^2.31.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-jest": "^23.8.2",
-    "eslint-plugin-prettier": "^3.1.3",
-    "homebridge": "^1.0.4",
-    "prettier": "^2.0.5",
+    "@types/node": "14.0.25",
+    "eslint": "^7.5.0",
+    "homebridge": "^1.1.1",
+    "markdownlint-cli": "^0.23.2",
     "rimraf": "^3.0.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.7"
   },
   "dependencies": {
-    "ffmpeg-for-homebridge": "0.0.6",
+    "ffmpeg-for-homebridge": "0.0.7",
+    "get-port": "^5.1.1",
     "ip": "^1.1.5",
-    "mqtt": "^4.1.0",
-    "get-port": "^5.1.1"
+    "mqtt": "^4.1.0"
   }
 }
