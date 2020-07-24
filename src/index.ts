@@ -11,8 +11,10 @@ import {
   PlatformAccessoryEvent,
   PlatformConfig
 } from 'homebridge';
+import ip from 'ip';
 import http from 'http';
 import mqtt from 'mqtt';
+import os from 'os';
 import url from 'url';
 import { CameraConfig, FfmpegPlatformConfig } from './configTypes';
 import { Logger } from './logger';
@@ -69,6 +71,23 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           }
         }
       });
+    }
+
+    if (!this.config.interfaceName) {
+      const nics = os.networkInterfaces();
+      const publicNics = [];
+      for (const [nic, details] of Object.entries(nics)) {
+        const find = details?.find((info) => {
+          return !ip.isLoopback(info.address) && ip.isPrivate(info.address);
+        });
+        if (find) {
+          publicNics.push(nic);
+        }
+      }
+      if (publicNics.length > 1) {
+        this.log.warn('Multiple public network interfaces detected, you should set interfaceName ' +
+          'to avoid issues: ' + publicNics.join(', '));
+      }
     }
 
     api.on(APIEvent.DID_FINISH_LAUNCHING, this.didFinishLaunching.bind(this));
