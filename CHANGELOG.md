@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.4.0 (2020-07-24)
+
+### Changes
+
+- Major rework of code to make future maintenance easier.
+- Added setting to limit HTTP server to listening on localhost only.
+
 ## v2.3.2 (2020-07-19)
 
 ### Bug Fixes
