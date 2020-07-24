@@ -46,7 +46,7 @@ type SessionInfo = {
 type ResolutionInfo = {
   width: number;
   height: number;
-  videoFilter: Array<string>;
+  videoFilter: string;
 };
 
 export class StreamingDelegate implements CameraStreamingDelegate {
@@ -146,7 +146,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       vf.push(videoFilter); // vflip and hflip filters must precede the scale filter to work
     }
 
-    return {width: width, height: height, videoFilter: vf};
+    return {width: width, height: height, videoFilter: vf.join(',')};
   }
 
   handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
@@ -156,7 +156,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     const ffmpegStillArgs =
       ' -frames:v 1' +
-      (resolution.videoFilter.length > 0 ? ' -vf ' + resolution.videoFilter.join(',') : '') +
+      (resolution.videoFilter ? ' -vf ' + resolution.videoFilter : '') +
       ' -f image2 -';
 
     fcmd += ffmpegStillArgs;
@@ -273,7 +273,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       ' -r ' + fps +
       ' -f rawvideo' +
       ' ' + additionalCommandline +
-      (resolution.videoFilter.length > 0 ? ' -vf ' + resolution.videoFilter.join(',') : '') +
+      (vcodec != 'copy' && resolution.videoFilter ? ' -vf ' + resolution.videoFilter : '') +
       ' -b:v ' + videoBitrate + 'k' +
       ' -bufsize ' + 2 * videoBitrate + 'k' +
       ' -maxrate ' + videoBitrate + 'k' +

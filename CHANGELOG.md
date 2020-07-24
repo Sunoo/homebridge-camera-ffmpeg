@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.4.1 (2020-07-24)
+
+### Changes
+
+- Added warning when multiple NICs detected.
+
+### Bug Fixes
+
+- Fix error using copy vcodec.
+
 ## v2.4.0 (2020-07-24)
 
 ### Changes
