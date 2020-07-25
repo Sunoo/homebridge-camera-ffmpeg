@@ -260,7 +260,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     let fcmd = this.videoConfig.source;
 
-    this.log.debug('Video stream requested: ' + request.video.width + 'x' + request.video.width + ', ' +
+    this.log.debug('Video stream requested: ' + request.video.width + 'x' + request.video.height + ', ' +
       request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.name, this.videoConfig.debug);
 
     this.log.info('Starting video stream: ' + resolution.width + 'x' + resolution.height + ', ' +
