@@ -1,74 +1,46 @@
-<span align="center">
-
-<a href="https://github.com/homebridge/verified/blob/master/verified-plugins.json"><img alt="homebridge-verified" src="https://github.com/homebridge/branding/blob/master/logos/homebridge-color-round.svg?sanitize=true" width="140px"></a>
-
 # Homebridge Camera FFmpeg
 
-<a href="https://www.npmjs.com/package/homebridge-camera-ffmpeg"><img title="npm version" src="https://badgen.net/npm/v/homebridge-camera-ffmpeg" ></a>
-<a href="https://www.npmjs.com/package/homebridge-camera-ffmpeg"><img title="npm downloads" src="https://badgen.net/npm/dt/homebridge-camera-ffmpeg" ></a>
+[![npm](https://badgen.net/npm/v/homebridge-camera-ffmpeg) ![npm](https://badgen.net/npm/dt/homebridge-camera-ffmpeg)](https://www.npmjs.com/package/homebridge-camera-ffmpeg) [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 
-<p><a href="https://www.ffmpeg.org">FFmpeg</a> plugin for 
-  <a href="https://homebridge.io">Homebridge</a>. 
-</p>
-
-</span>
+[Homebridge](https://homebridge.io) Plugin Providing [FFmpeg](https://www.ffmpeg.org)-based Camera Support
 
 ## Installation
 
-- Basic Installation
-  - Install this plugin using: `npm install -g homebridge-camera-ffmpeg`
-  - Edit `config.json` and add the camera.
-  - Run Homebridge
-  - Add extra camera accessories in Home app. The setup code is the same as homebridge.
+Before installing this plugin, you should install Homebridge using the [official instructions](https://github.com/homebridge/homebridge/wiki).
 
-- Install via Homebridge Web UI 
-  - Search for `Camera FFmpeg` on the plugin screen of [config-ui-x](https://github.com/oznu/homebridge-config-ui-x) .
-  - Click install.
+### Install via Homebridge Config UI X
 
-## Configuration
+1. Search for `Camera FFmpeg` on the Plugins tab of [Config UI X](https://www.npmjs.com/package/homebridge-config-ui-x).
+2. Install the `Homebridge Camera FFmpeg` plugin and use the form to enter your camera configurations.
 
-#### Config.json Example
+### Manual Installation
 
-    {
-      "platform": "Camera-ffmpeg",
-      "cameras": [
-        {
-          "name": "Camera Name",
-          "videoConfig": {
-            "source": "-re -i rtsp://myfancy_rtsp_stream",
-            "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
-            "maxStreams": 2,
-            "maxWidth": 1280,
-            "maxHeight": 720,
-            "maxFPS": 30
-          }
-        }
-      ]
-    }
+1. Install this plugin using: `sudo npm install -g homebridge-camera-ffmpeg --unsafe-perm`.
+2. Edit `config.json` manually to add your cameras. See below for instructions on that.
 
-#### Optional Parameters
+## Tested configurations
 
-* `uploader` enable uploading of snapshots to Google Drive, defaults to `false`. See wiki for more detailed instructions.
-* `motion` enable a dummy switch and motion sensor to trigger picture notifications in iOS 13, defaults to `false`.  See wiki for more detailed instructions.
-* `manufacturer` set manufacturer name for display in the Home app
-* `model` set model for display in the Home app
-* `serialNumber` set serial number for display in the Home app
-* `firmwareRevision` set firmware revision for display in the Home app
+Other users have been sharing configurations that work for them in [our wiki](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/Tested-Configurations). You may want to check that to see if anyone else has gotten your model of camera working already, or to share a configuration setup that works for you.
 
-Example with manufacturer, model, serial number and firmware set:
+## Manual Configuration
 
-```
+### Most Important Parameters
+
+- `platform`: _(Required)_ Must always be set to `Config-ffmpeg`.
+- `name`: _(Required)_ Set the camera name for display in the Home app.
+- `source`: _(Required)_ FFmpeg options on where to find and how to decode your camera's video stream. The most basic form is `-i` followed by your camera's URL.
+- `stillImageSource`: If your camera also provides a URL for a still image, that can be defined here with the same syntax as `source`. If not set, the plugin will grab one frame from `source`.
+
+#### Config Example
+
+```json
 {
   "platform": "Camera-ffmpeg",
   "cameras": [
     {
       "name": "Camera Name",
-      "manufacturer": "ACME, Inc.",
-      "model": "ABC-123",
-      "serialNumber": "1234567890",
-      "firmwareRevision": "1.0",
       "videoConfig": {
-        "source": "-re -i rtsp://myfancy_rtsp_stream",
+        "source": "-i rtsp://myfancy_rtsp_stream",
         "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
         "maxStreams": 2,
         "maxWidth": 1280,
@@ -80,37 +52,73 @@ Example with manufacturer, model, serial number and firmware set:
 }
 ```
 
-#### Optional videoConfig Parameters
+### Optional Parameters
 
-* `maxStreams` is the maximum number of streams that will be generated for this camera, default 2
-* `maxWidth` is the maximum width reported to HomeKit, default `1280`
-* `maxHeight` is the maximum height reported to HomeKit, default `720`
-* `maxFPS` is the maximum frame rate of the stream, default `10`
-* `minBitrate` is the minimum bit rate of the stream in kbit/s, default `0`
-* `maxBitrate` is the maximum bit rate of the stream in kbit/s, default `300`
-* `preserveRatio` can be set to either `W` or `H` with respective obvious meanings, all other values have no effect
-* `vcodec` If you're running on a RPi with the omx version of ffmpeg installed, you can change to the hardware accelerated video codec with this option, default `libx264`
-* `audio` can be set to true to enable audio streaming from camera. To use audio ffmpeg must be compiled with --enable-libfdk-aac, see https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki, default `false`. Many ffmpeg binaries are not compiled with libfdk-aac, and to work around this issue, force the OPUS codec:
-  `"acodec": "libopus"`
-* `packetSize` If audio or video is choppy try a smaller value, set to a multiple of 188, default `1316`
-* `vflip` Flips the stream vertically, default `false`
-* `hflip` Flips the stream horizontally, default `false`
-* `mapvideo` Select the stream used for video, default `0:0`
-* `mapaudio` Select the stream used for audio, default `0:1`
-* `videoFilter` Allows a custom video filter to be passed to FFmpeg via `-vf`, defaults to `scale=1280:720`
-* `additionalCommandline` Allows additional of extra command line options to FFmpeg, for example `'-loglevel verbose'`
-* `debug` Show the output of ffmpeg in the log, default `false`
+- `motion`: Exposes the motion sensor for this camera. This can be triggered with the dummy switches, MQTT messages, or via HTTP, depending on what features are enabled in the config. (Default: `false`)
+- `doorbell`: Exposes the doorbell device for this camera. This can be triggered with the dummy switches, MQTT messages, or via HTTP, depending on what features are enabled in the config. (Default: `false`)
+- `doorbellSwitch`: Exposes the stateless switch representing the doorbell button for this camera. (Default: `false`)
+- `switches`: Enables dummy switches to trigger motion and/or doorbell, if either of those are enabled. When enabled there will be an additional switch that triggers the motion or doorbell event. See wiki for [more detailed instructions](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/iOS-13-and-Photo-Notifications). (Default: `false`)
+- `motionTimeout`: The number of seconds after triggering to reset the motion sensor. Set to 0 to disable resetting of motion trigger for MQTT or HTTP. (Default: `1`)
+- `manufacturer`: Set the manufacturer name for display in the Home app. (Default: `Homebridge`)
+- `model`: Set the model for display in the Home app. (Default: `Camera FFmpeg`)
+- `serialNumber`: Set the serial number for display in the Home app. (Default: `SerialNumber`)
+- `firmwareRevision`: Set the firmware revision for display in the Home app. (Default: current plugin version)
 
-A somewhat complicated example:
+#### Config Example with Manufacturer and Model Set
 
+```json
+{
+  "platform": "Camera-ffmpeg",
+  "cameras": [
+    {
+      "name": "Camera Name",
+      "manufacturer": "ACME, Inc.",
+      "model": "ABC-123",
+      "serialNumber": "1234567890",
+      "firmwareRevision": "1.0",
+      "videoConfig": {
+        "source": "-i rtsp://myfancy_rtsp_stream",
+        "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
+        "maxStreams": 2,
+        "maxWidth": 1280,
+        "maxHeight": 720,
+        "maxFPS": 30
+      }
+    }
+  ]
+}
 ```
+
+### Optional videoConfig Parameters
+
+- `maxStreams`: The maximum number of streams that will be allowed concurrently this camera. (Default: `2`)
+- `maxWidth`: The maximum width used for video streamed to HomeKit. If not set, will use any size HomeKit requests.
+- `maxHeight`: The maximum height used for video streamed to HomeKit. If not set, will use any size HomeKit requests.
+- `maxFPS`: The maximum frame rate used for video streamed to HomeKit. If not set, will use any frame rate HomeKit requests.
+- `minBitrate`: The minimum bitrate used for video streamed to HomeKit, in kbit/s. If set, it will override the bitrate requested by HomeKit if that is lower than this value.
+- `maxBitrate`: The maximum bitrate used for video streamed to HomeKit, in kbit/s. If not set, will use any bitrate HomeKit requests.
+- `preserveRatio`: Can be set to preserve the aspect ratio based on either `W`idth or `H`eight. If not set, aspect ratio is not preserved.
+- `vcodec`: Set the codec used for encoding video sent to HomeKit, must be h.264-based. If you're running on a Raspberry Pi, you can change to the hardware accelerated video codec with this option. (Default: `libx264`)
+- `audio`: Enables audio streaming from camera. (Default: `false`)
+- `packetSize`: If audio or video is choppy try a smaller value, should be set to a multiple of 188. (Default: `1316`)
+- `vflip`: Flips the video vertically. (Default: `false`)
+- `hflip`: Flips the video horizontally. (Default: `false`)
+- `mapvideo`: Selects the stream used for video. (Default: `0:0`)
+- `mapaudio`: Selects the stream used for audio. (Default: `0:1`)
+- `videoFilter`: Allows a custom video filter to be passed to FFmpeg via `-vf`.
+- `additionalCommandline` Additional extra command line options passed to FFmpeg. (Default: `-preset ultrafast -tune zerolatency`)
+- `debug`: Includes debugging output from FFmpeg in the Homebridge log. (Default: `false`)
+
+#### More Complicated Example
+
+```json
 {
   "platform": "Camera-ffmpeg",
   "cameras": [
     {
       "name": "Camera Name",
       "videoConfig": {
-        "source": "-re -i rtsp://myfancy_rtsp_stream",
+        "source": "-i rtsp://myfancy_rtsp_stream",
         "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
         "maxStreams": 2,
         "maxWidth": 1280,
@@ -129,46 +137,44 @@ A somewhat complicated example:
 }
 ```
 
-#### Using another Video Processor
+### Automation Parameters
 
-* `videoProcessor` is the video processor used to manage videos. eg: ffmpeg (by default) or avconv or /a/path/to/another/ffmpeg. Need to use the same parameters than ffmpeg.
+- `mqtt`: Defines the hostname or IP of the MQTT broker to connect to for MQTT-based automation. If not set, MQTT support is not started. See the wiki for [more information on using MQTT](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/MQTT-Motion).
+- `portmqtt`: The port of the MQTT broker. (Default: `1883`)
+- `usermqtt`: The username used to connect to your MQTT broker. If not set, no authentication is used.
+- `passmqtt`: The password used to connect to your MQTT broker. If not set, no authentication is used.
+- `topic`: The base MQTT topic to subscribe to. (Default: `homebridge`)
+- `porthttp`: The port to listen on for HTTP-based automation. If not set, HTTP support is not started. See the wiki for [more information on using HTTP](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/HTTP-Motion).
+- `localhttp`: Only allow HTTP calls from localhost. Useful if using helper plugins that translate to HTTP. (Default: `false`)
 
-```
+#### Automation Example
+
+```json
 {
   "platform": "Camera-ffmpeg",
-  "videoProcessor": "avconv",
-  "cameras": [
-    ...
-  ]
+  "mqtt": "127.0.0.1",
+  "topic": "homebridge",
+  "porthttp": "8080",
+  "cameras": []
 }
 ```
 
-```
+### Rarely Needed Parameters
+
+- `videoProcessor`: Defines which video processor is used to decode and encode videos, must take the same parameters as FFmpeg. Common uses would be `avconv` or the path to a custom-compiled version of FFmpeg. If not set, will use the included version of FFmpeg, or the version of FFmpeg installed on the system if no included version is available.
+- `interfaceName`: Selects which network interface to use for video streaming to HomeKit. If you have multiple active network interfaces in your system, you may need to set this. If not set, the first available network interface is used, and a mismatch will cause HomeKit to discard the video stream.
+
+#### Rare Option Example
+
+```json
 {
   "platform": "Camera-ffmpeg",
-  "videoProcessor": "/my/own/compiled/ffmpeg",
-  "cameras": [
-    ...
-  ]
+  "videoProcessor": "/usr/bin/ffmpeg",
+  "interfaceName": "eth0",
+  "cameras": []
 }
 ```
 
-#### Setting a source interface, or IP address
+## Credit
 
-* `interfaceName` selects the IP address of a given network interface. The default is to select the first available, and that may not be the same IP address that ffmpeg will use. A mismatch will cause the iOS device to discard the video stream.
-
-```
-{
-  "platform": "Camera-ffmpeg",
-  "interfaceName": "bond0",
-  "cameras": [
-    ...
-  ]
-}
-```
-
-## Tested configurations
-
-We have started collecting tested configurations in the wiki, so please before raising an issue with your configuration, please check the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).  Also if you have a working configuration that you would like to share, please add it to the [wiki](https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki).
-
-https://github.com/KhaosT/homebridge-camera-ffmpeg/wiki
+Homebridge Camera FFmpeg is based on code originally written by [Khaos Tian](https://twitter.com/khaost).
