@@ -148,16 +148,13 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
             if (state) {
-              const doorbellService = cameraAccessory.getService(hap.Service.Doorbell);
-              if (doorbellService) {
-                doorbellService.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
-                  hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
-                );
+              doorbellService.updateCharacteristic(hap.Characteristic.ProgrammableSwitchEvent,
+                hap.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS
+              );
 
-                setTimeout(() => {
-                  doorbellTriggerService.getCharacteristic(hap.Characteristic.On).updateValue(false);
-                }, timeout * 1000);
-              }
+              setTimeout(() => {
+                doorbellTriggerService.getCharacteristic(hap.Characteristic.On).updateValue(false);
+              }, timeout * 1000);
             }
             callback(null, state);
           });
@@ -185,17 +182,14 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (isOn: CharacteristicValue, callback: CharacteristicSetCallback) => {
             log.info('Switch motion detect ' + (isOn ? 'on.' : 'off.'), cameraAccessory.displayName);
-            const motionService = cameraAccessory.getService(hap.Service.MotionSensor);
-            if (motionService) {
-              motionService.setCharacteristic(hap.Characteristic.MotionDetected, isOn ? 1 : 0);
-              if (isOn) {
-                setTimeout(() => {
-                  const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
-                  if (motionTriggerService) {
-                    motionTriggerService.setCharacteristic(hap.Characteristic.On, false);
-                  }
-                }, timeout * 1000);
-              }
+            motionService.setCharacteristic(hap.Characteristic.MotionDetected, isOn ? 1 : 0);
+            if (isOn) {
+              setTimeout(() => {
+                const motionTriggerService = cameraAccessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
+                if (motionTriggerService) {
+                  motionTriggerService.setCharacteristic(hap.Characteristic.On, false);
+                }
+              }, timeout * 1000);
             }
             callback(null, isOn);
           });
