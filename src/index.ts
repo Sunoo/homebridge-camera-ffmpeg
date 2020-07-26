@@ -59,6 +59,11 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         } else if (!cameraConfig.videoConfig.source) {
           this.log.error('There is no source configured for this camera. This camera will be skipped.', cameraConfig.name);
           error = true;
+        } else {
+          const sourceArgs = cameraConfig.videoConfig.source.split(/\s+/);
+          if (!sourceArgs.includes('-i')) {
+            this.log.warn('The source this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
+          }
         }
 
         if (!error) {
