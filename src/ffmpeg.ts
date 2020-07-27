@@ -26,6 +26,7 @@ export class FfmpegProcess {
       }
       this.timeout = setTimeout(() => {
         log.info('Device appears to be inactive for over 5 seconds. Stopping stream.', name);
+        delegate.controller.forceStopStreamingSession(sessionId);
         delegate.stopStream(sessionId);
       }, 5000);
     });
