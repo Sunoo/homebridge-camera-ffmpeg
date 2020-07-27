@@ -335,7 +335,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         break;
       case StreamRequestTypes.RECONFIGURE:
         // not implemented
-        this.log.debug('Received request to reconfigure: ' + request.video.width + 'x' + request.video.width + ', ' +
+        this.log.debug('Received request to reconfigure: ' + request.video.width + 'x' + request.video.height + ', ' +
           request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps (Ignored)', this.name, this.videoConfig.debug);
         callback();
         break;
