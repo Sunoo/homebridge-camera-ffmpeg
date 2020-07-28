@@ -1,0 +1,14 @@
+title: Homebridge Camera FFmpeg
+email: sunookitsune@kitsunet.org
+description: A site created to store the tested configurations created by users of Homebridge Camera FFmpeg
+twitter_username: sunookitsune
+github_username:  Sunoo
+
+markdown: kramdown
+theme: minima
+plugins:
+  - jekyll-feed
+
+collections:
+  configs:
+    output: true

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Reolink camera | Homebridge Camera FFmpeg</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="Reolink camera" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Hello," />
+<meta property="og:description" content="Hello," />
+<link rel="canonical" href="http://0.0.0.0:4000/configs/Reolink-camera.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/configs/Reolink-camera.html" />
+<meta property="og:site_name" content="Homebridge Camera FFmpeg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-07-27T22:37:41-04:00" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/configs/Reolink-camera.html"},"@type":"BlogPosting","url":"http://0.0.0.0:4000/configs/Reolink-camera.html","headline":"Reolink camera","dateModified":"2020-07-27T22:37:41-04:00","datePublished":"2020-07-27T22:37:41-04:00","description":"Hello,","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="Homebridge Camera FFmpeg" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Homebridge Camera FFmpeg</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/contributing/">Contributing</a><a class="page-link" href="/">Tested Configurations</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <h1>Reolink camera</h1>
+<blockquote><p>with better picture (rtmp) and audio (Ffmpeg tutorial)</p></blockquote>
+<div><p>Hello,</p>
+
+<p>here is a step by step tutorial how to make it work.</p>
+
+<p>The Reolink cameras have also 3 hidden streams that you get via <strong>rtmp</strong> protocol:
+<code class="language-plaintext highlighter-rouge">rtmp://your.ip/bcs/channel0_ext.bcs?channel=0&amp;stream=2&amp;user=admin&amp;password=XXX</code></p>
+
+<p>You have stream 1-3:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>fluent</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>balanced</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>clean</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>balanced</strong> is the one we want for cleaner image.</p>
+
+<p>To make audio work we need to compile <strong>FFMPEG</strong> with some extras eg. <strong>libfdk-aac-dev</strong>…
+so here the step by step … took it from old source and made it work for actual FFMPEG &amp; Raspberry</p>
+
+<p>First you need to add following to your source list:</p>
+
+<p>shh into your Pi</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">cd</span> /home
+</code></pre></div></div>
+
+<p>Now we’re going to edit a file which contains the sources of debian repositories. We’ll do this with nano – a text editor.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>nano /etc/apt/sources.list
+</code></pre></div></div>
+
+<p>Then use the cursor keys to get to line 2 and add…</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>deb http://www.deb-multimedia.org/ wheezy main non-free
+deb http://www.deb-multimedia.org/ jessie main
+</code></pre></div></div>
+
+<p>Then
+<code class="language-plaintext highlighter-rouge">CTRL</code> + <code class="language-plaintext highlighter-rouge">x</code> to exit,
+<code class="language-plaintext highlighter-rouge">y</code> to confirm you want to save and
+<code class="language-plaintext highlighter-rouge">ENTER</code> to confirm the filename (don’t change it)</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>apt-get update
+</code></pre></div></div>
+
+<p>It will update some package lists and give two errors.</p>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">W: GPG error</code></li>
+  <li><code class="language-plaintext highlighter-rouge">W: Duplicate sources</code></li>
+</ol>
+
+<p>We’ll deal with those next…</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>apt-get <span class="nb">install </span>deb-multimedia-keyring
+</code></pre></div></div>
+
+<p><code class="language-plaintext highlighter-rouge">y</code> confirm install without verification</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>apt-get update
+</code></pre></div></div>
+
+<p>Now we need to install all the development libraries required to build <strong>FFMPEG</strong>. From <code class="language-plaintext highlighter-rouge">sudo</code> to <code class="language-plaintext highlighter-rouge">libvorbis-dev</code> is is all one line.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>apt-get <span class="nb">install </span>libfdk-aac-dev libmp3lame-dev libx264-dev libxvidcore-dev libgsm1-dev libtheora-dev libvorbis-dev
+</code></pre></div></div>
+
+<p>Now let’s get the <strong>FFMPEG</strong> files themselves.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>git clone git://source.ffmpeg.org/ffmpeg.git
+</code></pre></div></div>
+
+<p>This is quite a large download and will <strong>take a little while</strong> (10-20 mins). Once complete…</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">cd </span>ffmpeg
+</code></pre></div></div>
+
+<p>Note that the following command from <code class="language-plaintext highlighter-rouge">sudo</code> to <code class="language-plaintext highlighter-rouge">--enable-nonfree</code> is all one continuous command.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo</span> ./configure <span class="nt">--enable-libmp3lame</span> <span class="nt">--enable-libtheora</span> <span class="nt">--enable-libx264</span> <span class="nt">--enable-libgsm</span> <span class="nt">--enable-postproc</span> <span class="nt">--enable-libxvid</span> <span class="nt">--enable-libfdk-aac</span> <span class="nt">--enable-pthreads</span> <span class="nt">--enable-libvorbis</span> <span class="nt">--enable-gpl</span> <span class="nt">--enable-nonfree</span>
+</code></pre></div></div>
+
+<p>After a minute or so, you will get a warning about <code class="language-plaintext highlighter-rouge">pkg-config not found</code>. Ignore it. It’ll still work. Now to compile. :)</p>
+
+<p><strong>WARNING!</strong> Once you press <code class="language-plaintext highlighter-rouge">ENTER</code> for the <code class="language-plaintext highlighter-rouge">sudo make</code> command it will tie up your Pi4 for <strong>about 1.5 hours</strong> until the compile is finished. (If you are accessing your Pi via ssh, you might want to run it via screen, so you can detach and reattach without killing the process.)</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>make
+</code></pre></div></div>
+
+<p>This will show you what it is doing as it goes. There will be lots of scary messages you don’t understand. Best go and do something else. And best run the <code class="language-plaintext highlighter-rouge">sudo make</code> directly on the Pi if you can. If you do it by ssh you’ll have to leave your other computer on and connected until it finishes.</p>
+
+<p>Once compiled, the install is a fair bit faster.</p>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>make <span class="nb">install</span>
+</code></pre></div></div>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>ldconfig
+</code></pre></div></div>
+
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo chown</span> <span class="nt">-R</span> pi /home/ffmpeg
+</code></pre></div></div>
+
+<hr />
+<p>now in homebridge conf.
+add  “videoProcessor”: “/home/ffmpeg/ffmpeg”,
+to the setup like shown below…
+audio works now with all cameras that support it…
+testet with Logitech USB Cam and Reolink</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Camera ffmpeg"</span><span class="err">,</span><span class="w">
+</span><span class="nl">"videoProcessor"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/home/ffmpeg/ffmpeg"</span><span class="err">,</span><span class="w">
+</span><span class="nl">"cameras"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Reolink1"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"videoConfig"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-i rtmp://192.168.178.93/bcs/channel0_ext.bcs?channel=0&amp;stream=2&amp;user=admin&amp;password=XXX -map 0 -an -dn -flags -global_header"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"stillImageSource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-i http://192.168.178.93/cgi-bin/api.cgi?cmd=Snap&amp;channel=0&amp;rs=wuuPhkmUCeI9WG7C&amp;user=admin&amp;password=XXX"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"maxStreams"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"maxWidth"</span><span class="p">:</span><span class="w"> </span><span class="mi">1280</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"maxHeight"</span><span class="p">:</span><span class="w"> </span><span class="mi">720</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"audio"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"debug"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div></div>
+
+<p>here another conf with audio and rtsp:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Reolink2"</span><span class="err">,</span><span class="w">
+</span><span class="nl">"videoConfig"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-rtsp_transport tcp -re -i rtsp://admin:XXX@192.168.178.91:554/h264Preview_01_sub"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"stillImageSource"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-i http://192.168.178.91/cgi-bin/api.cgi?cmd=Snap&amp;channel=0&amp;rs=wuuPhkmUCeI9WG7C&amp;user=admin&amp;password=XXX"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"maxWidth"</span><span class="p">:</span><span class="w"> </span><span class="mi">1280</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"maxHeight"</span><span class="p">:</span><span class="w"> </span><span class="mi">720</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"vcodec"</span><span class="p">:</span><span class="w"> </span><span class="s2">"copy"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"audio"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"debug"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>so if i use here the main stream it doesn’t work because of the video image size…
+but with rtmp i’ll can get the balanced stream that’s much better…</p>
+
+<p>hope this will help all other user who struggle with audio and rtmp
+rtmp is really recommend for Reolink user… give it a try and you’ll see…
+but add  -map 0 -dn -an -flags -global_header  after your Url like you see in my conf. 
+took me a day to figure it out … 
+best
+M.</p>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Homebridge Camera FFmpeg</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Homebridge Camera FFmpeg</li><li><a class="u-email" href="mailto:sunookitsune@kitsunet.org">sunookitsune@kitsunet.org</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/Sunoo"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">Sunoo</span></a></li><li><a href="https://www.twitter.com/sunookitsune"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">sunookitsune</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>A site created to store the tested configurations created by users of Homebridge Camera FFmpeg</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

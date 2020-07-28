@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Alptop AT-200B | Homebridge Camera FFmpeg</title>
+<meta name="generator" content="Jekyll v3.8.7" />
+<meta property="og:title" content="Alptop AT-200B" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="using homebridge-camera-ffmpeg authentication for rtsp disabled in camera config RaspberryPi seems to work with higher res but chokes" />
+<meta property="og:description" content="using homebridge-camera-ffmpeg authentication for rtsp disabled in camera config RaspberryPi seems to work with higher res but chokes" />
+<link rel="canonical" href="http://0.0.0.0:4000/configs/Alptop-AT-200B.html" />
+<meta property="og:url" content="http://0.0.0.0:4000/configs/Alptop-AT-200B.html" />
+<meta property="og:site_name" content="Homebridge Camera FFmpeg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-07-27T22:37:41-04:00" />
+<script type="application/ld+json">
+{"mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:4000/configs/Alptop-AT-200B.html"},"@type":"BlogPosting","url":"http://0.0.0.0:4000/configs/Alptop-AT-200B.html","headline":"Alptop AT-200B","dateModified":"2020-07-27T22:37:41-04:00","datePublished":"2020-07-27T22:37:41-04:00","description":"using homebridge-camera-ffmpeg authentication for rtsp disabled in camera config RaspberryPi seems to work with higher res but chokes","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:4000/feed.xml" title="Homebridge Camera FFmpeg" /></head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">Homebridge Camera FFmpeg</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/contributing/">Contributing</a><a class="page-link" href="/">Tested Configurations</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <h1>Alptop AT-200B</h1>
+<blockquote><p></p></blockquote>
+<div><ul>
+  <li>using homebridge-camera-ffmpeg</li>
+  <li>authentication for rtsp disabled in camera config</li>
+  <li>RaspberryPi seems to work with higher res but chokes</li>
+</ul>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+	</span><span class="nl">"platform"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Camera-ffmpeg"</span><span class="p">,</span><span class="w">
+	</span><span class="nl">"cameras"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+		</span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Crib Camera"</span><span class="p">,</span><span class="w">
+		</span><span class="nl">"videoConfig"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+			</span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-re -i rtsp://192.168.88.198/channel1"</span><span class="p">,</span><span class="w">
+			</span><span class="nl">"maxStreams"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+			</span><span class="nl">"maxWidth"</span><span class="p">:</span><span class="w"> </span><span class="mi">1280</span><span class="p">,</span><span class="w">
+			</span><span class="nl">"maxHeight"</span><span class="p">:</span><span class="w"> </span><span class="mi">720</span><span class="p">,</span><span class="w">
+			</span><span class="nl">"maxFPS"</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="w">
+		</span><span class="p">}</span><span class="w">
+	</span><span class="p">}]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+</div>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Homebridge Camera FFmpeg</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Homebridge Camera FFmpeg</li><li><a class="u-email" href="mailto:sunookitsune@kitsunet.org">sunookitsune@kitsunet.org</a></li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/Sunoo"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">Sunoo</span></a></li><li><a href="https://www.twitter.com/sunookitsune"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#twitter"></use></svg> <span class="username">sunookitsune</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>A site created to store the tested configurations created by users of Homebridge Camera FFmpeg</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

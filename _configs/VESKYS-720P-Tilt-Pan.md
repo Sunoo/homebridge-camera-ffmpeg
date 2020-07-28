@@ -1,0 +1,26 @@
+---
+layout: config
+title: VESKYS 720P Tilt / Pan
+---
+## config.json
+
+```json
+{
+   "platform":"Camera-ffmpeg",
+   "cameras":[
+      {
+         "name":"Veskys Camera",
+         "videoConfig":{
+            "source":"-rtsp_transport tcp -i rtsp://admin:PASSWORD@IPADDRESS:10554/tcp/av0_0 -map 0",
+            "stillImageSource":"-i http://IPADDRESS:81/snapshot.cgi?user=admin&pwd=PASSWORD",
+            "maxStreams":2,
+            "maxWidth":1280,
+            "maxHeight":720,
+            "maxFPS":30
+         }
+      }
+   ]
+}
+```
+
+### Notes: Replace IPADDRESS, PASSWORD with your data. I could not get this working with RPi and ffmpeg-omx, but working successfully on a macOS installation
