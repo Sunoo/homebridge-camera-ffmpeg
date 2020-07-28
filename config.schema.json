@@ -107,11 +107,6 @@
             "type": "boolean",
             "description": "Exposes the doorbell device for this camera. This can be triggered with the dummy switches, MQTT messages, or via HTTP, depending on what features are enabled in the config."
           },
-          "doorbellSwitch": {
-            "title": "Enable Doorbell Button",
-            "type": "boolean",
-            "description": "Exposes the stateless switch representing the doorbell button for this camera."
-          },
           "switches": {
             "title": "Enable Manual Automation Switches",
             "type": "boolean",
