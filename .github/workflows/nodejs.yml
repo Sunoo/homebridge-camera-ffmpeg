@@ -2,7 +2,7 @@ name: NodeJS
 
 on:
   push:
-    branches: '**'
+    branches-ignore: 'gh-pages'
   pull_request:
   release: # Run when release is created
     types: [created]
