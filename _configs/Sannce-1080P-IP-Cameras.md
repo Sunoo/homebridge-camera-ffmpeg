@@ -3,7 +3,7 @@ title: Sannce 1080P IP Cameras
 author: Ricardo Pereira
 date: 2017-02-04
 ---
-Purchased as a set of 4 with an NVR (no HD), available on [Amazon.ca] (https://www.amazon.ca/gp/product/B01ABRSM8S/ref=oh_aui_detailpage_o09_s00?ie=UTF8&psc=1) (Model POE-1080P-4CH)
+Purchased as a set of 4 with an NVR (no HD), available on [Amazon.ca](https://www.amazon.ca/gp/product/B01ABRSM8S/ref=oh_aui_detailpage_o09_s00?ie=UTF8&psc=1) (Model POE-1080P-4CH)
 
 ## config.json
 

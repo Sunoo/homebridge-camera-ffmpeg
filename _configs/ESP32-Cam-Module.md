@@ -30,5 +30,5 @@ date: 2019-12-22
 ### Notes
 
 Replace XXX.XXX.XXX.XXX, etc with your values.
-This is the config for the ESP32-Cam "CameraWebServer" example provided by espressif. Setup your Arduino IDE accordingly: https://github.com/espressif/arduino-esp32/tree/master/docs/arduino-ide
+This is the config for the ESP32-Cam "CameraWebServer" example provided by espressif. Setup your Arduino IDE accordingly: <https://github.com/espressif/arduino-esp32/tree/master/docs/arduino-ide>
 You will just add your Wifi SSID and select camera model in the source code.

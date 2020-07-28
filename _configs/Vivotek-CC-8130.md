@@ -5,7 +5,7 @@ author: NorthernMan54
 date: 2017-02-05
 ---
 To resolve playback issues I had to use the OMX fork to get the PI 2 and FFMPEG to work more or less reliably.
-https://github.com/legotheboss/homebridge-camera-ffmpeg-omx
+<https://github.com/legotheboss/homebridge-camera-ffmpeg-omx>
 
 ## Camera Settings
 

@@ -4,6 +4,8 @@ comment: (Should work with all ReoLink-Cams supporting RTSP)
 author: Jonathan Fritz
 date: 2019-09-24
 ---
+[example](https://amzn.to/2mhS9mi)
+
 ## config.json
 
 ```json

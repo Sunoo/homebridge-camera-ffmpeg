@@ -5,7 +5,7 @@ author: pponce
 date: 2017-01-31
 ---
 I had to use the OMX fork to get the PI 3 and FFMPEG to work more or less reliably.
-https://github.com/legotheboss/homebridge-camera-ffmpeg-omx
+<https://github.com/legotheboss/homebridge-camera-ffmpeg-omx>
 
 ## Camera Settings
 

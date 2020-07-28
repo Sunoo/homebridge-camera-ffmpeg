@@ -3,6 +3,8 @@ title: VESKYS 720P Tilt / Pan
 author: Charles Vestal
 date: 2017-05-13
 ---
+[example](http://www.ebay.com/itm/292036336237?_trksid=p2060353.m2749.l2649&ssPageName=STRK%3AMEBIDX%3AIT)
+
 ## config.json
 
 ```json

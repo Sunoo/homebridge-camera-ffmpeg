@@ -6,7 +6,7 @@ date: 2018-05-29
 ---
 Replica of the Xiaomi Xiaofang (Small White Square)
 
-Note: I used the homebridge-camera-ffmpeg-omx plugin (https://github.com/legotheboss/homebridge-camera-ffmpeg-omx) along with OpenIPC v0.2.4 for Wyze V1 (https://github.com/openipcamera/openipc-firmware) which is forked from Fang-Hacks(https://github.com/samtap/fang-hacks)
+Note: I used the homebridge-camera-ffmpeg-omx plugin (<https://github.com/legotheboss/homebridge-camera-ffmpeg-omx>) along with OpenIPC v0.2.4 for Wyze V1 (<https://github.com/openipcamera/openipc-firmware>) which is forked from Fang-Hacks(<https://github.com/samtap/fang-hacks>)
 
 The rest of the `config.json` file is similar to the above Xioami Xiaofang `config.json`
 
