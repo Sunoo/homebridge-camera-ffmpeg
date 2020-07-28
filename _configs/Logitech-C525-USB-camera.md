@@ -2,6 +2,8 @@
 layout: config
 title: Logitech C525 USB camera
 comment: and Raspberry Pi 3
+author: Miquel Sanz Alcántara
+date: 2019-12-08
 ---
 This configuration works with synchronized video/audio:
 

@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Logitech HD Pro Webcam C920
+author: cmlpreston
+date: 2018-03-08
 ---
 macOS (High Sierra), ffmpeg compiled through macports. Demonstrates use of avfoundation stream. I had to limit the video stream size and frame rate otherwise ffmpeg throws an input/output error.
 

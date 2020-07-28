@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Amcrest IP4M-1026
+author: Larry Davis
+date: 2020-05-06
 ---
 ## config.json
 

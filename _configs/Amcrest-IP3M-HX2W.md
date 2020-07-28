@@ -2,6 +2,8 @@
 layout: config
 title: Amcrest IP3M-HX2W
 comment: HOOBS + Raspberry Pi 4
+author: resgroupmsr
+date: 2020-04-18
 ---
 - 7 cameras working as expected.  Copy vcodec seems smoother but the other option here working fine with ultrafast option chosen
 

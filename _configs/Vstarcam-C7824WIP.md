@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Vstarcam C7824WIP
+author: teymur1988
+date: 2020-07-15
 ---
 - using homebridge-camera-ffmpeg 2.3.0
 - authentication for rtsp admin and camera password

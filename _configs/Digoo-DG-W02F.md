@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Digoo DG-W02F
+author: LeJeko
+date: 2019-04-04
 ---
 Working through RTSP on RaspberryPi
 

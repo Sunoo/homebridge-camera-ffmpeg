@@ -2,6 +2,8 @@
 layout: config
 title: Mobotix M24
 comment: with Raspberry Pi 3 Model B
+author: tiele004
+date: 2018-02-08
 ---
 ## config.json
 

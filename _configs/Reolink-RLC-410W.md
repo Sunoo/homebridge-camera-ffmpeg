@@ -2,6 +2,8 @@
 layout: config
 title: Reolink RLC-410W
 comment: HOOBS + Raspberry Pi 4
+author: resgroupmsr
+date: 2018-04-18
 ---
 - 7 cameras working as expected.  Copy vcodec seems smoother but the other option here working fine with ultrafast option chosen
 

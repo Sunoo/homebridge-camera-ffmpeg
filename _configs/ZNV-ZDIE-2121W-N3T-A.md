@@ -1,6 +1,8 @@
 ---
 layout: config
 title: ZNV ZDIE-2121W-N3T-A
+author: Caribsky
+date: 2018-04-20
 ---
 [Product page](http://www.znv.com/product/detail.aspx?id=100000569652783&nodecode=101002001010)
 

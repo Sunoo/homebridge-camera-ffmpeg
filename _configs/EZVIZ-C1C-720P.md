@@ -1,6 +1,8 @@
 ---
 layout: config
 title: EZVIZ C1C 720P
+author: Alberto Mengoli
+date: 2020-06-22
 ---
 [Product Page](https://www.ezvizlife.com/uk/product/mini-plus/916)
 

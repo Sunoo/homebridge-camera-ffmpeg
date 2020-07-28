@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Pelco cameras
+author: Klangen82
+date: 2017-03-25
 ---
 Working through RTSP
 

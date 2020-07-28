@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Lorex LHV2008
+author: icdoo
+date: 2020-01-19
 ---
 ## config.json
 

@@ -2,6 +2,8 @@
 layout: config
 title: Raspberry Pi Camera Module V2
 comment: and Raspberry PI Zero W (Jessie)
+author: XavM
+date: 2017-08-17
 ---
 I had to build ffmpeg with "--enable-libx264" to be able to use the "-tune zerolatency" from ffmpeg.js, and with "--enable-omx" and "--enable-omx-rpi" to use the GPU encoding
 

@@ -2,6 +2,8 @@
 layout: config
 title: Xiaomi Xiaofang
 comment: (Small White Square) with Raspberry Pi 3 Model B
+author: mrblack7
+date: 2018-05-26
 ---
 Note: I applied [Fang-Hacks](https://github.com/samtap/fang-hacks) to the camera to enable the RTSP stream.
 

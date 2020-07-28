@@ -2,6 +2,8 @@
 layout: config
 title: IP Webcam App
 comment: by Pavel Khlebovich
+author: Bernd Gewehr
+date: 2019-11-15
 ---
 Working through http
 

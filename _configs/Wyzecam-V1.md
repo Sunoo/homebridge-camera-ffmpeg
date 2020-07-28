@@ -2,6 +2,8 @@
 layout: config
 title: Wyzecam V1
 comment: with Raspberry Pi 3 Model B Rev 1.2
+author: Karan S
+date: 2018-05-29
 ---
 Replica of the Xiaomi Xiaofang (Small White Square)
 

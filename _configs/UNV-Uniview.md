@@ -1,6 +1,8 @@
 ---
 layout: config
 title: UNV Uniview
+author: iq85k
+date: 2020-02-28
 ---
 Model NVR301-04LB-P4
 Cameras are UNV IPC2122LR3-PF40-E

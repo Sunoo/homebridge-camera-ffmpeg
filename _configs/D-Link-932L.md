@@ -1,6 +1,8 @@
 ---
 layout: config
 title: D-Link 932L
+author: gilesmartin
+date: 2017-01-31
 ---
 Works on Mac Mini core i5, Raspberry Pi 3 (with and without omx)
 

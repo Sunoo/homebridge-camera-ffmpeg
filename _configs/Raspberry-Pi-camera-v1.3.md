@@ -2,6 +2,8 @@
 layout: config
 title: Raspberry Pi camera v1.3
 comment: connected to another RasPi
+author: Jan Kaiser
+date: 2019-08-02
 ---
 ## Description
 

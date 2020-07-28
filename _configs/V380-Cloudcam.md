@@ -1,6 +1,8 @@
 ---
 layout: config
 title: V380 Cloudcam
+author: LeJeko
+date: 2019-04-04
 ---
 **Need to patch the firmware to activate RTSP on port 554.**
 

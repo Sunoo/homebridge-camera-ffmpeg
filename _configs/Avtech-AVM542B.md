@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Avtech AVM542B
+author: Lukas Foukal
+date: 2020-01-18
 ---
 Server on Synology with Docker via oznu's homebridge-syno-spk
 

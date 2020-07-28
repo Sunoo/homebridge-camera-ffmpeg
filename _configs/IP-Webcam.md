@@ -2,6 +2,8 @@
 layout: config
 title: IP Webcam
 comment: running on an older Samsung Smartphone and Raspberry PI 2 (Jessie)
+author: NorthernMan54
+date: 2017-02-05
 ---
 To resolve playback issues I had to use the OMX fork to get the PI 2 and FFMPEG to work more or less reliably.
 https://github.com/legotheboss/homebridge-camera-ffmpeg-omx

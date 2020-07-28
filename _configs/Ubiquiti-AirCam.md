@@ -2,6 +2,8 @@
 layout: config
 title: Ubiquiti AirCam
 comment: (Generation 1, firmware v3.1.4.39), RPi 3
+author: Matevž Gačnik
+date: 2017-02-13
 ---
 Working without Ubiquiti NVR (running software UniFi Video), available on [Ubiquiti site] (https://www.ubnt.com/download/unifi-video/) or via a direct RTSP connection to camera (older firmware, via ffmpeg).
 

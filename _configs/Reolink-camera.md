@@ -2,6 +2,8 @@
 layout: config
 title: Reolink camera
 comment: with better picture (rtmp) and audio (Ffmpeg tutorial)
+author: LSD MadMac
+date: 2020-03-01
 ---
 Hello,
 

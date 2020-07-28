@@ -1,6 +1,8 @@
 ---
 layout: config
 title: ReoLink RLC-422
+author: t1dals
+date: 2019-10-03
 ---
 ## config.json
 

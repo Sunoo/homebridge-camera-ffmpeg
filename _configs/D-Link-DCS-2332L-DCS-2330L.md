@@ -1,6 +1,8 @@
 ---
 layout: config
 title: D-Link DCS-2332L/DCS-2330L
+author: pkempe
+date: 2018-05-20
 ---
 Works for both DCS-2332L and DCS2330L on Mac Mini late 2009 (MacOS El Capitan 10.11.6). The video profiles for the cameras are set as below in the web interface.
 

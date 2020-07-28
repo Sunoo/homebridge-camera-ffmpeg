@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Pi Camera V2
+author: LeJeko
+date: 2019-04-06
 ---
 The dedicated [homebridge-rpi-camera](https://github.com/moritzmhmk/homebridge-camera-rpi) plugin makes the ffmpeg process crash for me.
 

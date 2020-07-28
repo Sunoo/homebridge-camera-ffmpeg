@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Avtech MDR751B DVR
+author: badnimits
+date: 2019-01-10
 ---
 Server running on windows 10.
 

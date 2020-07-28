@@ -1,6 +1,8 @@
 ---
 layout: config
 title: TP-Link C200
+author: jonasophie
+date: 2020-04-17
 ---
 Model C 200
 

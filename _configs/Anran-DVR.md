@@ -2,6 +2,8 @@
 layout: config
 title: Anran DVR
 comment: Generic Chinese DVR
+author: gilesmartin
+date: 2018-12-11
 ---
 This works perfectly with a properly powered computer (my Mac mini i5). I am also having the DVR send motion emails to the smtpsensor plugin. This triggers a motion sensor for the area and immediately sends a homekit notification with a clip from the camera.
 

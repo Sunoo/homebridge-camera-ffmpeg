@@ -2,6 +2,8 @@
 layout: config
 title: Amcrest IPM-HX1B
 comment: with MP4 Passthrough
+author: Eric Cirone
+date: 2020-05-27
 ---
 ## config.json
 

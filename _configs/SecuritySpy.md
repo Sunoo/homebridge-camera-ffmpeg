@@ -2,6 +2,8 @@
 layout: config
 title: SecuritySpy
 comment: for MacOs
+author: Tom Hickey
+date: 2018-06-17
 ---
 [Product page](https://www.bensoftware.com/securityspy/)
 

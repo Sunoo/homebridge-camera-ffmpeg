@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Szsinocam ip onvif
+author: Jony
+date: 2020-06-30
 ---
 - using homebridge-camera-ffmpeg
 - authentication for rtsp disabled in camera config

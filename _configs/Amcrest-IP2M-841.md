@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Amcrest IP2M-841
+author: Brad Gessler
+date: 2017-09-25
 ---
 Tested from Linux. These camera's aren't that great and have difficulty holding a stream for longer than 30s.
 

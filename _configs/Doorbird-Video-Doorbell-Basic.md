@@ -2,6 +2,8 @@
 layout: config
 title: Doorbird Video Doorbell
 comment: Basic
+author: tommyd75
+date: 2017-01-11
 ---
 This works for me, it's for a Doorbird Video Doorbell, which I think uses the same hardware or at least same connection method as a Axis IP camera.
 

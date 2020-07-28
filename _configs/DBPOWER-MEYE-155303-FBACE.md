@@ -2,6 +2,8 @@
 layout: config
 title: DBPOWER MEYE-155303-FBACE
 comment: with Raspberry Pi 3 Model B
+author: Marci
+date: 2020-04-28
 ---
 No rtsp streams available - all via MJPEG...
 

@@ -2,6 +2,8 @@
 layout: config
 title: Dahua IPC-A35
 comment: with sound
+author: Martin Kuneš
+date: 2020-06-11
 ---
 ## config.json
 

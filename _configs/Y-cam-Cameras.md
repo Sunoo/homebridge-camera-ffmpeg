@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Y-cam Cameras
+author: usmcguy
+date: 2017-05-18
 ---
 Working through RTSP
 

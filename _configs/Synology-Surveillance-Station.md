@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Synology Surveillance Station
+author: Marc GUYARD
+date: 2020-03-01
 ---
 For Synology Surveillance Station
 Link for source and stillImageSource are generate by Surveillance Station, right clic on camera and select "Share streaming Path"

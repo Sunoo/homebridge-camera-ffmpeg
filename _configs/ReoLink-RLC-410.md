@@ -1,7 +1,9 @@
 ---
 layout: config
-title: ReoLink Camera RLC-410
+title: ReoLink RLC-410
 comment: (Should work with all ReoLink-Cams supporting RTSP)
+author: Jonathan Fritz
+date: 2019-09-24
 ---
 ## config.json
 

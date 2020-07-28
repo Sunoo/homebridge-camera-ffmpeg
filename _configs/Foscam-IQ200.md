@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Foscam IQ200
+author: redelva
+date: 2017-03-23
 ---
 Working through RTSP
 

@@ -2,6 +2,8 @@
 layout: config
 title: Axis M3024-L
 comment: with Raspberry Pi 3 Model B
+author: tiele004
+date: 2018-02-08
 ---
 ## config.json
 

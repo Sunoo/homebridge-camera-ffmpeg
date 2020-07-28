@@ -2,6 +2,8 @@
 layout: config
 title: IeGeek IP camera
 comment: with Raspberry Pi 3 Model B
+author: mach1009
+date: 2017-12-26
 ---
 You can also use "rtsp://ip-address/11" for HQ-Stream.
 

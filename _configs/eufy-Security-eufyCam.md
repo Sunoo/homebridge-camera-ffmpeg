@@ -1,6 +1,8 @@
 ---
 layout: config
 title: eufy Security eufyCam
+author: scrytch
+date: 2019-06-23
 ---
 ### Description
 

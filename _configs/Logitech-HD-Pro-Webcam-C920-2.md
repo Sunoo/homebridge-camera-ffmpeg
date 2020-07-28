@@ -2,6 +2,8 @@
 layout: config
 title: Logitech HD Pro Webcam C920
 comment: w/ Raspberry Pi
+author: Manuel Gottstein
+date: 2018-12-19
 ---
 I set up a Rpi1 with the camera and stream using [v4l2rtspserver](https://github.com/mpromonet/v4l2rtspserver).
 Install a webserver (Apache / I use Lighttpd) and use this command to take a screenshot every 5 seconds from the stream for faster still image captures (also running on the pi1):

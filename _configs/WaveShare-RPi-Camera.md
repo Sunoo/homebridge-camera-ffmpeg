@@ -2,6 +2,8 @@
 layout: config
 title: WaveShare RPi Camera
 comment: and Raspberry PI 3B (Stretch)
+author: milmber
+date: 2020-07-19
 ---
 3 configurations using the following video codecs as per the `vcodec` parameter:
 - `copy` codec for streaming with much higher quality but with a downside that you must specify the target video resolution for your iOS/MacOS device by updating the `video_size` parameter. 

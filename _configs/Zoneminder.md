@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Zoneminder
+author: Thomas Hentschel
+date: 2018-04-20
 ---
 works pretty well with zoneminder, using the ZM 'nph-zms' urls. Since the stream is already "cleaned up", it's pretty fast starting the stream as well. If you have a decent zoneminder setup (on a beefy server, since you need that anyway for motion detection), just run homebridge-camera-ffmpeg straight there.
 

@@ -1,6 +1,8 @@
 ---
 layout: config
 title: ESP32-Cam Module
+author: odx
+date: 2019-12-22
 ---
 ## config.json
 

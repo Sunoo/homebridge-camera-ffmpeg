@@ -1,6 +1,8 @@
 ---
 layout: config
 title: D-Link DCS-5222LB1
+author: EDRENOS
+date: 2019-12-26
 ---
 Notes: Replace IPADDRESS XX.XX.XX.XX, USER and PASSWORD with your data.
 

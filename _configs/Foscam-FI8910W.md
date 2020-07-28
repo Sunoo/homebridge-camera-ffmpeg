@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Foscam FI8910W
+author: mishakim
+date: 2018-01-20
 ---
 Streaming via http
 

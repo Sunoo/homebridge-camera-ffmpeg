@@ -1,6 +1,8 @@
 ---
 layout: config
 title: Alptop AT-200B
+author: bombcar
+date: 2019-01-19
 ---
 - using homebridge-camera-ffmpeg
 - authentication for rtsp disabled in camera config

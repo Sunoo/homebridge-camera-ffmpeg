@@ -2,6 +2,8 @@
 layout: config
 title: Xiaomi Dafang
 comment: with Raspberry Pi 3 Model B
+author: Partyboy97
+date: 2018-05-13
 ---
 Note: [Dafang-Hacks](https://github.com/EliasKotlyar/Xiaomi-Dafang-Hacks) Enable the RTSP stream.
 
