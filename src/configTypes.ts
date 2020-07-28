@@ -20,7 +20,6 @@ export type CameraConfig = {
   firmwareRevision: string;
   motion: boolean;
   doorbell: boolean;
-  doorbellSwitch: boolean;
   switches: boolean;
   motionTimeout: number;
   videoConfig: VideoConfig;
