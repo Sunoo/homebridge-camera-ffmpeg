@@ -26,7 +26,7 @@ Other users have been sharing configurations that work for them on our GitHub si
 
 ### Most Important Parameters
 
-- `platform`: _(Required)_ Must always be set to `Config-ffmpeg`.
+- `platform`: _(Required)_ Must always be set to `Camera-ffmpeg`.
 - `name`: _(Required)_ Set the camera name for display in the Home app.
 - `source`: _(Required)_ FFmpeg options on where to find and how to decode your camera's video stream. The most basic form is `-i` followed by your camera's URL.
 - `stillImageSource`: If your camera also provides a URL for a still image, that can be defined here with the same syntax as `source`. If not set, the plugin will grab one frame from `source`.
