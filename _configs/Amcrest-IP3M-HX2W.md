@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Amcrest IP3M-HX2W
 comment: HOOBS + Raspberry Pi 4
 author: resgroupmsr

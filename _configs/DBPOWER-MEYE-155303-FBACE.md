@@ -1,5 +1,4 @@
 ---
-layout: config
 title: DBPOWER MEYE-155303-FBACE
 comment: with Raspberry Pi 3 Model B
 author: Marci

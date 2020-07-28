@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Szsinocam ip onvif
 author: Jony
 date: 2020-06-30

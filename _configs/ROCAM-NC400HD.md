@@ -1,5 +1,4 @@
 ---
-layout: config
 title: ROCAM-NC400HD
 comment: with Raspberry Pi Model B 512Mb RAM - jessie
 author: BonRm

@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Xiaomi Xiaofang
 comment: (Small White Square) with Raspberry Pi 3 Model B
 author: mrblack7

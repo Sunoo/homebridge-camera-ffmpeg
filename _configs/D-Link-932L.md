@@ -1,5 +1,4 @@
 ---
-layout: config
 title: D-Link 932L
 author: gilesmartin
 date: 2017-01-31

@@ -1,5 +1,4 @@
 ---
-layout: config
 title: ZNV ZDIE-2121W-N3T-A
 author: Caribsky
 date: 2018-04-20

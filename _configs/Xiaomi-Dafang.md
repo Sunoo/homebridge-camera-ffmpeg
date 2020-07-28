@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Xiaomi Dafang
 comment: with Raspberry Pi 3 Model B
 author: Partyboy97

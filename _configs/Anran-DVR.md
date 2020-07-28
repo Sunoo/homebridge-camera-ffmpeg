@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Anran DVR
 comment: Generic Chinese DVR
 author: gilesmartin

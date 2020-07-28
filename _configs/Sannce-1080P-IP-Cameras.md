@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Sannce 1080P IP Cameras
 author: Ricardo Pereira
 date: 2017-02-04

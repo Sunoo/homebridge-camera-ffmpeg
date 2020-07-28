@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Avtech AVM542B
 author: Lukas Foukal
 date: 2020-01-18

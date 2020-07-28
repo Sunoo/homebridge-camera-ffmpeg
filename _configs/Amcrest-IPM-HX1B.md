@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Amcrest IPM-HX1B
 comment: with MP4 Passthrough
 author: Eric Cirone

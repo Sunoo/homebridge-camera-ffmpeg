@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Logitech HD Pro Webcam C920
 author: cmlpreston
 date: 2018-03-08

@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Ubiquiti AirCam
 comment: (Generation 1, firmware v3.1.4.39), RPi 3
 author: Matevž Gačnik

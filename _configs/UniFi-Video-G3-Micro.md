@@ -1,5 +1,4 @@
 ---
-layout: config
 title: UniFi Video G3-Micro
 author: gijoecool
 date: 2019-07-06

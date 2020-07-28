@@ -1,5 +1,4 @@
 ---
-layout: config
 title: WyzeCam V2
 comment: with Raspberry Pi 4 Model B
 author: Luke Hoersten

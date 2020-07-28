@@ -1,5 +1,4 @@
 ---
-layout: config
 title: August Doorbell Cam Version 1
 author: siobhanellis
 date: 2020-01-27

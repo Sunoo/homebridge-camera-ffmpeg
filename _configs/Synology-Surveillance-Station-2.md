@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Synology Surveillance Station
 author: Malcolm Hall
 date: 2020-06-13

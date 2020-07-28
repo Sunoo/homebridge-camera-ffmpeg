@@ -1,16 +1,21 @@
 title: Homebridge Camera FFmpeg
-email: sunookitsune@kitsunet.org
-description: A site created to store the tested configurations created by users of Homebridge Camera FFmpeg
+author: David Maher
+description: A place to store the tested configurations created by users of Homebridge Camera FFmpeg
 baseurl: "/homebridge-camera-ffmpeg"
 url: "https://sunoo.github.io"
-twitter_username: sunookitsune
 github_username:  Sunoo
 
-markdown: kramdown
+markdown: CommonMarkGhPages
 theme: minima
-plugins:
-  - jekyll-feed
 
 collections:
   configs:
     output: true
+
+defaults:
+  -
+    scope:
+      path: ""
+      type: "configs"
+    values:
+      layout: "config"

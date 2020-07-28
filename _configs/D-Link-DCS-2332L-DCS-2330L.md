@@ -1,5 +1,4 @@
 ---
-layout: config
 title: D-Link DCS-2332L/DCS-2330L
 author: pkempe
 date: 2018-05-20

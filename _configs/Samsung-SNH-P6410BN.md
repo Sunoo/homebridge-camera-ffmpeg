@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Samsung SNH-P6410BN
 comment: Samsung SmartCam (firmware 1.08) and Raspberry PI 3
 author: pponce

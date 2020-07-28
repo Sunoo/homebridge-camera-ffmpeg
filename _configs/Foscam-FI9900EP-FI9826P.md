@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Foscam FI9900EP / FI9826P
 author: Veldkornet
 date: 2018-03-29

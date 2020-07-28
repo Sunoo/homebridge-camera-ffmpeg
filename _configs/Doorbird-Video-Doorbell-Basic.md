@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Doorbird Video Doorbell
 comment: Basic
 author: tommyd75

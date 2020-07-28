@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Foscam R2
 author: mishakim
 date: 2018-01-20

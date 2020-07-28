@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Ubiquiti UVC G3
 author: Deon
 date: 2020-05-11

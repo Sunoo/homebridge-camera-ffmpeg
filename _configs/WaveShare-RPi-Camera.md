@@ -1,5 +1,4 @@
 ---
-layout: config
 title: WaveShare RPi Camera
 comment: and Raspberry PI 3B (Stretch)
 author: milmber

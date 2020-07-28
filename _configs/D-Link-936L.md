@@ -1,5 +1,4 @@
 ---
-layout: config
 title: D-Link 936L
 author: Arne
 date: 2017-10-06

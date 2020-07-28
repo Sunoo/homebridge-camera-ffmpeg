@@ -1,5 +1,4 @@
 ---
-layout: config
 title: UNV Uniview
 author: iq85k
 date: 2020-02-28

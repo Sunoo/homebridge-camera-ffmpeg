@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Pi Camera V2
 author: LeJeko
 date: 2019-04-06

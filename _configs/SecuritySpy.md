@@ -1,5 +1,4 @@
 ---
-layout: config
 title: SecuritySpy
 comment: for MacOs
 author: Tom Hickey

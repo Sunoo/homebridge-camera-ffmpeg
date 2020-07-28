@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Zoneminder
 author: Thomas Hentschel
 date: 2018-04-20

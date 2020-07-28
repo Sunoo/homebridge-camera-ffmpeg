@@ -1,5 +1,4 @@
 ---
-layout: config
 title: IeGeek IP camera
 comment: with Raspberry Pi 3 Model B
 author: mach1009

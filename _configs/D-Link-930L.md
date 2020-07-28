@@ -1,5 +1,4 @@
 ---
-layout: config
 title: D-Link 930L
 author: Gamer106
 date: 2018-09-01

@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Maygion H264 IPCam
 comment: (Software Version H.264 6.40) with Raspberry Pi 3 Model B
 author: Marci

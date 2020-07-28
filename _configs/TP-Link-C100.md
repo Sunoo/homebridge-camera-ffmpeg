@@ -1,5 +1,4 @@
 ---
-layout: config
 title: TP-Link C100
 author: Jirka
 date: 2020-07-07

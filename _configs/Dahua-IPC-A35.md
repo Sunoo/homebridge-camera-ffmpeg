@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Dahua IPC-A35
 comment: with sound
 author: Martin Kuneš

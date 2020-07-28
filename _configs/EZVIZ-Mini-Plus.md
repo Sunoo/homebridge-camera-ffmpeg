@@ -1,5 +1,4 @@
 ---
-layout: config
 title: EZVIZ Mini Plus
 author: TheRealGreatOldOne
 date: 2018-09-30

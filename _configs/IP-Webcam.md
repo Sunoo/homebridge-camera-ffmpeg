@@ -1,5 +1,4 @@
 ---
-layout: config
 title: IP Webcam
 comment: running on an older Samsung Smartphone and Raspberry PI 2 (Jessie)
 author: NorthernMan54

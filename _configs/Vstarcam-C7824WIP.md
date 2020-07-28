@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Vstarcam C7824WIP
 author: teymur1988
 date: 2020-07-15

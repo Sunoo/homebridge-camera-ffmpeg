@@ -1,5 +1,4 @@
 ---
-layout: config
 title: V380 Cloudcam
 author: LeJeko
 date: 2019-04-04

@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Xiaomi Xiaofang 1S
 comment: on Raspberry Pi3b (maybe also for Pi2 etc)
 author: mrdc

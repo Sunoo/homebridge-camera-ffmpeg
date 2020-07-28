@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Blue Iris
 author: Normen Hansen
 date: 2018-03-02

@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Raspberry Pi Camera Module V2
 comment: and Raspberry PI Zero W (Jessie)
 author: XavM

@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Amcrest IP2M-841
 author: Brad Gessler
 date: 2017-09-25

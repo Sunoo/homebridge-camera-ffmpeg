@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Alptop AT-200B
 author: bombcar
 date: 2019-01-19

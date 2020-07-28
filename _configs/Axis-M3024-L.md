@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Axis M3024-L
 comment: with Raspberry Pi 3 Model B
 author: tiele004

@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Reolink RLC-410W
 comment: HOOBS + Raspberry Pi 4
 author: resgroupmsr

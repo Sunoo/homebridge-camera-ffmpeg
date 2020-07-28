@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Hikam S5
 comment: + Raspberry Pi2
 author: Normen Hansen

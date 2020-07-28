@@ -1,5 +1,4 @@
 ---
-layout: config
 title: IP Webcam App
 comment: by Pavel Khlebovich
 author: Bernd Gewehr

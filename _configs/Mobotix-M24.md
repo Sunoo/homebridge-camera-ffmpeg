@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Mobotix M24
 comment: with Raspberry Pi 3 Model B
 author: tiele004

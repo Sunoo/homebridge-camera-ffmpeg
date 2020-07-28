@@ -1,5 +1,4 @@
 ---
-layout: config
 title: VESKYS 720P Tilt / Pan
 author: Charles Vestal
 date: 2017-05-13

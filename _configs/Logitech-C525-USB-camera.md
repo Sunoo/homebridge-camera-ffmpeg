@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Logitech C525 USB camera
 comment: and Raspberry Pi 3
 author: Miquel Sanz Alcántara

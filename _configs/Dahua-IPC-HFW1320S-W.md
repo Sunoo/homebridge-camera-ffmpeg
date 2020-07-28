@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Dahua IPC-HFW1320S-W
 author: Martin Kuneš
 date: 2020-06-11

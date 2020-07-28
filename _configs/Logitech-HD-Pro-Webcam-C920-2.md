@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Logitech HD Pro Webcam C920
 comment: w/ Raspberry Pi
 author: Manuel Gottstein

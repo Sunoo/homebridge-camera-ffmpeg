@@ -1,5 +1,4 @@
 ---
-layout: config
 title: CNB IVP4030VR
 comment: via RPI Model B
 author: migabc

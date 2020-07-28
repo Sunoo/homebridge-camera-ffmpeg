@@ -1,5 +1,4 @@
 ---
-layout: config
 title: Vivotek CC-8130
 comment: and Raspberry PI 2 (Jessie)
 author: NorthernMan54

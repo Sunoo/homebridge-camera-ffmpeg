@@ -1,5 +1,4 @@
 ---
-layout: config
 title: ReoLink RLC-410
 comment: (Should work with all ReoLink-Cams supporting RTSP)
 author: Jonathan Fritz

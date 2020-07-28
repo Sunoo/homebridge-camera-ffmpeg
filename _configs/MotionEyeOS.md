@@ -1,5 +1,4 @@
 ---
-layout: config
 title: MotionEyeOS
 author: Normen Hansen
 date: 2018-03-02
