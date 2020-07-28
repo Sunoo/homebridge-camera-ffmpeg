@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.4.2 (2020-07-27)
+
+### Bug Fixes
+
+- Properly shut down sessions when devices go inactive.
+- Fixed some debug messages.
+
 ## v2.4.1 (2020-07-24)
 
 ### Changes
