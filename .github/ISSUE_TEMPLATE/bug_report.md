@@ -1,22 +1,18 @@
 ---
-name: Bug Report
-about: Create a report to help us improve
+name: Support Request
+about: Report a bug or request help.
 title: ''
-labels: bug
 assignees: ''
 
 ---
 
-<!-- You must use the issue template below when submitting a bug -->
+<!-- You must use the issue template below -->
 
-**Describe The Bug:**
+**Describe The Problem:**
 <!-- A clear and concise description of what the bug is. -->
 
 **To Reproduce:**
 <!-- Steps to reproduce the behavior. -->
-
-**Expected behavior:**
-<!-- A clear and concise description of what you expected to happen. -->
 
 **Logs:**
 <!-- Bug reports that do not contain logs may be closed without warning. -->

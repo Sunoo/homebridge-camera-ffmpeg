@@ -20,7 +20,7 @@ Before installing this plugin, you should install Homebridge using the [official
 
 ## Tested configurations
 
-Other users have been sharing configurations that work for them in [our wiki](https://github.com/Sunoo/homebridge-camera-ffmpeg/wiki/Tested-Configurations). You may want to check that to see if anyone else has gotten your model of camera working already, or to share a configuration setup that works for you.
+Other users have been sharing configurations that work for them on our GitHub site. You may want to [check that](https://sunoo.github.io/homebridge-camera-ffmpeg/) to see if anyone else has gotten your model of camera working already, or [share](https://sunoo.github.io/homebridge-camera-ffmpeg/contributing/) a configuration setup that works for you.
 
 ## Manual Configuration
 
