@@ -1,6 +1,8 @@
 title: Homebridge Camera FFmpeg
 email: sunookitsune@kitsunet.org
 description: A site created to store the tested configurations created by users of Homebridge Camera FFmpeg
+baseurl: "/homebridge-camera-ffmpeg"
+url: "https://sunoo.github.io"
 twitter_username: sunookitsune
 github_username:  Sunoo
 
