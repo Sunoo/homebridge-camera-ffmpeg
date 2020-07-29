@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.4.3 (2020-07-29)
+
+### Changes
+
+- Trigger switches are now turned on and off with HTTP or MQTT messages as well.
+- Removed doorbell stateless switch because it had no functionality.
+
 ## v2.4.2 (2020-07-27)
 
 ### Bug Fixes
