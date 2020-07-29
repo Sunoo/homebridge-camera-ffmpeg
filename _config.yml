@@ -1,6 +1,6 @@
 title: Homebridge Camera FFmpeg
 author: David Maher
-description: A place to store the tested configurations created by users of Homebridge Camera FFmpeg
+description: Homebridge Plugin Providing FFmpeg-based Camera Support
 baseurl: "/homebridge-camera-ffmpeg"
 url: "https://sunoo.github.io"
 github_username:  Sunoo
@@ -11,6 +11,8 @@ theme: minima
 collections:
   configs:
     output: true
+  automation:
+    output: true
 
 defaults:
   -
@@ -19,3 +21,9 @@ defaults:
       type: "configs"
     values:
       layout: "config"
+  -
+    scope:
+      path: ""
+      type: "automation"
+    values:
+      layout: "page"

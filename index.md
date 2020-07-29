@@ -1,19 +1,14 @@
 ---
 layout: page
-title: Tested Configurations
 ---
-iSpyConnect [maintains a large database](https://www.ispyconnect.com/sources.aspx) of camera manufacturers, supported methods (MJPEG, FFMPEG, RTSP), and the necessary URLs for accessing video, audio, and stills. If you don’t know that information, iSpyConnect is a great place to start.
+<span align="center">
 
-Despite what some older posts and comments you come across may mention, it is strongly recommended that you do not use the `-re` setting in your source, as it is known to cause problems with live sources.
+<a href="https://github.com/Sunoo/homebridge-camera-ffmpeg"><img alt="homebridge-verified" src="{{ site.baseurl }}/assets/homebridge-color-round.svg" width="140px"></a>
 
-Users have submitted {{ site.configs | size }} configurations:
+# Homebridge Camera FFmpeg
 
-{% assign collection = site.configs | sort_natural:"title" %}
-<ul>
-{% for config in collection %}
-  <li>
-    <a href="{{ site.baseurl }}{{ config.url }}">{{ config.title }}</a>
-    {% if config.comment %}<p class="post-meta" style="display: inline">{{ config.comment }}</p>{% endif %}
-  </li>
-{% endfor %}
-</ul>
+[![npm](https://badgen.net/npm/v/homebridge-camera-ffmpeg) ![npm](https://badgen.net/npm/dt/homebridge-camera-ffmpeg)](https://www.npmjs.com/package/homebridge-camera-ffmpeg) [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+
+[Homebridge](https://homebridge.io) Plugin Providing [FFmpeg](https://www.ffmpeg.org)-based Camera Support
+
+</span>
