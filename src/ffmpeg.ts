@@ -10,7 +10,7 @@ export class FfmpegProcess {
   private timeout?: NodeJS.Timeout;
 
   constructor(name: string, sessionId: string, videoProcessor: string, command: string, log: Logger,
-    returnPort: number, debug: boolean, delegate: StreamingDelegate, callback: StreamRequestCallback | undefined) {
+    returnPort: number, debug: boolean, delegate: StreamingDelegate, callback: StreamRequestCallback) {
     let started = false;
 
     log.debug('Stream command: ' + videoProcessor + ' ' + command, name, debug);

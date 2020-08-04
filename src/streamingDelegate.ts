@@ -166,7 +166,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
       let imageBuffer = Buffer.alloc(0);
       this.log.debug('Snapshot requested: ' + request.width + 'x' + request.height, this.name, this.videoConfig.debug);
-      this.log.info('Sending snapshot: ' + resolution.width + 'x' + resolution.height, this.name);
+      this.log.debug('Sending snapshot: ' + resolution.width + 'x' + resolution.height, this.name, this.videoConfig.debug);
       this.log.debug('Snapshot command: ' + this.videoProcessor + ' ' + fcmd, this.name, this.videoConfig.debug);
       ffmpeg.stdout.on('data', (data: Uint8Array) => {
         imageBuffer = Buffer.concat([imageBuffer, data]);
