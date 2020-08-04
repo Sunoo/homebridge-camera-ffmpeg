@@ -22,6 +22,7 @@ import {
 import { spawn } from 'child_process';
 import fs from 'fs';
 import getPort from 'get-port';
+import ip6addr from 'ip6addr';
 import si from 'systeminformation';
 import { CameraConfig, VideoConfig } from './configTypes';
 import { FfmpegProcess } from './ffmpeg';
@@ -73,6 +74,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     const hbConfig = JSON.parse(fs.readFileSync(api.user.configPath(), 'utf8'));
     this.hbPort = hbConfig?.bridge?.port;
+    if (!this.hbPort) {
+      this.log.warn('You don\'t appear to have a port set for Homebridge in your config.json. Adding one ' +
+        'is highly recommended and may improve reliability of video steaming.', this.name);
+    }
 
     api.on(APIEvent.SHUTDOWN, () => {
       for (const session in this.ongoingSessions) {
@@ -222,16 +227,25 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       }
     });
     if (connection) {
-      currentAddress = connection.localaddress;
-    } /* else {
-      const defaultIface = await si.networkInterfaceDefault();
-      const iface = (await si.networkInterfaces()).find(netIface => {
-        return netIface.iface == defaultIface;
-      });
-      if (iface) {
-        currentAddress = iface.ip4;
+      const address = ip6addr.parse(connection.localaddress);
+      if (request.addressVersion == address.kind()) {
+        currentAddress = connection.localaddress;
+      } else if (request.addressVersion == 'ipv4') {
+        const iface = (await si.networkInterfaces()).find(netIface => {
+          return address.compare(ip6addr.parse(netIface.ip6));
+        });
+        if (iface) {
+          currentAddress = iface.ip4;
+        }
+      } else if (request.addressVersion == 'ipv6') {
+        const iface = (await si.networkInterfaces()).find(netIface => {
+          return address.compare(ip6addr.parse(netIface.ip4));
+        });
+        if (iface) {
+          currentAddress = iface.ip6;
+        }
       }
-    } */
+    }
 
     const response: PrepareStreamResponse = {
       address: currentAddress,
