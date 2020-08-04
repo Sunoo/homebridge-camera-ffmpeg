@@ -17,12 +17,6 @@
       "placeholder": "ffmpeg",
       "description": "Defines which video processor is used to decode and encode videos, must take the same parameters as FFmpeg. Common uses would be 'avconv' or the path to a custom-compiled version of FFmpeg. If not set, will use the included version of FFmpeg, or the version of FFmpeg installed on the system if no included version is available."
     },
-    "interfaceName": {
-      "title": "Network Interface",
-      "type": "string",
-      "placeholder": "eth0",
-      "description": "Selects which network interface to use for video streaming to HomeKit. If you have multiple active network interfaces in your system, you may need to set this. If not set, the first available network interface is used, and a mismatch will cause HomeKit to discard the video stream."
-    },
     "mqtt": {
       "title": "MQTT Server",
       "type": "string",
@@ -335,8 +329,7 @@
       "expandable": true,
       "expanded": false,
       "items": [
-        "videoProcessor",
-        "interfaceName"
+        "videoProcessor"
       ]
     },
     {

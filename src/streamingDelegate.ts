@@ -20,8 +20,9 @@ import {
   VideoInfo
 } from 'homebridge';
 import { spawn } from 'child_process';
-import ip from 'ip';
+import fs from 'fs';
 import getPort from 'get-port';
+import si from 'systeminformation';
 import { CameraConfig, VideoConfig } from './configTypes';
 import { FfmpegProcess } from './ffmpeg';
 import { Logger } from './logger';
@@ -55,21 +56,23 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly name: string;
   private readonly videoConfig: VideoConfig;
   private readonly videoProcessor: string;
-  private readonly interfaceName: string;
+  private readonly hbPort: string;
   controller: CameraController;
 
   // keep track of sessions
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
 
-  constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string, interfaceName: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+  constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string) {
     this.log = log;
     this.videoConfig = cameraConfig.videoConfig;
     this.hap = hap;
 
     this.name = cameraConfig.name;
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
-    this.interfaceName = interfaceName || 'public';
+
+    const hbConfig = JSON.parse(fs.readFileSync(api.user.configPath(), 'utf8'));
+    this.hbPort = hbConfig?.bridge?.port;
 
     api.on(APIEvent.SHUTDOWN, () => {
       for (const session in this.ongoingSessions) {
@@ -206,14 +209,29 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       audioSSRC: audioSSRC
     };
 
-    let currentAddress: string;
-    try {
-      currentAddress = ip.address(this.interfaceName, request.addressVersion); // ipAddress version must match
-    } catch {
-      this.log.warn('Unable to get ' + request.addressVersion + ' address for ' + this.interfaceName +
-        '! Falling back to public.', this.name);
-      currentAddress = ip.address('public', request.addressVersion); // ipAddress version must match
-    }
+    let currentAddress = '';
+    const connection = (await si.networkConnections()).find(connection => {
+      if (connection.peeraddress == request.targetAddress) {
+        if (this.hbPort) {
+          return connection.localport == this.hbPort;
+        } else {
+          return true;
+        }
+      } else {
+        return false;
+      }
+    });
+    if (connection) {
+      currentAddress = connection.localaddress;
+    } /* else {
+      const defaultIface = await si.networkInterfaceDefault();
+      const iface = (await si.networkInterfaces()).find(netIface => {
+        return netIface.iface == defaultIface;
+      });
+      if (iface) {
+        currentAddress = iface.ip4;
+      }
+    } */
 
     const response: PrepareStreamResponse = {
       address: currentAddress,

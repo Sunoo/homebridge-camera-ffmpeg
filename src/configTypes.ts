@@ -1,7 +1,6 @@
 export type FfmpegPlatformConfig = {
   name: string;
   videoProcessor: string;
-  interfaceName: string;
   mqtt: string;
   portmqtt: number;
   usermqtt: string;
