@@ -119,6 +119,11 @@
             "minimum": 0,
             "description": "The number of seconds after triggering to reset the motion sensor. Set to 0 to disable resetting of motion trigger for MQTT or HTTP."
           },
+          "unbridge": {
+            "title": "Unbridge Camera",
+            "type": "boolean",
+            "description": "Bridged cameras can cause slowdowns of the entire Homebridge instance. If unbridged, the camera will need to be added to HomeKit manually."
+          },
           "videoConfig": {
             "title": "Video Configuration",
             "type": "object",
@@ -275,6 +280,7 @@
             "cameras[].videoConfig.stillImageSource",
             "cameras[].videoConfig.vcodec",
             "cameras[].videoConfig.audio",
+            "cameras[].unbridge",
             {
               "key": "cameras[].videoConfig",
               "type": "section",

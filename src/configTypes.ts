@@ -22,6 +22,7 @@ export type CameraConfig = {
   doorbell: boolean;
   switches: boolean;
   motionTimeout: number;
+  unbridge: boolean;
   videoConfig: VideoConfig;
 };
 

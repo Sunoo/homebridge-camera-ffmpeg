@@ -32,7 +32,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly api: API;
   private readonly config: FfmpegPlatformConfig;
   private readonly cameraConfigs: Map<string, CameraConfig> = new Map();
-  private readonly accessories: Array<PlatformAccessory> = [];
+  private readonly cachedAccessories: Array<PlatformAccessory> = [];
   private readonly motionTimers: Map<string, NodeJS.Timeout> = new Map();
   private readonly doorbellTimers: Map<string, NodeJS.Timeout> = new Map();
 
@@ -62,7 +62,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         } else {
           const sourceArgs = cameraConfig.videoConfig.source.split(/\s+/);
           if (!sourceArgs.includes('-i')) {
-            this.log.warn('The source this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
+            this.log.warn('The source for this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
           }
         }
 
@@ -98,19 +98,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     api.on(APIEvent.DID_FINISH_LAUNCHING, this.didFinishLaunching.bind(this));
   }
 
-  configureAccessory(accessory: PlatformAccessory): void {
-    this.log.info('Configuring accessory...', accessory.displayName);
-
+  setupAccessory(accessory: PlatformAccessory, cameraConfig: CameraConfig): void {
     accessory.on(PlatformAccessoryEvent.IDENTIFY, () => {
       this.log.info('Identify requested.', accessory.displayName);
     });
-
-    const cameraConfig = this.cameraConfigs.get(accessory.UUID);
-
-    if (!cameraConfig) {
-      this.accessories.push(accessory);
-      return;
-    }
 
     const accInfo = accessory.getService(hap.Service.AccessoryInformation);
     if (accInfo) {
@@ -175,8 +166,18 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       this.config.videoProcessor, this.config.interfaceName);
 
     accessory.configureController(delegate.controller);
+  }
 
-    this.accessories.push(accessory);
+  configureAccessory(accessory: PlatformAccessory): void {
+    this.log.info('Configuring cached bridged accessory...', accessory.displayName);
+
+    const cameraConfig = this.cameraConfigs.get(accessory.UUID);
+
+    if (cameraConfig) {
+      this.setupAccessory(accessory, cameraConfig);
+    }
+
+    this.cachedAccessories.push(accessory);
   }
 
   private doorbellHandler(accessory: PlatformAccessory, active = true): void {
@@ -249,7 +250,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   private automationHandler(fullpath: string, name: string): void{
-    const accessory = this.accessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
+    const accessory = this.cachedAccessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
     if (accessory) {
       const path = fullpath.split('/').filter((value) => value.length > 0);
       switch (path[0]) {
@@ -288,7 +289,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       });
     }
     if (this.config.porthttp) {
-      this.log.info('Setting up HTTP server on port ' + this.config.porthttp + '...');
+      this.log.info('Setting up ' + (this.config.localhttp ? 'localhost-only ' : '') +
+        'HTTP server on port ' + this.config.porthttp + '...');
       const server = http.createServer();
       const hostname = this.config.localhttp ? 'localhost' : undefined;
       server.listen(this.config.porthttp, hostname);
@@ -306,15 +308,23 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
 
     for (const [uuid, cameraConfig] of this.cameraConfigs) {
-      if (!this.accessories.find((x: PlatformAccessory) => x.UUID === uuid)) {
-        const cameraAccessory = new Accessory(cameraConfig.name, uuid);
-        this.configureAccessory(cameraAccessory);
-        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [cameraAccessory]);
+      if (cameraConfig.unbridge) {
+        const accessory = new Accessory(cameraConfig.name, uuid);
+        this.log.info('Configuring unbridged accessory...', accessory.displayName);
+        this.setupAccessory(accessory, cameraConfig);
+        this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
+      } else if (!this.cachedAccessories.find((curAcc: PlatformAccessory) => curAcc.UUID === uuid)) {
+        const accessory = new Accessory(cameraConfig.name, uuid);
+        this.log.info('Configuring bridged accessory...', accessory.displayName);
+        this.setupAccessory(accessory, cameraConfig);
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
     }
 
-    this.accessories.forEach((accessory: PlatformAccessory) => {
-      if (!this.cameraConfigs.has(accessory.UUID)) {
+    this.cachedAccessories.forEach((accessory: PlatformAccessory) => {
+      const cameraConfig = this.cameraConfigs.get(accessory.UUID);
+      if (!cameraConfig || cameraConfig.unbridge) {
+        this.log.info('Removing bridged accessory...', accessory.displayName);
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
     });
