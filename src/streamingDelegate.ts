@@ -228,24 +228,26 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     });
     if (connection) {
       const address = ip6addr.parse(connection.localaddress);
+      this.log.warn(JSON.stringify(address));
       if (request.addressVersion == address.kind()) {
         currentAddress = connection.localaddress;
       } else if (request.addressVersion == 'ipv4') {
         const iface = (await si.networkInterfaces()).find(netIface => {
-          return address.compare(ip6addr.parse(netIface.ip6));
+          return address.compare(ip6addr.parse(netIface.ip6)) == 0;
         });
         if (iface) {
           currentAddress = iface.ip4;
         }
       } else if (request.addressVersion == 'ipv6') {
         const iface = (await si.networkInterfaces()).find(netIface => {
-          return address.compare(ip6addr.parse(netIface.ip4));
+          return address.compare(ip6addr.parse(netIface.ip4)) == 0;
         });
         if (iface) {
           currentAddress = iface.ip6;
         }
       }
     }
+    this.log.warn(currentAddress);
 
     const response: PrepareStreamResponse = {
       address: currentAddress,
