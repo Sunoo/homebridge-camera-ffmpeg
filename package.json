@@ -1,16 +1,34 @@
 {
   "displayName": "Homebridge Camera FFmpeg",
   "name": "homebridge-camera-ffmpeg",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "Homebridge Plugin Providing FFmpeg-based Camera Support",
   "main": "dist/index.js",
   "license": "ISC",
+  "funding": [
+    {
+      "type": "kofi",
+      "url": "https://ko-fi.com/sunookitsune"
+    },
+    {
+      "type": "paypal",
+      "url": "https://paypal.me/sunoo"
+    },
+    {
+      "type": "github",
+      "url": "https://github.com/Sunoo"
+    },
+    {
+      "type": "liberapay",
+      "url": "https://liberapay.com/Sunoo"
+    }
+  ],
   "scripts": {
     "clean": "rimraf ./dist ./coverage",
     "build": "rimraf ./dist ./coverage && tsc",
     "format": "markdownlint --fix *.md",
-    "lint": "eslint **/*.ts --fix",
-    "lint-check": "eslint **/*.ts",
+    "lint": "eslint src/*.ts --fix",
+    "lint-check": "eslint src/*.ts",
     "prepare": "npm run build",
     "prepublishOnly": "npm run lint-check",
     "postpublish": "npm run clean",
