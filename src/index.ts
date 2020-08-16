@@ -27,6 +27,11 @@ let Accessory: typeof PlatformAccessory;
 const PLUGIN_NAME = 'homebridge-camera-ffmpeg';
 const PLATFORM_NAME = 'Camera-ffmpeg';
 
+type AutomationReturn = {
+  error: boolean;
+  message: string;
+};
+
 class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logger;
   private readonly api: API;
@@ -180,7 +185,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.cachedAccessories.push(accessory);
   }
 
-  private doorbellHandler(accessory: PlatformAccessory, active = true): void {
+  private doorbellHandler(accessory: PlatformAccessory, active = true): AutomationReturn {
     const doorbell = accessory.getService(hap.Service.Doorbell);
     if (doorbell) {
       this.log.debug('Switch doorbell ' + (active ? 'on.' : 'off.'), accessory.displayName);
@@ -204,13 +209,28 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           }, timeoutConfig * 1000);
           this.doorbellTimers.set(accessory.UUID, timer);
         }
-      } else if (doorbellTrigger) {
-        doorbellTrigger.updateCharacteristic(hap.Characteristic.On, true);
+        return {
+          error: false,
+          message: 'Doorbell switched on.'
+        };
+      } else {
+        if (doorbellTrigger) {
+          doorbellTrigger.updateCharacteristic(hap.Characteristic.On, false);
+        }
+        return {
+          error: false,
+          message: 'Doorbell switched off.'
+        };
       }
+    } else {
+      return {
+        error: true,
+        message: 'Doorbell is not enabled for this camera.'
+      };
     }
   }
 
-  private motionHandler(accessory: PlatformAccessory, active = true, minimumTimeout = 0): void {
+  private motionHandler(accessory: PlatformAccessory, active = true, minimumTimeout = 0): AutomationReturn {
     const motionSensor = accessory.getService(hap.Service.MotionSensor);
     if (motionSensor) {
       this.log.debug('Switch motion detect ' + (active ? 'on.' : 'off.'), accessory.displayName);
@@ -240,27 +260,52 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           }, timeoutConfig * 1000);
           this.motionTimers.set(accessory.UUID, timer);
         }
+        return {
+          error: false,
+          message: 'Motion switched on.'
+        };
       } else {
         motionSensor.updateCharacteristic(hap.Characteristic.MotionDetected, false);
         if (motionTrigger) {
           motionTrigger.updateCharacteristic(hap.Characteristic.On, false);
         }
+        return {
+          error: false,
+          message: 'Motion switched off.'
+        };
       }
+    } else {
+      return {
+        error: true,
+        message: 'Motion is not enabled for this camera.'
+      };
     }
   }
 
-  private automationHandler(fullpath: string, name: string): void{
-    const accessory = this.cachedAccessories.find((curAcc: PlatformAccessory) => curAcc.displayName == name);
+  private automationHandler(fullpath: string, name: string): AutomationReturn {
+    const accessory = this.cachedAccessories.find((curAcc: PlatformAccessory) => {
+      return curAcc.displayName == name;
+    });
     if (accessory) {
       const path = fullpath.split('/').filter((value) => value.length > 0);
       switch (path[0]) {
         case 'motion':
-          this.motionHandler(accessory, path[1] != 'reset');
+          return this.motionHandler(accessory, path[1] != 'reset');
           break;
         case 'doorbell':
-          this.doorbellHandler(accessory);
+          return this.doorbellHandler(accessory);
           break;
+        default:
+          return {
+            error: true,
+            message: 'First directory level must be "motion" or "doorbell", got "' + path[0] + '".'
+          };
       }
+    } else {
+      return {
+        error: true,
+        message: 'Camera "' + name + '" not found.'
+      };
     }
   }
 
@@ -295,14 +340,19 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       const hostname = this.config.localhttp ? 'localhost' : undefined;
       server.listen(this.config.porthttp, hostname);
       server.on('request', (request: http.IncomingMessage, response: http.ServerResponse) => {
+        let results: AutomationReturn = {
+          error: true,
+          message: 'Malformed URL.'
+        };
         if (request.url) {
           const parseurl = url.parse(request.url);
           if (parseurl.pathname && parseurl.query) {
             const name = decodeURIComponent(parseurl.query);
-            this.automationHandler(parseurl.pathname, name);
+            results = this.automationHandler(parseurl.pathname, name);
           }
         }
-        response.writeHead(200);
+        response.writeHead(results.error ? 500 : 200);
+        response.write(results.message);
         response.end();
       });
     }
