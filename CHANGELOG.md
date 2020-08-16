@@ -2,11 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.4.5 (2020-08-15)
+
+### Changes
+
+- Return messages and error codes when using HTTP automation.
+
+### Bug Fixes
+
+- Fixed bug preventing MQTT/HTTP automation from working.
+
 ## v2.4.4 (2020-08-07)
 
 ### Changes
 
-- Added support for unbridging specific cameras.This can aid with performance of the camera and Homebridge as a whole, but requires manually adding any unbridged cameras to HomeKit.
+- Added support for unbridging specific cameras. This can aid with performance of the camera and Homebridge as a whole, but requires manually adding any unbridged cameras to HomeKit.
 
 ## v2.4.3 (2020-07-29)
 

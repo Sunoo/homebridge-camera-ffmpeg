@@ -253,7 +253,6 @@
               "debug": {
                 "title": "Debug Logging",
                 "type": "boolean",
-                "default": true,
                 "description": "Includes debugging output from FFmpeg in the Homebridge log."
               }
             }
