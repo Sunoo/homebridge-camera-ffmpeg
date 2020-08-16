@@ -38,6 +38,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly config: FfmpegPlatformConfig;
   private readonly cameraConfigs: Map<string, CameraConfig> = new Map();
   private readonly cachedAccessories: Array<PlatformAccessory> = [];
+  private readonly accessories: Array<PlatformAccessory> = [];
   private readonly motionTimers: Map<string, NodeJS.Timeout> = new Map();
   private readonly doorbellTimers: Map<string, NodeJS.Timeout> = new Map();
 
@@ -283,7 +284,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   private automationHandler(fullpath: string, name: string): AutomationReturn {
-    const accessory = this.cachedAccessories.find((curAcc: PlatformAccessory) => {
+    const accessory = this.accessories.find((curAcc: PlatformAccessory) => {
       return curAcc.displayName == name;
     });
     if (accessory) {
@@ -363,11 +364,18 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         this.log.info('Configuring unbridged accessory...', accessory.displayName);
         this.setupAccessory(accessory, cameraConfig);
         this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
-      } else if (!this.cachedAccessories.find((curAcc: PlatformAccessory) => curAcc.UUID === uuid)) {
-        const accessory = new Accessory(cameraConfig.name, uuid);
-        this.log.info('Configuring bridged accessory...', accessory.displayName);
-        this.setupAccessory(accessory, cameraConfig);
-        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        this.accessories.push(accessory);
+      } else {
+        const cachedAccessory = this.cachedAccessories.find((curAcc: PlatformAccessory) => curAcc.UUID === uuid);
+        if (!cachedAccessory) {
+          const accessory = new Accessory(cameraConfig.name, uuid);
+          this.log.info('Configuring bridged accessory...', accessory.displayName);
+          this.setupAccessory(accessory, cameraConfig);
+          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+          this.accessories.push(accessory);
+        } else {
+          this.accessories.push(cachedAccessory);
+        }
       }
     }
 
