@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.4.6 (2020-08-16)
+
+### Bug Fixes
+
+- Fix MQTT/HTTP automation when unbridge is used.
+
 ## v2.4.5 (2020-08-15)
 
 ### Changes
