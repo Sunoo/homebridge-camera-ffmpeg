@@ -20,8 +20,9 @@ import {
   VideoInfo
 } from 'homebridge';
 import { spawn } from 'child_process';
-import ip from 'ip';
 import getPort from 'get-port';
+import os from 'os';
+import { networkInterfaceDefault } from 'systeminformation';
 import { CameraConfig, VideoConfig } from './configTypes';
 import { FfmpegProcess } from './ffmpeg';
 import { Logger } from './logger';
@@ -55,21 +56,21 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly name: string;
   private readonly videoConfig: VideoConfig;
   private readonly videoProcessor: string;
-  private readonly interfaceName: string;
+  private readonly interfaceName?: string;
   controller: CameraController;
 
   // keep track of sessions
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
 
-  constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string, interfaceName: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+  constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string, interfaceName?: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
     this.log = log;
     this.videoConfig = cameraConfig.videoConfig;
     this.hap = hap;
 
     this.name = cameraConfig.name;
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
-    this.interfaceName = interfaceName || 'public';
+    this.interfaceName = interfaceName;
 
     api.on(APIEvent.SHUTDOWN, () => {
       for (const session in this.ongoingSessions) {
@@ -184,6 +185,24 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     }
   }
 
+  async getIpAddress(addressVersion: ('ipv6' | 'ipv4'), interfaceName?: string): Promise<string> {
+    if (!interfaceName) {
+      interfaceName = await networkInterfaceDefault();
+    }
+    const interfaces = os.networkInterfaces();
+    const externalInfo = interfaces[interfaceName]?.filter((info) => {
+      return !info.internal;
+    });
+    const preferredFamily = addressVersion === 'ipv6' ? 'IPv6' : 'IPv4';
+    const addressInfo = externalInfo?.find((info) => {
+      return info.family === preferredFamily;
+    }) || externalInfo?.[0];
+    if (!addressInfo) {
+      throw new Error('Unable to get network address for "' + interfaceName + '"!');
+    }
+    return addressInfo.address;
+  }
+
   async prepareStream(request: PrepareStreamRequest, callback: PrepareStreamCallback): Promise<void> {
     const videoReturnPort = await getPort();
     const videoSSRC = this.hap.CameraController.generateSynchronisationSource();
@@ -208,11 +227,14 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     let currentAddress: string;
     try {
-      currentAddress = ip.address(this.interfaceName, request.addressVersion); // ipAddress version must match
-    } catch {
-      this.log.warn('Unable to get ' + request.addressVersion + ' address for ' + this.interfaceName +
-        '! Falling back to public.', this.name);
-      currentAddress = ip.address('public', request.addressVersion); // ipAddress version must match
+      currentAddress = await this.getIpAddress(request.addressVersion, this.interfaceName);
+    } catch (ex) {
+      if (this.interfaceName) {
+        this.log.warn(ex + ' Falling back to default.', this.name);
+        currentAddress = await this.getIpAddress(request.addressVersion);
+      } else {
+        throw ex;
+      }
     }
 
     const response: PrepareStreamResponse = {

@@ -11,10 +11,10 @@ import {
   PlatformAccessoryEvent,
   PlatformConfig
 } from 'homebridge';
-import ip from 'ip';
 import http from 'http';
 import mqtt from 'mqtt';
 import os from 'os';
+import { networkInterfaceDefault } from 'systeminformation';
 import url from 'url';
 import { CameraConfig, FfmpegPlatformConfig } from './configTypes';
 import { Logger } from './logger';
@@ -85,19 +85,23 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
 
     if (!this.config.interfaceName) {
-      const nics = os.networkInterfaces();
-      const publicNics = [];
-      for (const [nic, details] of Object.entries(nics)) {
-        const find = details?.find((info) => {
-          return !ip.isLoopback(info.address) && ip.isPrivate(info.address);
+      const interfaces = os.networkInterfaces();
+      const publicNics: Array<string> = [];
+      for (const [nic, details] of Object.entries(interfaces)) {
+        const externalInfo = details?.find((info) => {
+          return !info.internal;
         });
-        if (find) {
+        if (externalInfo) {
           publicNics.push(nic);
         }
       }
       if (publicNics.length > 1) {
-        this.log.warn('Multiple public network interfaces detected, you should set interfaceName ' +
-          'to avoid issues: ' + publicNics.join(', '));
+        networkInterfaceDefault()
+          .then((defaultInterfaceName) => {
+            this.log.warn('Multiple network interfaces detected ("' + publicNics.join('", "') + '"). ' +
+              'If you encounter issues with streaming video you may need to set interfaceName. ' +
+              'If not set, "' + defaultInterfaceName + '" will be used.');
+          });
       }
     }
 
