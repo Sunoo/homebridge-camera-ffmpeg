@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.4.7 (2020-08-17)
+
+### Changes
+
+- Changed the way external IP address is determined. This should result in video streams working by default in more setups.
+
 ## v2.4.6 (2020-08-16)
 
 ### Bug Fixes
