@@ -205,6 +205,18 @@
                 },
                 "description": "Set the codec used for encoding video sent to HomeKit, must be h.264-based. If you're running on a Raspberry Pi, you can change to the hardware accelerated video codec with this option."
               },
+              "pformat": {
+                "title": "Pixel Format",
+                "type": "string",
+                "placeholder": "yuv420p",
+                "typeahead": {
+                  "source": [
+                    "yuv420p",
+                    "yuvj422p"
+                  ]
+                },
+                "description": "Set the pixel format that is used."
+              },
               "packetSize": {
                 "title": "Packet Size",
                 "type": "number",
