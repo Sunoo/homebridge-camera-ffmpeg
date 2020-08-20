@@ -99,6 +99,7 @@ Other users have been sharing configurations that work for them on our GitHub si
 - `maxBitrate`: The maximum bitrate used for video streamed to HomeKit, in kbit/s. If not set, will use any bitrate HomeKit requests.
 - `preserveRatio`: Can be set to preserve the aspect ratio based on either `W`idth or `H`eight. If not set, aspect ratio is not preserved.
 - `vcodec`: Set the codec used for encoding video sent to HomeKit, must be h.264-based. If you're running on a Raspberry Pi, you can change to the hardware accelerated video codec with this option. (Default: `libx264`)
+- `pformat`: Set the pixel format that is to be used by video being processed. (Default: `yuv420p`)
 - `audio`: Enables audio streaming from camera. (Default: `false`)
 - `packetSize`: If audio or video is choppy try a smaller value, should be set to a multiple of 188. (Default: `1316`)
 - `vflip`: Flips the video vertically. (Default: `false`)

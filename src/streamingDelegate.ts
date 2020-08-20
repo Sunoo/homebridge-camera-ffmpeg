@@ -262,6 +262,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private startStream(request: StartStreamRequest, callback: StreamRequestCallback): void{
     const sessionInfo = this.pendingSessions[request.sessionID];
     const vcodec = this.videoConfig.vcodec || 'libx264';
+    const pformat = this.videoConfig.pformat || 'yuv420p';
     const fps = request.video.fps > this.videoConfig.maxFPS ? this.videoConfig.maxFPS : request.video.fps;
     const mtu = this.videoConfig.packetSize || 1316; // request.video.mtu is not used
     const mapvideo = this.videoConfig.mapvideo || '0:0';
@@ -291,7 +292,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const ffmpegVideoArgs =
       ' -map ' + mapvideo +
       ' -vcodec ' + vcodec +
-      ' -pix_fmt yuv420p' +
+      ' -pix_fmt ' + pformat +
       ' -r ' + fps +
       ' -f rawvideo' +
       ' ' + additionalCommandline +

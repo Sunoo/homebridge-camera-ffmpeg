@@ -37,6 +37,7 @@ export type VideoConfig = {
   minBitrate: number;
   preserveRatio: string;
   vcodec: string;
+  pformat: string;
   packetSize: number;
   videoFilter: string;
   additionalCommandline: string;
