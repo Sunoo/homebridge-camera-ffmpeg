@@ -15,7 +15,9 @@
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "removeComments": true
+    "removeComments": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": [
     "./src/**/*"
