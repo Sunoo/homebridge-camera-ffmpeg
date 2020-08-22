@@ -139,10 +139,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     // In the case of null, skip entirely
     if (videoFilter !== null && videoFilter !== 'none') {
       if (this.videoConfig.vflip) {
-        vf.push('hflip');
+        vf.push('vflip');
       }
       if (this.videoConfig.hflip) {
-        vf.push('vflip');
+        vf.push('hflip');
       }
       vf.push(videoFilter); // vflip and hflip filters must precede the scale filter to work
     }
