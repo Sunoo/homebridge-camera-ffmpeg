@@ -98,7 +98,7 @@
             "description": "Set the firmware revision for display in the Home app."
           },
           "motion": {
-            "title": "Enable Motion",
+            "title": "Enable Motion Sensor",
             "type": "boolean",
             "description": "Exposes the motion sensor for this camera. This can be triggered with the dummy switches, MQTT messages, or via HTTP, depending on what features are enabled in the config."
           },
@@ -108,7 +108,7 @@
             "description": "Exposes the doorbell device for this camera. This can be triggered with the dummy switches, MQTT messages, or via HTTP, depending on what features are enabled in the config."
           },
           "switches": {
-            "title": "Enable Manual Automation Switches",
+            "title": "Enable Dummy Switches",
             "type": "boolean",
             "description": "Enables dummy switches to trigger motion and/or doorbell, if either of those are enabled. When enabled there will be an additional switch that triggers the motion or doorbell event."
           },
@@ -129,9 +129,9 @@
             "type": "object",
             "properties": {
               "source": {
-                "title": "Source",
+                "title": "Video Source",
                 "type": "string",
-                "placeholder": "-i rtsp://myfancy_rtsp_stream",
+                "placeholder": "-i rtsp://username:password@example.com:554",
                 "required": true,
                 "description": "FFmpeg options on where to find and how to decode your camera's video stream. The most basic form is '-i' followed by your camera's URL."
               },
@@ -145,51 +145,47 @@
                 "type": "integer",
                 "placeholder": 2,
                 "minimum": 1,
-                "description": "The maximum number of streams that will be allowed concurrently this camera."
+                "description": "The maximum number of streams that will be allowed at once to this camera."
               },
               "maxWidth": {
                 "title": "Maximum Width",
                 "type": "integer",
                 "placeholder": 1280,
-                "minimum": 1,
-                "description": "The maximum width used for video streamed to HomeKit. If not set, will use any size HomeKit requests."
+                "multipleOf": 2,
+                "minimum": 0,
+                "description": "The maximum width used for video streamed to HomeKit. If set to 0, the resolution of the source is used. If not set, will use any size HomeKit requests."
               },
               "maxHeight": {
                 "title": "Maximum Height",
                 "type": "integer",
                 "placeholder": 720,
-                "minimum": 1,
-                "description": "The maximum height used for video streamed to HomeKit. If not set, will use any size HomeKit requests."
+                "multipleOf": 2,
+                "minimum": 0,
+                "description": "The maximum height used for video streamed to HomeKit. If set to 0, the resolution of the source is used. If not set, will use any size HomeKit requests."
               },
               "maxFPS": {
-                "title": "Maximum FPS",
+                "title": "Maximum Framerate",
                 "type": "integer",
-                "placeholder": 10,
-                "minimum": 1,
-                "description": "The maximum frame rate used for video streamed to HomeKit. If not set, will use any frame rate HomeKit requests."
+                "placeholder": 30,
+                "minimum": 0,
+                "description": "The maximum frame rate used for video streamed to HomeKit. If set to 0, the framerate of the source is used. If not set, will use any framerate HomeKit requests."
               },
               "maxBitrate": {
                 "title": "Maximum Bitrate",
                 "type": "integer",
-                "placeholder": 300,
-                "minimum": 1,
+                "placeholder": 299,
+                "minimum": 0,
                 "description": "The maximum bitrate used for video streamed to HomeKit, in kbit/s. If not set, will use any bitrate HomeKit requests."
               },
-              "minBitrate": {
-                "title": "Minimum Bitrate",
-                "type": "integer",
-                "placeholder": 0,
-                "minimum": 0,
-                "description": "The minimum bitrate used for video streamed to HomeKit, in kbit/s. If set, it will override the bitrate requested by HomeKit if that is lower than this value."
+              "forceMax": {
+                "title": "Force Maximums",
+                "type": "boolean",
+                "description": "If set, the settings requested by HomeKit will be overridden with any 'maximum' values defined in this config."
               },
               "preserveRatio": {
                 "title": "Preserve Aspect Ratio",
-                "type": "string",
-                "oneOf": [
-                  { "title": "Width", "enum": ["W"] },
-                  { "title": "Height", "enum": ["H"] }
-                ],
-                "description": "Can be set to preserve the aspect ratio based on either Width or Height. If not set, aspect ratio is not preserved."
+                "type": "boolean",
+                "description": "Preserves the aspect ratio of the source video."
               },
               "vcodec": {
                 "title": "Video Codec",
@@ -199,39 +195,40 @@
                   "source": [
                     "libx264",
                     "h264_omx",
-                    "h264",
+                    "h264_videotoolbox",
                     "copy"
                   ]
                 },
-                "description": "Set the codec used for encoding video sent to HomeKit, must be h.264-based. If you're running on a Raspberry Pi, you can change to the hardware accelerated video codec with this option."
+                "description": "Set the codec used for encoding video sent to HomeKit, must be H.264-based. You can change to a hardware accelerated video codec with this option, if one is available."
               },
               "packetSize": {
                 "title": "Packet Size",
                 "type": "number",
                 "placeholder": 1316,
                 "multipleOf": 188,
+                "minimum": 188,
                 "description": "If audio or video is choppy try a smaller value."
               },
               "videoFilter": {
-                "title": "Custom Video Filter",
+                "title": "Additional Video Filter Options",
                 "type": "string",
-                "description": "Allows a custom video filter to be passed to FFmpeg via '-vf'."
+                "description": "Allows additional video filter options to be passed to FFmpeg. If set to 'none', all video filters are disabled."
               },
               "additionalCommandline": {
                 "title": "Additional Command Line Options",
                 "type": "string",
                 "placeholder": "-preset ultrafast -tune zerolatency",
-                "description": "Additional extra command line options passed to FFmpeg."
+                "description": "Allows additional command line options to be passed to FFmpeg."
               },
               "mapvideo": {
                 "type": "string",
-                "title": "Map Video",
+                "title": "Video Stream",
                 "placeholder": "0:0",
                 "description": "Selects the stream used for video."
               },
               "mapaudio": {
                 "type": "string",
-                "title": "Map Audio",
+                "title": "Audio Stream",
                 "placeholder": "0:1",
                 "description": "Selects the stream used for audio."
               },
@@ -239,16 +236,6 @@
                 "title": "Enable Audio",
                 "type": "boolean",
                 "description": "Enables audio streaming from camera."
-              },
-              "vflip": {
-                "title": "Flip Vertically",
-                "type": "boolean",
-                "description": "Flips the video vertically."
-              },
-              "hflip": {
-                "title": "Flip Horizontally",
-                "type": "boolean",
-                "description": "Flips the video horizontally."
               },
               "debug": {
                 "title": "Debug Logging",
@@ -277,37 +264,11 @@
             "cameras[].name",
             "cameras[].videoConfig.source",
             "cameras[].videoConfig.stillImageSource",
-            "cameras[].videoConfig.vcodec",
             "cameras[].videoConfig.audio",
-            "cameras[].unbridge",
-            {
-              "key": "cameras[].videoConfig",
-              "type": "section",
-              "title": "Advanced Settings",
-              "expandable": true,
-              "expanded": false,
-              "items": [
-                "cameras[].videoConfig.maxStreams",
-                "cameras[].videoConfig.maxWidth",
-                "cameras[].videoConfig.maxHeight",
-                "cameras[].videoConfig.maxFPS",
-                "cameras[].videoConfig.maxBitrate",
-                "cameras[].videoConfig.minBitrate",
-                "cameras[].videoConfig.preserveRatio",
-                "cameras[].videoConfig.packetSize",
-                "cameras[].videoConfig.videoFilter",
-                "cameras[].videoConfig.additionalCommandline",
-                "cameras[].videoConfig.mapvideo",
-                "cameras[].videoConfig.mapaudio",
-                "cameras[].videoConfig.vflip",
-                "cameras[].videoConfig.hflip",
-                "cameras[].videoConfig.debug"
-              ]
-            },
             {
               "key": "cameras[]",
               "type": "section",
-              "title": "Customization Settings",
+              "title": "Branding",
               "expandable": true,
               "expanded": false,
               "items": [
@@ -320,7 +281,40 @@
             {
               "key": "cameras[]",
               "type": "section",
-              "title": "Automation Settings",
+              "title": "Video Output",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "cameras[].videoConfig.maxWidth",
+                "cameras[].videoConfig.maxHeight",
+                "cameras[].videoConfig.maxFPS",
+                "cameras[].videoConfig.maxBitrate",
+                "cameras[].videoConfig.forceMax",
+                "cameras[].videoConfig.preserveRatio",
+                "cameras[].videoConfig.videoFilter",
+                "cameras[].videoConfig.additionalCommandline"
+              ]
+            },
+            {
+              "key": "cameras[]",
+              "type": "section",
+              "title": "Advanced",
+              "expandable": true,
+              "expanded": false,
+              "items": [
+                "cameras[].videoConfig.vcodec",
+                "cameras[].videoConfig.mapvideo",
+                "cameras[].videoConfig.mapaudio",
+                "cameras[].videoConfig.maxStreams",
+                "cameras[].videoConfig.packetSize",
+                "cameras[].unbridge",
+                "cameras[].videoConfig.debug"
+              ]
+            },
+            {
+              "key": "cameras[]",
+              "type": "section",
+              "title": "Automation",
               "expandable": true,
               "expanded": false,
               "items": [
@@ -336,7 +330,7 @@
     },
     {
       "type": "section",
-      "title": "Optional Settings",
+      "title": "Global Advanced",
       "expandable": true,
       "expanded": false,
       "items": [
@@ -346,7 +340,7 @@
     },
     {
       "type": "section",
-      "title": "Automation Settings",
+      "title": "Global Automation",
       "expandable": true,
       "expanded": false,
       "items": [

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.5.0 (2020-08-23)
+
+### Changes
+
+- `forceMax` has been added. This will force the use of `maxWidth`, `maxHeight`, `maxFPS`, and `maxBitrate` when set.
+- If `maxWidth`, `maxHeight`, or `maxFPS` are set to `0`, the width, height, or framerate of the source will now be used for the output.
+- Reorganized config UI options.
+
+### Breaking Changes
+
+- Horizontal and vertical flip have been removed. If you need these options, pass `hflip` and/or `vflip` in `videoFilter`.
+- `forceMax` has resulted in the removal of `minBitrate`, as it is now redundant. To replicate the old behavior, set `maxBitrate` to the bitrate you want to use and set `forceMax` to true.
+- `preserveRatio` is now a boolean to reduce confusion and support the better handling of that option.
+
 ## v2.4.7 (2020-08-17)
 
 ### Changes

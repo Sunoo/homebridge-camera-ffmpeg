@@ -34,8 +34,8 @@ export type VideoConfig = {
   maxHeight: number;
   maxFPS: number;
   maxBitrate: number;
-  minBitrate: number;
-  preserveRatio: string;
+  forceMax: boolean;
+  preserveRatio: boolean;
   vcodec: string;
   packetSize: number;
   videoFilter: string;
@@ -43,7 +43,5 @@ export type VideoConfig = {
   mapvideo: string;
   mapaudio: string;
   audio: boolean;
-  vflip: boolean;
-  hflip: boolean;
   debug: boolean;
 };
