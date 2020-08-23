@@ -1,35 +1,16 @@
 import { ChildProcess, spawn } from 'child_process';
-import { createSocket } from 'dgram';
 import { StreamRequestCallback } from 'homebridge';
 import { Logger } from './logger';
 import { StreamingDelegate } from './streamingDelegate';
 
 export class FfmpegProcess {
   private readonly process: ChildProcess;
-  private timeout?: NodeJS.Timeout;
 
-  constructor(cameraName: string, sessionId: string, videoProcessor: string, ffmpegArgs: string, log: Logger,
-    returnPort: number, debug: boolean, delegate: StreamingDelegate, callback: StreamRequestCallback) {
+  constructor(cameraName: string, sessionId: string, videoProcessor: string, ffmpegArgs: string,
+    log: Logger, debug: boolean, delegate: StreamingDelegate, callback: StreamRequestCallback) {
     let started = false;
 
     log.debug('Stream command: ' + videoProcessor + ' ' + ffmpegArgs, cameraName, debug);
-
-    const socket = createSocket('udp4');
-    socket.on('error', (err: Error) => {
-      log.error('Socket error: ' + err.name, cameraName);
-      delegate.stopStream(sessionId);
-    });
-    socket.on('message', () => {
-      if (this.timeout) {
-        clearTimeout(this.timeout);
-      }
-      this.timeout = setTimeout(() => {
-        log.info('Device appears to be inactive for over 5 seconds. Stopping stream.', cameraName);
-        delegate.controller.forceStopStreamingSession(sessionId);
-        delegate.stopStream(sessionId);
-      }, 5000);
-    });
-    socket.bind(returnPort);
 
     this.process = spawn(videoProcessor, ffmpegArgs.split(/\s+/), { env: process.env });
 
@@ -56,11 +37,11 @@ export class FfmpegProcess {
     }
     this.process.on('error', (error: Error) => {
       log.error('Failed to start stream: ' + error.message, cameraName);
-      callback(new Error('ffmpeg process creation failed!'));
+      callback(new Error('FFmpeg process creation failed!'));
       delegate.stopStream(sessionId);
     });
     this.process.on('exit', (code: number, signal: NodeJS.Signals) => {
-      const message = 'ffmpeg exited with code: ' + code + ' and signal: ' + signal;
+      const message = 'FFmpeg exited with code: ' + code + ' and signal: ' + signal;
 
       if (code == null || code === 255) {
         if (this.process.killed) {
@@ -81,9 +62,6 @@ export class FfmpegProcess {
   }
 
   public stop(): void {
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
     this.process.kill('SIGKILL');
   }
 }

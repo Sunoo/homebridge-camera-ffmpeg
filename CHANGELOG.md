@@ -8,7 +8,12 @@ All notable changes to this project will be documented in this file.
 
 - `forceMax` has been added. This will force the use of `maxWidth`, `maxHeight`, `maxFPS`, and `maxBitrate` when set.
 - If `maxWidth`, `maxHeight`, or `maxFPS` are set to `0`, the width, height, or framerate of the source will now be used for the output.
+- If `maxBitrate` is set to `0`, the bitrate of the encoder will not be limited. I strongly recommend against this, but it is a better option than setting it to `999999` or similar values, as I've seen in some configs.
 - Reorganized config UI options.
+
+### Bug Fixes
+
+- Fix handling of IPv6 connections.
 
 ### Breaking Changes
 
