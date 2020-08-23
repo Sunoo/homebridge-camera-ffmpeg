@@ -20,7 +20,6 @@ import {
   VideoInfo
 } from 'homebridge';
 import { spawn } from 'child_process';
-import { createSocket } from 'dgram';
 import getPort from 'get-port';
 import os from 'os';
 import { networkInterfaceDefault } from 'systeminformation';
@@ -29,7 +28,7 @@ import { FfmpegProcess } from './ffmpeg';
 import { Logger } from './logger';
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
-type SessionInfo = {
+export type SessionInfo = {
   address: string; // address of the HAP controller
   localAddress: string;
   addressVersion: ('ipv6' | 'ipv4');
@@ -60,12 +59,12 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly videoConfig: VideoConfig;
   private readonly videoProcessor: string;
   private readonly interfaceName?: string;
-  private timeout?: NodeJS.Timeout;
-  controller: CameraController;
+  readonly controller: CameraController;
 
   // keep track of sessions
   pendingSessions: Record<string, SessionInfo> = {};
   ongoingSessions: Record<string, FfmpegProcess> = {};
+  timeouts: Record<string, NodeJS.Timeout> = {};
 
   constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string, interfaceName?: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
     this.log = log;
@@ -330,25 +329,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       ffmpegArgs += ' -loglevel level+verbose';
     }
 
-    const socket = createSocket(sessionInfo.addressVersion === 'ipv4' ? 'udp4' : 'udp6');
-    socket.on('error', (err: Error) => {
-      this.log.error('Socket error: ' + err.name, this.name);
-      this.stopStream(request.sessionID);
-    });
-    socket.on('message', () => {
-      if (this.timeout) {
-        clearTimeout(this.timeout);
-      }
-      this.timeout = setTimeout(() => {
-        this.log.info('Device appears to be inactive for over 5 seconds. Stopping stream.', this.name);
-        this.controller.forceStopStreamingSession(request.sessionID);
-        this.stopStream(request.sessionID);
-      }, 5000);
-    });
-    socket.bind(sessionInfo.videoReturnPort, sessionInfo.localAddress);
-
-    const ffmpeg = new FfmpegProcess(this.name, request.sessionID, this.videoProcessor, ffmpegArgs,
-      this.log, this.videoConfig.debug, this, callback);
+    const ffmpeg = new FfmpegProcess(this.name, request.sessionID, this.videoProcessor, ffmpegArgs, this.log,
+      sessionInfo, this.videoConfig.debug, this, callback);
 
     this.ongoingSessions[request.sessionID] = ffmpeg;
     delete this.pendingSessions[request.sessionID];
@@ -372,9 +354,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   }
 
   public stopStream(sessionId: string): void {
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-    }
     try {
       if (this.ongoingSessions[sessionId]) {
         const ffmpegProcess = this.ongoingSessions[sessionId];

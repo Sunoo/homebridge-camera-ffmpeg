@@ -1,16 +1,36 @@
 import { ChildProcess, spawn } from 'child_process';
+import { createSocket } from 'dgram';
 import { StreamRequestCallback } from 'homebridge';
 import { Logger } from './logger';
-import { StreamingDelegate } from './streamingDelegate';
+import { SessionInfo, StreamingDelegate } from './streamingDelegate';
 
 export class FfmpegProcess {
   private readonly process: ChildProcess;
+  private timeout?: NodeJS.Timeout;
 
-  constructor(cameraName: string, sessionId: string, videoProcessor: string, ffmpegArgs: string,
-    log: Logger, debug: boolean, delegate: StreamingDelegate, callback: StreamRequestCallback) {
+  constructor(cameraName: string, sessionId: string, videoProcessor: string, ffmpegArgs: string, log: Logger,
+    sessionInfo: SessionInfo, debug: boolean, delegate: StreamingDelegate, callback: StreamRequestCallback) {
     let started = false;
 
     log.debug('Stream command: ' + videoProcessor + ' ' + ffmpegArgs, cameraName, debug);
+
+    const socket = createSocket(sessionInfo.addressVersion === 'ipv4' ? 'udp4' : 'udp6');
+    socket.on('error', (err: Error) => {
+      log.error('Socket error: ' + err.name, cameraName);
+      delegate.stopStream(sessionId);
+    });
+    socket.on('message', () => {
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+      this.timeout = setTimeout(() => {
+        socket.close();
+        log.info('Device appears to be inactive for over 5 seconds. Stopping stream.', cameraName);
+        delegate.controller.forceStopStreamingSession(sessionId);
+        delegate.stopStream(sessionId);
+      }, 5000);
+    });
+    socket.bind(sessionInfo.videoReturnPort, sessionInfo.localAddress);
 
     this.process = spawn(videoProcessor, ffmpegArgs.split(/\s+/), { env: process.env });
 
