@@ -20,6 +20,7 @@ import {
   VideoInfo
 } from 'homebridge';
 import { spawn } from 'child_process';
+import { createSocket } from 'dgram';
 import getPort from 'get-port';
 import os from 'os';
 import { networkInterfaceDefault } from 'systeminformation';
@@ -30,6 +31,8 @@ const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @t
 
 type SessionInfo = {
   address: string; // address of the HAP controller
+  localAddress: string;
+  addressVersion: ('ipv6' | 'ipv4');
 
   videoPort: number;
   videoReturnPort: number;
@@ -57,6 +60,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly videoConfig: VideoConfig;
   private readonly videoProcessor: string;
   private readonly interfaceName?: string;
+  private timeout?: NodeJS.Timeout;
   controller: CameraController;
 
   // keep track of sessions
@@ -204,8 +208,22 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const audioReturnPort = await getPort();
     const audioSSRC = this.hap.CameraController.generateSynchronisationSource();
 
+    let currentAddress: string;
+    try {
+      currentAddress = await this.getIpAddress(request.addressVersion, this.interfaceName);
+    } catch (ex) {
+      if (this.interfaceName) {
+        this.log.warn(ex + ' Falling back to default.', this.name);
+        currentAddress = await this.getIpAddress(request.addressVersion);
+      } else {
+        throw ex;
+      }
+    }
+
     const sessionInfo: SessionInfo = {
       address: request.targetAddress,
+      localAddress: currentAddress,
+      addressVersion: request.addressVersion,
 
       videoPort: request.video.port,
       videoReturnPort: videoReturnPort,
@@ -219,18 +237,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       audioSRTP: Buffer.concat([request.audio.srtp_key, request.audio.srtp_salt]),
       audioSSRC: audioSSRC
     };
-
-    let currentAddress: string;
-    try {
-      currentAddress = await this.getIpAddress(request.addressVersion, this.interfaceName);
-    } catch (ex) {
-      if (this.interfaceName) {
-        this.log.warn(ex + ' Falling back to default.', this.name);
-        currentAddress = await this.getIpAddress(request.addressVersion);
-      } else {
-        throw ex;
-      }
-    }
 
     const response: PrepareStreamResponse = {
       address: currentAddress,
@@ -324,8 +330,25 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       ffmpegArgs += ' -loglevel level+verbose';
     }
 
-    const ffmpeg = new FfmpegProcess(this.name, request.sessionID, this.videoProcessor, ffmpegArgs, this.log,
-      sessionInfo.videoReturnPort, this.videoConfig.debug, this, callback);
+    const socket = createSocket(sessionInfo.addressVersion === 'ipv4' ? 'udp4' : 'udp6');
+    socket.on('error', (err: Error) => {
+      this.log.error('Socket error: ' + err.name, this.name);
+      this.stopStream(request.sessionID);
+    });
+    socket.on('message', () => {
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+      this.timeout = setTimeout(() => {
+        this.log.info('Device appears to be inactive for over 5 seconds. Stopping stream.', this.name);
+        this.controller.forceStopStreamingSession(request.sessionID);
+        this.stopStream(request.sessionID);
+      }, 5000);
+    });
+    socket.bind(sessionInfo.videoReturnPort, sessionInfo.localAddress);
+
+    const ffmpeg = new FfmpegProcess(this.name, request.sessionID, this.videoProcessor, ffmpegArgs,
+      this.log, this.videoConfig.debug, this, callback);
 
     this.ongoingSessions[request.sessionID] = ffmpeg;
     delete this.pendingSessions[request.sessionID];
@@ -349,6 +372,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   }
 
   public stopStream(sessionId: string): void {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
     try {
       if (this.ongoingSessions[sessionId]) {
         const ffmpegProcess = this.ongoingSessions[sessionId];
@@ -359,7 +385,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       delete this.ongoingSessions[sessionId];
       this.log.info('Stopped video stream.', this.name);
     } catch (err) {
-      this.log.error('Error occurred terminating video process: ' + err, this.name);
+      this.log.error('Error occurred terminating FFmpeg process: ' + err, this.name);
     }
   }
 }
