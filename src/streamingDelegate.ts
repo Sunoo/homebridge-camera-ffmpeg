@@ -269,12 +269,20 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     const resolution = this.determineResolution(request.video, this.videoConfig.forceMax);
 
-    const fps = (this.videoConfig.forceMax && this.videoConfig.maxFPS) ||
+    let fps = (this.videoConfig.forceMax && this.videoConfig.maxFPS) ||
       (request.video.fps > this.videoConfig.maxFPS) ?
       this.videoConfig.maxFPS : request.video.fps;
-    const videoBitrate = (this.videoConfig.forceMax && this.videoConfig.maxBitrate) ||
+    let videoBitrate = (this.videoConfig.forceMax && this.videoConfig.maxBitrate) ||
       (request.video.max_bit_rate > this.videoConfig.maxBitrate) ?
       this.videoConfig.maxBitrate : request.video.max_bit_rate;
+
+    if (vcodec === 'copy') {
+      resolution.width = 0;
+      resolution.height = 0;
+      resolution.videoFilter = '';
+      fps = 0;
+      videoBitrate = 0;
+    }
 
     this.log.debug('Video stream requested: ' + request.video.width + ' x ' + request.video.height + ', ' +
       request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.name, this.videoConfig.debug);
@@ -292,7 +300,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       (fps > 0 ? ' -r ' + fps : '') +
       ' -f rawvideo' +
       ' ' + additionalCommandline +
-      (vcodec !== 'copy' && resolution.videoFilter ? ' -filter:v ' + resolution.videoFilter : '') +
+      (resolution.videoFilter.length > 0 ? ' -filter:v ' + resolution.videoFilter : '') +
       (videoBitrate > 0 ? ' -b:v ' + videoBitrate + 'k' : '') +
       ' -payload_type ' + request.video.pt;
 
