@@ -40,8 +40,8 @@ Other users have been sharing configurations that work for them on our GitHub si
     {
       "name": "Camera Name",
       "videoConfig": {
-        "source": "-i rtsp://myfancy_rtsp_stream",
-        "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
+        "source": "-i rtsp://username:password@example.com:554",
+        "stillImageSource": "-i http://example.com/still_image.jpg",
         "maxStreams": 2,
         "maxWidth": 1280,
         "maxHeight": 720,
@@ -77,8 +77,8 @@ Other users have been sharing configurations that work for them on our GitHub si
       "serialNumber": "1234567890",
       "firmwareRevision": "1.0",
       "videoConfig": {
-        "source": "-i rtsp://myfancy_rtsp_stream",
-        "stillImageSource": "-i http://faster_still_image_grab_url/this_is_optional.jpg",
+        "source": "-i rtsp://username:password@example.com:554",
+        "stillImageSource": "-i http://example.com/still_image.jpg",
         "maxStreams": 2,
         "maxWidth": 1280,
         "maxHeight": 720,
@@ -91,22 +91,20 @@ Other users have been sharing configurations that work for them on our GitHub si
 
 ### Optional videoConfig Parameters
 
-- `maxStreams`: The maximum number of streams that will be allowed concurrently this camera. (Default: `2`)
-- `maxWidth`: The maximum width used for video streamed to HomeKit. If not set, will use any size HomeKit requests.
-- `maxHeight`: The maximum height used for video streamed to HomeKit. If not set, will use any size HomeKit requests.
-- `maxFPS`: The maximum frame rate used for video streamed to HomeKit. If not set, will use any frame rate HomeKit requests.
-- `minBitrate`: The minimum bitrate used for video streamed to HomeKit, in kbit/s. If set, it will override the bitrate requested by HomeKit if that is lower than this value.
+- `maxStreams`: The maximum number of streams that will be allowed at once to this camera. (Default: `2`)
+- `maxWidth`: The maximum width used for video streamed to HomeKit. If set to 0, the resolution of the source is used. If not set, will use any size HomeKit requests.
+- `maxHeight`: The maximum height used for video streamed to HomeKit. If set to 0, the resolution of the source is used. If not set, will use any size HomeKit requests.
+- `maxFPS`: The maximum frame rate used for video streamed to HomeKit. If set to 0, the framerate of the source is used. If not set, will use any frame rate HomeKit requests.
 - `maxBitrate`: The maximum bitrate used for video streamed to HomeKit, in kbit/s. If not set, will use any bitrate HomeKit requests.
-- `preserveRatio`: Can be set to preserve the aspect ratio based on either `W`idth or `H`eight. If not set, aspect ratio is not preserved.
-- `vcodec`: Set the codec used for encoding video sent to HomeKit, must be h.264-based. If you're running on a Raspberry Pi, you can change to the hardware accelerated video codec with this option. (Default: `libx264`)
+- `forceMax`: If set, the settings requested by HomeKit will be overridden with any 'maximum' values defined in this config. (Default: `false`)
+- `preserveRatio`: Preserves the aspect ratio of the source video. (Default: `false`)
+- `vcodec`: Set the codec used for encoding video sent to HomeKit, must be H.264-based.  You can change to a hardware accelerated video codec with this option, if one is available. (Default: `libx264`)
 - `audio`: Enables audio streaming from camera. (Default: `false`)
 - `packetSize`: If audio or video is choppy try a smaller value, should be set to a multiple of 188. (Default: `1316`)
-- `vflip`: Flips the video vertically. (Default: `false`)
-- `hflip`: Flips the video horizontally. (Default: `false`)
 - `mapvideo`: Selects the stream used for video. (Default: `0:0`)
 - `mapaudio`: Selects the stream used for audio. (Default: `0:1`)
-- `videoFilter`: Allows a custom video filter to be passed to FFmpeg via `-vf`.
-- `additionalCommandline` Additional extra command line options passed to FFmpeg. (Default: `-preset ultrafast -tune zerolatency`)
+- `videoFilter`: Allows additional video filter options to be passed to FFmpeg. If set to 'none', all video filters are disabled.
+- `additionalCommandline`: Allows additional command line options to be passed to FFmpeg. (Default: `-preset ultrafast -tune zerolatency`)
 - `debug`: Includes debugging output from FFmpeg in the Homebridge log. (Default: `false`)
 
 #### More Complicated Example

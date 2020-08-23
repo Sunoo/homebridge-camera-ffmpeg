@@ -116,35 +116,31 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.controller = new hap.CameraController(options);
   }
 
-  private determineResolution(request: SnapshotRequest | VideoInfo): ResolutionInfo {
-    const width = request.width > this.videoConfig.maxWidth ? this.videoConfig.maxWidth : request.width;
-    const height = request.height > this.videoConfig.maxHeight ? this.videoConfig.maxHeight : request.height;
-
-    let resolution: string;
-    switch (this.videoConfig.preserveRatio) {
-      case 'W':
-        resolution = width + ':-1';
-        break;
-      case 'H':
-        resolution = '-1:' + height;
-        break;
-      default:
-        resolution = width + ':' + height;
-        break;
+  private determineResolution(request: SnapshotRequest | VideoInfo, isSnapshot = false): ResolutionInfo {
+    let width = request.width;
+    let height = request.height;
+    if (!isSnapshot) {
+      if ((this.videoConfig.forceMax && this.videoConfig.maxWidth) ||
+        (request.width > this.videoConfig.maxWidth)) {
+        width = this.videoConfig.maxWidth;
+      }
+      if ((this.videoConfig.forceMax && this.videoConfig.maxHeight) ||
+        (request.height > this.videoConfig.maxHeight)) {
+        height = this.videoConfig.maxHeight;
+      }
     }
 
     const vf: Array<string> = [];
-    const configFilter = this.videoConfig.videoFilter || null; // null is a valid discrete value
-    const videoFilter = configFilter === '' || configFilter === null ? 'scale=' + resolution : configFilter; // empty string or null indicates default
-    // In the case of null, skip entirely
-    if (videoFilter !== null && videoFilter !== 'none') {
-      if (this.videoConfig.vflip) {
-        vf.push('vflip');
+    if (this.videoConfig.videoFilter !== 'none') {
+      if (this.videoConfig.videoFilter) {
+        vf.push(this.videoConfig.videoFilter);
       }
-      if (this.videoConfig.hflip) {
-        vf.push('hflip');
+      if (width > 0 || height > 0) {
+        vf.push('scale=' + (width > 0 ? '\'min(' + width + ',iw)\'' : 'iw') + ':' +
+          (height > 0 ? '\'min(' + height + ',ih)\'' : 'ih') +
+          (this.videoConfig.preserveRatio ? ':force_original_aspect_ratio=decrease' : ''));
+        vf.push('scale=trunc(iw/2)*2:trunc(ih/2)*2'); // Force to fit encoder restrictions
       }
-      vf.push(videoFilter); // vflip and hflip filters must precede the scale filter to work
     }
 
     return {width: width, height: height, videoFilter: vf.join(',')};
@@ -153,22 +149,22 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
     const resolution = this.determineResolution(request);
 
-    let fcmd = this.videoConfig.stillImageSource || this.videoConfig.source;
+    this.log.debug('Snapshot requested: ' + request.width + ' x ' + request.height, this.name, this.videoConfig.debug);
+    this.log.debug('Sending snapshot: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
+      (resolution.height > 0 ? resolution.height : 'native'), this.name, this.videoConfig.debug);
 
-    const ffmpegStillArgs =
+    let ffmpegArgs = this.videoConfig.stillImageSource || this.videoConfig.source;
+
+    ffmpegArgs += // Still
       ' -frames:v 1' +
-      (resolution.videoFilter ? ' -vf ' + resolution.videoFilter : '') +
+      (resolution.videoFilter ? ' -filter:v ' + resolution.videoFilter : '') +
       ' -f image2 -';
 
-    fcmd += ffmpegStillArgs;
-
     try {
-      const ffmpeg = spawn(this.videoProcessor, fcmd.split(/\s+/), { env: process.env });
+      const ffmpeg = spawn(this.videoProcessor, ffmpegArgs.split(/\s+/), { env: process.env });
 
       let imageBuffer = Buffer.alloc(0);
-      this.log.debug('Snapshot requested: ' + request.width + 'x' + request.height, this.name, this.videoConfig.debug);
-      this.log.debug('Sending snapshot: ' + resolution.width + 'x' + resolution.height, this.name, this.videoConfig.debug);
-      this.log.debug('Snapshot command: ' + this.videoProcessor + ' ' + fcmd, this.name, this.videoConfig.debug);
+      this.log.debug('Snapshot command: ' + this.videoProcessor + ' ' + ffmpegArgs, this.name, this.videoConfig.debug);
       ffmpeg.stdout.on('data', (data: Uint8Array) => {
         imageBuffer = Buffer.concat([imageBuffer, data]);
       });
@@ -193,9 +189,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const externalInfo = interfaces[interfaceName]?.filter((info) => {
       return !info.internal;
     });
-    const preferredFamily = addressVersion === 'ipv6' ? 'IPv6' : 'IPv4';
     const addressInfo = externalInfo?.find((info) => {
-      return info.family === preferredFamily;
+      return info.family.toLowerCase() === addressVersion;
     }) || externalInfo?.[0];
     if (!addressInfo) {
       throw new Error('Unable to get network address for "' + interfaceName + '"!');
@@ -262,88 +257,74 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private startStream(request: StartStreamRequest, callback: StreamRequestCallback): void{
     const sessionInfo = this.pendingSessions[request.sessionID];
     const vcodec = this.videoConfig.vcodec || 'libx264';
-    const fps = request.video.fps > this.videoConfig.maxFPS ? this.videoConfig.maxFPS : request.video.fps;
     const mtu = this.videoConfig.packetSize || 1316; // request.video.mtu is not used
     const mapvideo = this.videoConfig.mapvideo || '0:0';
     const mapaudio = this.videoConfig.mapaudio || '0:1';
     const additionalCommandline = this.videoConfig.additionalCommandline || '-preset ultrafast -tune zerolatency';
-    const resolution = this.determineResolution(request.video);
 
-    let videoBitrate = request.video.max_bit_rate;
-    if (this.videoConfig.maxBitrate && videoBitrate > this.videoConfig.maxBitrate) {
-      videoBitrate = this.videoConfig.maxBitrate;
-    } else if (this.videoConfig.minBitrate && videoBitrate < this.videoConfig.minBitrate) {
-      videoBitrate = this.videoConfig.minBitrate;
-    }
-    let audioBitrate = request.audio.max_bit_rate;
-    if (this.videoConfig.maxBitrate && audioBitrate > this.videoConfig.maxBitrate) {
-      audioBitrate = this.videoConfig.maxBitrate;
-    }
+    const resolution = this.determineResolution(request.video, this.videoConfig.forceMax);
 
-    let fcmd = this.videoConfig.source;
+    const fps = (this.videoConfig.forceMax && this.videoConfig.maxFPS) ||
+      (request.video.fps > this.videoConfig.maxFPS) ?
+      this.videoConfig.maxFPS : request.video.fps;
+    const videoBitrate = (this.videoConfig.forceMax && this.videoConfig.maxBitrate) ||
+      (request.video.max_bit_rate > this.videoConfig.maxBitrate) ?
+      this.videoConfig.maxBitrate : request.video.max_bit_rate;
 
-    this.log.debug('Video stream requested: ' + request.video.width + 'x' + request.video.height + ', ' +
+    this.log.debug('Video stream requested: ' + request.video.width + ' x ' + request.video.height + ', ' +
       request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.name, this.videoConfig.debug);
+    this.log.info('Starting video stream: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
+      (resolution.height > 0 ? resolution.height : 'native') + ', ' + (fps > 0 ? fps : 'native') +
+      ' fps, ' + (videoBitrate > 0 ? videoBitrate : '???') + ' kbps', this.name);
 
-    this.log.info('Starting video stream: ' + resolution.width + 'x' + resolution.height + ', ' +
-      fps + ' fps, ' + videoBitrate + ' kbps', this.name);
+    let ffmpegArgs = this.videoConfig.source;
 
-    const ffmpegVideoArgs =
+    ffmpegArgs += // Video
       ' -map ' + mapvideo +
-      ' -vcodec ' + vcodec +
+      ' -codec:v ' + vcodec +
       ' -pix_fmt yuv420p' +
-      ' -r ' + fps +
+      ' -color_range mpeg' +
+      (fps > 0 ? ' -r ' + fps : '') +
       ' -f rawvideo' +
       ' ' + additionalCommandline +
-      (vcodec != 'copy' && resolution.videoFilter ? ' -vf ' + resolution.videoFilter : '') +
-      ' -b:v ' + videoBitrate + 'k' +
-      ' -bufsize ' + 2 * videoBitrate + 'k' +
-      ' -maxrate ' + videoBitrate + 'k' +
+      (vcodec !== 'copy' && resolution.videoFilter ? ' -filter:v ' + resolution.videoFilter : '') +
+      (videoBitrate > 0 ? ' -b:v ' + videoBitrate + 'k' : '') +
       ' -payload_type ' + request.video.pt;
 
-    const ffmpegVideoStream =
+    ffmpegArgs += // Video Stream
       ' -ssrc ' + sessionInfo.videoSSRC +
       ' -f rtp' +
       ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
       ' -srtp_out_params ' + sessionInfo.videoSRTP.toString('base64') +
       ' srtp://' + sessionInfo.address + ':' + sessionInfo.videoPort +
-      '?rtcpport=' + sessionInfo.videoPort +'&localrtcpport=' + sessionInfo.videoPort + '&pkt_size=' + mtu;
+      '?rtcpport=' + sessionInfo.videoPort + '&pkt_size=' + mtu;
 
-    // build required video arguments
-    fcmd += ffmpegVideoArgs;
-    fcmd += ffmpegVideoStream;
-
-    // build optional audio arguments
     if (this.videoConfig.audio) {
-      const ffmpegAudioArgs =
+      ffmpegArgs += // Audio
         ' -map ' + mapaudio +
-        ' -acodec libfdk_aac' +
+        ' -codec:a libfdk_aac' +
         ' -profile:a aac_eld' +
         ' -flags +global_header' +
         ' -f null' +
         ' -ar ' + request.audio.sample_rate + 'k' +
-        ' -b:a ' + audioBitrate + 'k' +
-        ' -bufsize ' + audioBitrate + 'k' +
+        ' -b:a ' + request.audio.max_bit_rate + 'k' +
         ' -ac 1' +
         ' -payload_type ' + request.audio.pt;
 
-      const ffmpegAudioStream =
+      ffmpegArgs += // Audio Stream
         ' -ssrc ' + sessionInfo.audioSSRC +
         ' -f rtp' +
         ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
         ' -srtp_out_params ' + sessionInfo.audioSRTP.toString('base64') +
         ' srtp://' + sessionInfo.address + ':' + sessionInfo.audioPort +
-        '?rtcpport=' + sessionInfo.audioPort + '&localrtcpport=' + sessionInfo.audioPort + '&pkt_size=188';
-
-      fcmd += ffmpegAudioArgs;
-      fcmd += ffmpegAudioStream;
+        '?rtcpport=' + sessionInfo.audioPort + '&pkt_size=188';
     }
 
     if (this.videoConfig.debug) {
-      fcmd += ' -loglevel level+verbose';
+      ffmpegArgs += ' -loglevel level+verbose';
     }
 
-    const ffmpeg = new FfmpegProcess(this.name, request.sessionID, this.videoProcessor, fcmd, this.log,
+    const ffmpeg = new FfmpegProcess(this.name, request.sessionID, this.videoProcessor, ffmpegArgs, this.log,
       sessionInfo.videoReturnPort, this.videoConfig.debug, this, callback);
 
     this.ongoingSessions[request.sessionID] = ffmpeg;
@@ -356,8 +337,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         this.startStream(request, callback);
         break;
       case StreamRequestTypes.RECONFIGURE:
-        // not implemented
-        this.log.debug('Received request to reconfigure: ' + request.video.width + 'x' + request.video.height + ', ' +
+        this.log.debug('Received request to reconfigure: ' + request.video.width + ' x ' + request.video.height + ', ' +
           request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps (Ignored)', this.name, this.videoConfig.debug);
         callback();
         break;

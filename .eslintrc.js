@@ -20,7 +20,6 @@ module.exports = {
     '@typescript-eslint/lines-between-class-members': ['error', {"exceptAfterSingleLine": true}],
     '@typescript-eslint/no-base-to-string': 'error',
     '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/no-extra-parens': 'error',
     '@typescript-eslint/no-unnecessary-boolean-literal-compare': ['error', {"allowComparingNullableBooleansToTrue": false, "allowComparingNullableBooleansToFalse": false}],
     '@typescript-eslint/no-var-requires': 'error',
     '@typescript-eslint/prefer-optional-chain': 'error',
