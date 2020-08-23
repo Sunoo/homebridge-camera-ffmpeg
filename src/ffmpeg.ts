@@ -1,11 +1,12 @@
 import { ChildProcess, spawn } from 'child_process';
-import { createSocket } from 'dgram';
+import { createSocket, Socket } from 'dgram';
 import { StreamRequestCallback } from 'homebridge';
 import { Logger } from './logger';
 import { SessionInfo, StreamingDelegate } from './streamingDelegate';
 
 export class FfmpegProcess {
   private readonly process: ChildProcess;
+  private readonly socket: Socket;
   private timeout?: NodeJS.Timeout;
 
   constructor(cameraName: string, sessionId: string, videoProcessor: string, ffmpegArgs: string, log: Logger,
@@ -14,23 +15,23 @@ export class FfmpegProcess {
 
     log.debug('Stream command: ' + videoProcessor + ' ' + ffmpegArgs, cameraName, debug);
 
-    const socket = createSocket(sessionInfo.addressVersion === 'ipv4' ? 'udp4' : 'udp6');
-    socket.on('error', (err: Error) => {
+    this.socket = createSocket(sessionInfo.addressVersion === 'ipv4' ? 'udp4' : 'udp6');
+    this.socket.on('error', (err: Error) => {
       log.error('Socket error: ' + err.name, cameraName);
       delegate.stopStream(sessionId);
     });
-    socket.on('message', () => {
+    this.socket.on('message', () => {
       if (this.timeout) {
         clearTimeout(this.timeout);
       }
       this.timeout = setTimeout(() => {
-        socket.close();
+        this.socket.close();
         log.info('Device appears to be inactive for over 5 seconds. Stopping stream.', cameraName);
         delegate.controller.forceStopStreamingSession(sessionId);
         delegate.stopStream(sessionId);
       }, 5000);
     });
-    socket.bind(sessionInfo.videoReturnPort, sessionInfo.localAddress);
+    this.socket.bind(sessionInfo.videoReturnPort, sessionInfo.localAddress);
 
     this.process = spawn(videoProcessor, ffmpegArgs.split(/\s+/), { env: process.env });
 
@@ -45,7 +46,7 @@ export class FfmpegProcess {
       this.process.stderr.on('data', (data) => {
         if (!started) {
           started = true;
-          callback(); // do not forget to execute callback once set up
+          callback();
         }
 
         if (debug) {
@@ -82,6 +83,10 @@ export class FfmpegProcess {
   }
 
   public stop(): void {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+      this.socket.close();
+    }
     this.process.kill('SIGKILL');
   }
 }
