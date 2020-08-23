@@ -9,20 +9,18 @@ According to [this comment](https://github.com/KhaosT/homebridge-camera-ffmpeg/i
 
 ```json
 {
-   "platform": "Camera-ffmpeg",
-   "cameras": [
-      {
-         "name": "Pi Cam",
-         "videoConfig": {
-            "source": "-re -r 6 -s 1280x720 -f video4linux2 -i /dev/video0",
-            "stillImageSource": "-s 1280x720 -f video4linux2 -i /dev/video0",
-            "maxStreams": 2,
-            "maxWidth": 1280,
-            "maxHeight": 720,
-            "maxFPS": 6,
-            "vcodec": "h264_omx"
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Pi Cam",
+		"videoConfig": {
+			"source": "-re -r 6 -s 1280x720 -f video4linux2 -i /dev/video0",
+			"stillImageSource": "-s 1280x720 -f video4linux2 -i /dev/video0",
+			"maxStreams": 2,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"maxFPS": 6,
+			"vcodec": "h264_omx"
+		}
+	}]
 }
 ```

@@ -39,22 +39,20 @@ Cron job to pull the latest snapshot locally every minute
 
 ```json
 {
-    "platform": "Camera-ffmpeg",
-    "cameras": [
-        {
-            "name": "Balcony Camera",
-            "videoConfig": {
-                "source": "-f rtsp -re -i rtsp://192.168.1.107:8000/live",
-                "stillImageSource": "-i file:///home/pi/latest.jpg",
-                "maxStreams": 2,
-                "maxWidth": 1280,
-                "maxHeight": 720,
-                "maxFPS": 15,
-                "maxBitrate": 299,
-                "audio": false,
-                "packetSize": 188
-            }
-        }
-    ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Balcony Camera",
+		"videoConfig": {
+			"source": "-f rtsp -re -i rtsp://192.168.1.107:8000/live",
+			"stillImageSource": "-i file:///home/pi/latest.jpg",
+			"maxStreams": 2,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"maxFPS": 15,
+			"maxBitrate": 299,
+			"audio": false,
+			"packetSize": 188
+		}
+	}]
 }
 ```

@@ -21,19 +21,17 @@ To resolve playback issues I had to use the OMX fork to get the PI 2 and FFMPEG 
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"Office Camera",
-         "videoConfig":{
-            "source":"-re -i http://login:password@192.168.1.98/video2.mjpg",
-            "stillImageSource":"-f mjpeg -i http://login:password@192.168.1.98/cgi-bin/viewer/video.jpg",
-            "maxStreams":2,
-            "maxWidth":1920,
-            "maxHeight":1080,
-            "maxFPS":30
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Office Camera",
+		"videoConfig": {
+			"source": "-re -i http://login:password@192.168.1.98/video2.mjpg",
+			"stillImageSource": "-f mjpeg -i http://login:password@192.168.1.98/cgi-bin/viewer/video.jpg",
+			"maxStreams": 2,
+			"maxWidth": 1920,
+			"maxHeight": 1080,
+			"maxFPS": 30
+		}
+	}]
 }
 ```

@@ -7,7 +7,7 @@ iSpyConnect [maintains a large database](https://www.ispyconnect.com/sources.asp
 
 If you want to share a configuration you have tested, submit a [Tested Configuration Issue](https://github.com/Sunoo/homebridge-camera-ffmpeg/issues/new?assignees=&labels=tested+config&template=tested_config.md) and it will be added to this list shortly.
 
-Despite what some older posts and comments you come across may mention, it is strongly recommended that you do not use the `-re` setting in your source, as it is known to cause problems with live sources.
+Keep in mind that many configs on this site were written for older versions of the plugin, and may require tweaks for the current version. Also, while many of these configs use the `-re` setting in the source, the FFmpeg developers recommend against using that for live sources, so I'd suggest first trying without that set. If you have any updates for any of these configs, please open an issue on the GitHub page.
 
 Users have submitted {{ site.configs | size }} configurations:
 

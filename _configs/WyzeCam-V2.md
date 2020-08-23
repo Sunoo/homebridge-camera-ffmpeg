@@ -10,16 +10,14 @@ As described in this [blog post](https://medium.com/dirigible/wyze-cam-homekit-5
 
 ```json
 {
-    "platform": "Camera-ffmpeg",
-    "cameras": [
-        {
-            "name": "Wyze Cam",
-            "videoConfig": {
-                "source": "-i rtsp://username:password@192.168.0.100/live",
-                "stillImageSource": "-i rtsp://username:password@192.168.0.100/live -vframes 1 -r 1",
-                "vcodec": "copy"
-            }
-        }
-    ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Wyze Cam",
+		"videoConfig": {
+			"source": "-i rtsp://username:password@192.168.0.100/live",
+			"stillImageSource": "-i rtsp://username:password@192.168.0.100/live -vframes 1 -r 1",
+			"vcodec": "copy"
+		}
+	}]
 }
 ```

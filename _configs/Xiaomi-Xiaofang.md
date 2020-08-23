@@ -12,20 +12,18 @@ I also reduced the RTSP output to 720p which is helpful when your Wi-Fi link is 
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"Camera 1",
-         "videoConfig":{
-            "source":"-rtsp_transport tcp -i rtsp://ip-address/unicast",
-            "stillImageSource":"-i rtsp://ip-address/unicast -vframes 1 -r 1",
-            "maxStreams":2,
-            "maxWidth":720,
-            "maxHeight":480,
-            "maxFPS":10,
-            "vcodec":"h264_omx"
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Camera 1",
+		"videoConfig": {
+			"source": "-rtsp_transport tcp -i rtsp://ip-address/unicast",
+			"stillImageSource": "-i rtsp://ip-address/unicast -vframes 1 -r 1",
+			"maxStreams": 2,
+			"maxWidth": 720,
+			"maxHeight": 480,
+			"maxFPS": 10,
+			"vcodec": "h264_omx"
+		}
+	}]
 }
 ```

@@ -11,21 +11,21 @@ Audio and video working on a Raspberry Pi 3 Model B using the instructions [here
 
 ```json
 {
-  "name": "UniFi-G3-Micro",
-  "videoConfig": {
-    "source": "-re -rtsp_transport tcp -i rtsp://UNIFI_CLOUD_KEY_G2_IP:PORT/UNIQUE_ID",
-    "stillImageSource": "-i http://UNIFI_CAMERA_IP/snap.jpeg",
-    "additionalCommandline": "-preset slow -profile:v high -level 4.2 -x264-params intra-refresh=1:bframes=0",
-    "vcodec": "h264_omx",
-    "audio": true,
-    "packetsize": 188,
-    "maxStreams": 2,
-    "maxWidth": 1024,
-    "maxHeight": 576,
-    "maxFPS": 20,
-    "debug": true,
-    "mapvideo": "0:1",
-    "mapaudio": "0:0"
-  }
+	"name": "UniFi-G3-Micro",
+	"videoConfig": {
+		"source": "-re -rtsp_transport tcp -i rtsp://UNIFI_CLOUD_KEY_G2_IP:PORT/UNIQUE_ID",
+		"stillImageSource": "-i http://UNIFI_CAMERA_IP/snap.jpeg",
+		"additionalCommandline": "-preset slow -profile:v high -level 4.2 -x264-params intra-refresh=1:bframes=0",
+		"vcodec": "h264_omx",
+		"audio": true,
+		"packetsize": 188,
+		"maxStreams": 2,
+		"maxWidth": 1024,
+		"maxHeight": 576,
+		"maxFPS": 20,
+		"debug": true,
+		"mapvideo": "0:1",
+		"mapaudio": "0:0"
+	}
 }
 ```

@@ -10,19 +10,17 @@ This is a more complete set of settings for the Doorbird Video Doorbell based on
 
 ```json
 {
-    "platform":"Camera-ffmpeg",
-    "cameras":[
-      {
-          "name":"Doorbird Camera",
-          "videoConfig":{
-            "source":"-re -i rtsp://<username>:<password>@<doorbird_ip>:554/mpeg/media.amp",
-            "stillImageSource":"-i http://<username>:<password>@<doorbird_ip>/bha-api/image.cgi",
-            "maxStreams":1,
-            "maxWidth":1280,
-            "maxHeight":720,
-            "maxFPS":15
-          }
-      }
-    ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Doorbird Camera",
+		"videoConfig": {
+			"source": "-re -i rtsp://<username>:<password>@<doorbird_ip>:554/mpeg/media.amp",
+			"stillImageSource": "-i http://<username>:<password>@<doorbird_ip>/bha-api/image.cgi",
+			"maxStreams": 1,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"maxFPS": 15
+		}
+	}]
 }
 ```

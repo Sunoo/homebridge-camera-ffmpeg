@@ -8,20 +8,18 @@ Link for source and stillImageSource are generate by Surveillance Station, right
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"Camera-Salon",
-         "videoConfig":{
-            "source":"-rtsp_transport tcp -re -i rtsp://USER:PASS@IP:554/Sms=CAMID.unicast",
-            "stillImageSource":"-rtsp_transport tcp -re -i rtsp://USER:PASS@IP:554/Sms=CAMID.unicast -updatefirst",
-            "maxStreams":2,
-            "maxWidth":2688,
-            "maxHeight":1520,
-            "maxFPS":20,
-            "vcodec": "h264"
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Camera-Salon",
+		"videoConfig": {
+			"source": "-rtsp_transport tcp -re -i rtsp://USER:PASS@IP:554/Sms=CAMID.unicast",
+			"stillImageSource": "-rtsp_transport tcp -re -i rtsp://USER:PASS@IP:554/Sms=CAMID.unicast -updatefirst",
+			"maxStreams": 2,
+			"maxWidth": 2688,
+			"maxHeight": 1520,
+			"maxFPS": 20,
+			"vcodec": "h264"
+		}
+	}]
 }
 ```

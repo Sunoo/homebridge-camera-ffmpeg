@@ -28,18 +28,16 @@ rtsp://username:password@IPAddress:554/profile6/media.smp
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"CamNameHere",
-         "videoConfig":{
-            "source":"-re -i rtsp://username:password@ipaddress:554/profile2/media.smp",
-            "maxStreams":2,
-            "maxWidth":640,
-            "maxHeight":360,
-            "maxFPS":15
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "CamNameHere",
+		"videoConfig": {
+			"source": "-re -i rtsp://username:password@ipaddress:554/profile2/media.smp",
+			"maxStreams": 2,
+			"maxWidth": 640,
+			"maxHeight": 360,
+			"maxFPS": 15
+		}
+	}]
 }
 ```

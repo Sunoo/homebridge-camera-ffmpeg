@@ -14,21 +14,19 @@ Still image sometimes don't refresh in homekit App : Need to reboot the iPhone t
 
 ```json
 {
-  "platform": "Camera-ffmpeg",
-  "cameras": [
-    {
-      "name": "piCam",
-      "uploader": false,
-      "videoConfig": {
-          "source": "-re -f video4linux2 -i /dev/video0",
-          "stillImageSource": "-re -f video4linux2 -ss 0.9 -i /dev/video0 -vframes 1",
-          "maxStreams": 2,
-          "maxWidth": 1920,
-          "maxHeight": 1080,
-          "maxFPS": 30,
-          "vcodec": "h264_omx"
-      }
-    }
-  ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "piCam",
+		"uploader": false,
+		"videoConfig": {
+			"source": "-re -f video4linux2 -i /dev/video0",
+			"stillImageSource": "-re -f video4linux2 -ss 0.9 -i /dev/video0 -vframes 1",
+			"maxStreams": 2,
+			"maxWidth": 1920,
+			"maxHeight": 1080,
+			"maxFPS": 30,
+			"vcodec": "h264_omx"
+		}
+	}]
 }
 ```

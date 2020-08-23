@@ -8,21 +8,21 @@ macOS (High Sierra), ffmpeg compiled through macports. Demonstrates use of avfou
 ## config.json
 
 ```json
-"platform": "Camera-ffmpeg",
-"cameras": [
 {
-  "name": "macCam",
-  "uploader": true,
-  "videoConfig": {
-    "source": "-re -f avfoundation -video_size 640x480 -framerate 30 -i 0",
-    "stillImageSource": "-re -f avfoundation -video_size 640x480 -framerate 30 -ss 0.9 -i 0 -vframes 1",
-    "maxStreams": 2,
-    "maxWidth": 640,
-    "maxHeight": 480,
-    "maxFPS": 30,
-    "vcodec": "h264",
-    "debug": true
-  }
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "macCam",
+		"uploader": true,
+		"videoConfig": {
+			"source": "-re -f avfoundation -video_size 640x480 -framerate 30 -i 0",
+			"stillImageSource": "-re -f avfoundation -video_size 640x480 -framerate 30 -ss 0.9 -i 0 -vframes 1",
+			"maxStreams": 2,
+			"maxWidth": 640,
+			"maxHeight": 480,
+			"maxFPS": 30,
+			"vcodec": "h264",
+			"debug": true
+		}
+	}]
 }
-]
 ```

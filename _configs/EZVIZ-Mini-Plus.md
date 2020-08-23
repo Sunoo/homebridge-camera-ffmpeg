@@ -12,21 +12,22 @@ Camera password is the 6 character verification code printed on the back of each
 ### config.json
 
 ```json
-"platform": "Camera-ffmpeg",
-"cameras": [
-    {
-        "name": "YOUR CAMERA NAME",
-        "videoConfig": {
-            "source": "-rtsp_transport tcp -vcodec h264_mmal -i rtsp://admin:password@nn.nn.nn.nn/Streaming/Channels/1",
-            "stillImageSource": "-i rtsp://admin:password@nn.nn.nn.nn/Streaming/Channels/1/picture",
-            "maxStreams": 2,
-            "maxWidth": 1920,
-            "maxHeight": 1080,
-            "maxBitrate": 500,
-            "vcodec": "h264_omx",
-            "maxFPS": 15,
-            "audio": true,
-            "packetSize": 564
-        }
-    }
+{
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "YOUR CAMERA NAME",
+		"videoConfig": {
+			"source": "-rtsp_transport tcp -vcodec h264_mmal -i rtsp://admin:password@nn.nn.nn.nn/Streaming/Channels/1",
+			"stillImageSource": "-i rtsp://admin:password@nn.nn.nn.nn/Streaming/Channels/1/picture",
+			"maxStreams": 2,
+			"maxWidth": 1920,
+			"maxHeight": 1080,
+			"maxBitrate": 500,
+			"vcodec": "h264_omx",
+			"maxFPS": 15,
+			"audio": true,
+			"packetSize": 564
+		}
+	}]
+}
 ```

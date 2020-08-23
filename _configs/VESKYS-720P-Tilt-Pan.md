@@ -9,20 +9,18 @@ date: 2017-05-13
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"Veskys Camera",
-         "videoConfig":{
-            "source":"-rtsp_transport tcp -i rtsp://admin:PASSWORD@IPADDRESS:10554/tcp/av0_0 -map 0",
-            "stillImageSource":"-i http://IPADDRESS:81/snapshot.cgi?user=admin&pwd=PASSWORD",
-            "maxStreams":2,
-            "maxWidth":1280,
-            "maxHeight":720,
-            "maxFPS":30
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Veskys Camera",
+		"videoConfig": {
+			"source": "-rtsp_transport tcp -i rtsp://admin:PASSWORD@IPADDRESS:10554/tcp/av0_0 -map 0",
+			"stillImageSource": "-i http://IPADDRESS:81/snapshot.cgi?user=admin&pwd=PASSWORD",
+			"maxStreams": 2,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"maxFPS": 30
+		}
+	}]
 }
 ```
 

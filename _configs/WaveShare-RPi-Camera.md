@@ -15,26 +15,24 @@ date: 2020-07-19
 
 ```json
 {
-    "cameras": [
-        {
-            "name": "Pi 3B Camera",
-            "motion": true,
-            "switches": true,
-            "videoConfig": {
-                "source": "-re -r 30 -video_size 1920x1080 -f video4linux2 -input_format h264 -i /dev/video0 -copyts -start_at_zero -timestamps abs",
-                "stillImageSource": "-video_size 1920x1080 -f video4linux2 -i /dev/video0 -ss 1.5",
-                "maxStreams": 2,
-                "maxFPS": 30,
-                "maxBitrate": 500000000,
-                "vcodec": "copy",
-                "audio": false,
-                "vflip": false,
-                "hflip": false,
-                "debug": true
-            }
-        }
-    ],
-    "platform": "Camera-ffmpeg"
+	"cameras": [{
+		"name": "Pi 3B Camera",
+		"motion": true,
+		"switches": true,
+		"videoConfig": {
+			"source": "-re -r 30 -video_size 1920x1080 -f video4linux2 -input_format h264 -i /dev/video0 -copyts -start_at_zero -timestamps abs",
+			"stillImageSource": "-video_size 1920x1080 -f video4linux2 -i /dev/video0 -ss 1.5",
+			"maxStreams": 2,
+			"maxFPS": 30,
+			"maxBitrate": 500000000,
+			"vcodec": "copy",
+			"audio": false,
+			"vflip": false,
+			"hflip": false,
+			"debug": true
+		}
+	}],
+	"platform": "Camera-ffmpeg"
 }
 ```
 

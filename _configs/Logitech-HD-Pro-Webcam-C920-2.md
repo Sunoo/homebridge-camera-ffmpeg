@@ -22,23 +22,23 @@ Video Only:
 ## config.json
 
 ```json
-"platform": "Camera-ffmpeg",
-"cameras": [
-    {
-        "name": "C920",
-        "videoConfig": {
-            "source": "-f rtsp -vcodec h264_mmal -i rtsp://rpi:8555/unicast",
-            "stillImageSource": "-i http://rpi/latest.jpg",
-            "maxStreams": 2,
-            "maxWidth": 1280,
-            "maxHeight": 720,
-            "maxFPS": 30,
-            "maxBitrate": 300,
-            "vcodec": "h264_omx",
-            "audio": true,
-            "packetSize": 188,
-            "debug": false
-        }
-    }
-]
+{
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "C920",
+		"videoConfig": {
+			"source": "-f rtsp -vcodec h264_mmal -i rtsp://rpi:8555/unicast",
+			"stillImageSource": "-i http://rpi/latest.jpg",
+			"maxStreams": 2,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"maxFPS": 30,
+			"maxBitrate": 300,
+			"vcodec": "h264_omx",
+			"audio": true,
+			"packetSize": 188,
+			"debug": false
+		}
+	}]
+}
 ```

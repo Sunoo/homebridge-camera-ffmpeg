@@ -128,36 +128,38 @@ audio works now with all cameras that support it...
 testet with Logitech USB Cam and Reolink
 
 ```json
-"name": "Camera ffmpeg",
-"videoProcessor": "/home/ffmpeg/ffmpeg",
-"cameras": [
-    {
-        "name": "Reolink1",
-        "videoConfig": {
-            "source": "-i rtmp://192.168.178.93/bcs/channel0_ext.bcs?channel=0&stream=2&user=admin&password=XXX -map 0 -an -dn -flags -global_header",
-            "stillImageSource": "-i http://192.168.178.93/cgi-bin/api.cgi?cmd=Snap&channel=0&rs=wuuPhkmUCeI9WG7C&user=admin&password=XXX",
-            "maxStreams": 2,
-            "maxWidth": 1280,
-            "maxHeight": 720,
-            "audio": false,
-            "debug": false
-        }
-    }
-]
+{
+	"name": "Camera ffmpeg",
+	"videoProcessor": "/home/ffmpeg/ffmpeg",
+	"cameras": [{
+		"name": "Reolink1",
+		"videoConfig": {
+			"source": "-i rtmp://192.168.178.93/bcs/channel0_ext.bcs?channel=0&stream=2&user=admin&password=XXX -map 0 -an -dn -flags -global_header",
+			"stillImageSource": "-i http://192.168.178.93/cgi-bin/api.cgi?cmd=Snap&channel=0&rs=wuuPhkmUCeI9WG7C&user=admin&password=XXX",
+			"maxStreams": 2,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"audio": false,
+			"debug": false
+		}
+	}]
+}
 ```
 
 here another conf with audio and rtsp:
 
 ```json
-"name": "Reolink2",
-"videoConfig": {
-    "source": "-rtsp_transport tcp -re -i rtsp://admin:XXX@192.168.178.91:554/h264Preview_01_sub",
-    "stillImageSource": "-i http://192.168.178.91/cgi-bin/api.cgi?cmd=Snap&channel=0&rs=wuuPhkmUCeI9WG7C&user=admin&password=XXX",
-    "maxWidth": 1280,
-    "maxHeight": 720,
-    "vcodec": "copy",
-    "audio": true,
-    "debug": false
+{
+	"name": "Reolink2",
+	"videoConfig": {
+		"source": "-rtsp_transport tcp -re -i rtsp://admin:XXX@192.168.178.91:554/h264Preview_01_sub",
+		"stillImageSource": "-i http://192.168.178.91/cgi-bin/api.cgi?cmd=Snap&channel=0&rs=wuuPhkmUCeI9WG7C&user=admin&password=XXX",
+		"maxWidth": 1280,
+		"maxHeight": 720,
+		"vcodec": "copy",
+		"audio": true,
+		"debug": false
+	}
 }
 ```
 

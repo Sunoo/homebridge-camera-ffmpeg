@@ -10,25 +10,23 @@ Working through RTSP on RaspberryPi
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"Camera",
-         "videoConfig":{
-            "source":"-rtsp_transport tcp -re -i rtsp://username:password@XXX.XXX.XXX.XXX:port/videoSub",
-            "stillImageSource":"-i http://username:password@XXX.XXX.XXX.XXX:port/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2&usr=username&pwd=password",
-            "maxStreams": 2,
-            "maxWidth": 1280,
-            "maxHeight": 720,
-            "maxFPS": 10,
-            "maxBitrate": 300,
-            "vcodec": "h264_omx",
-            "audio": false,
-            "packetSize": 1316,
-            "debug": false
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Camera",
+		"videoConfig": {
+			"source": "-rtsp_transport tcp -re -i rtsp://username:password@XXX.XXX.XXX.XXX:port/videoSub",
+			"stillImageSource": "-i http://username:password@XXX.XXX.XXX.XXX:port/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2&usr=username&pwd=password",
+			"maxStreams": 2,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"maxFPS": 10,
+			"maxBitrate": 300,
+			"vcodec": "h264_omx",
+			"audio": false,
+			"packetSize": 1316,
+			"debug": false
+		}
+	}]
 }
 ```
 

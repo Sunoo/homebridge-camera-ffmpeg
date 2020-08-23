@@ -11,19 +11,19 @@ Not it's fixed (config for Xiaomi Xiaofang 1S):
 
 ```json
 {
-  "name":"Camera",
-  "videoConfig":{
-    "source": "-rtsp_transport tcp -re -i rtsp://your_ip_address",
-    "maxFPS":30,
-    "maxWidth": 1280,
-    "maxHeight": 720,
-    "videoFilter":"none",
-    "maxBitrate":1024,
-    "packetSize": 188,
-    "maxStreams":2,
-    "vcodec":"copy",
-    "audio":false
-  }
+	"name": "Camera",
+	"videoConfig": {
+		"source": "-rtsp_transport tcp -re -i rtsp://your_ip_address",
+		"maxFPS": 30,
+		"maxWidth": 1280,
+		"maxHeight": 720,
+		"videoFilter": "none",
+		"maxBitrate": 1024,
+		"packetSize": 188,
+		"maxStreams": 2,
+		"vcodec": "copy",
+		"audio": false
+	}
 }
 ```
 

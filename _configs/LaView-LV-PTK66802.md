@@ -8,21 +8,21 @@ date: 2020-08-16
 
 ```json
 {
-    "name": "Camera1",
-    "manufacturer": "LaView",
-    "model": "LV-PTK66802",
-    "serialNumber": "123456789",
-    "firmwareRevision": "V5.4.0 build 160811",
-    "motion": true,
-    "videoConfig": {
-        "source": "-rtsp_transport tcp -i rtsp://user:password@1.1.1.1/Streaming/Channels/2",
-        "stillImageSource": "-i https://user:password@1.1.1.1/streaming/channels/1/picture",
-        "maxStreams": 2,
-        "maxWidth": 640,
-        "maxHeight": 480,
-        "maxFPS": 20,
-        "vcodec": "copy"
-    }
+	"name": "Camera1",
+	"manufacturer": "LaView",
+	"model": "LV-PTK66802",
+	"serialNumber": "123456789",
+	"firmwareRevision": "V5.4.0 build 160811",
+	"motion": true,
+	"videoConfig": {
+		"source": "-rtsp_transport tcp -re -i rtsp://user:password@1.1.1.1/Streaming/Channels/2",
+		"stillImageSource": "-i https://user:password@1.1.1.1/streaming/channels/1/picture",
+		"maxStreams": 2,
+		"maxWidth": 640,
+		"maxHeight": 480,
+		"maxFPS": 20,
+		"vcodec": "copy"
+	}
 }
 ```
 

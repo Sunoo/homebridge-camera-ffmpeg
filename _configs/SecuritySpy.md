@@ -10,30 +10,29 @@ The great thing about this is, if SecuritySpy supports your camera ([which is an
 
 ```json
 {
-  "platform": "Camera-ffmpeg",
-  "cameras": [
-    {
-      "name": "Security Cam 0",
-      "videoConfig": {
-        "source": "-i http://<SecurityspyUsername>:<SecurityspyPassword>@<SecurityspyIP>:<SecurityspyPort>/++hls?cameraNum=0&codec=h264&width=1280&height=720",
-        "stillImageSource": "-i http://<SecurityspyUsername>:<SecurityspyPassword>@<SecurityspyIP>:<SecurityspyPort>/++image?cameraNum=0&width=480&height=270",
-        "maxStreams": 2,
-        "maxWidth": 1280,
-        "maxHeight": 720,
-        "maxFPS": 30
-      },
-    }
-    {
-      "name": "Security Cam 1",
-      "videoConfig": {
-        "source": "-i http://<SecurityspyUsername>:<SecurityspyPassword>@<SecurityspyIP>:<SecurityspyPort>/++hls?cameraNum=1&codec=h264&width=1280&height=720",
-        "stillImageSource": "-i http://<SecurityspyUsername>:<SecurityspyPassword>@<SecurityspyIP>:<SecurityspyPort>/++image?cameraNum=1&width=480&height=270",
-        "maxStreams": 2,
-        "maxWidth": 1280,
-        "maxHeight": 720,
-        "maxFPS": 30
-      }
-    }
-  ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+			"name": "Security Cam 0",
+			"videoConfig": {
+				"source": "-i http://<SecurityspyUsername>:<SecurityspyPassword>@<SecurityspyIP>:<SecurityspyPort>/++hls?cameraNum=0&codec=h264&width=1280&height=720",
+				"stillImageSource": "-i http://<SecurityspyUsername>:<SecurityspyPassword>@<SecurityspyIP>:<SecurityspyPort>/++image?cameraNum=0&width=480&height=270",
+				"maxStreams": 2,
+				"maxWidth": 1280,
+				"maxHeight": 720,
+				"maxFPS": 30
+			}
+		},
+		{
+			"name": "Security Cam 1",
+			"videoConfig": {
+				"source": "-i http://<SecurityspyUsername>:<SecurityspyPassword>@<SecurityspyIP>:<SecurityspyPort>/++hls?cameraNum=1&codec=h264&width=1280&height=720",
+				"stillImageSource": "-i http://<SecurityspyUsername>:<SecurityspyPassword>@<SecurityspyIP>:<SecurityspyPort>/++image?cameraNum=1&width=480&height=270",
+				"maxStreams": 2,
+				"maxWidth": 1280,
+				"maxHeight": 720,
+				"maxFPS": 30
+			}
+		}
+	]
 }
 ```

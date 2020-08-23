@@ -12,30 +12,29 @@ DVR system: <https://www.amazon.com/ANRAN-Detection-Surveillance-Security-Record
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"Outside Front",
-         "videoConfig":{
-            "source":"-re -i rtsp://10.0.1.93:554/user=admin&password=XXXXXX&channel=1&stream=0.sdp?real_stream--rtp-caching=100",
-            "stillImageSource":"-re -i rtsp://10.0.1.93:554/user=admin&password=XXXXXX&channel=1&stream=1.sdp?real_stream--rtp-caching=100",
-            "maxStreams":2,
-            "maxWidth":1280,
-            "maxHeight":720,
-            "maxFPS":50
-         }
-      },
-      {
-         "name":"Outside Rear",
-         "videoConfig":{
-            "source":"-re -i rtsp://10.0.1.93:554/user=admin&password=XXXXXX&channel=2&stream=0.sdp?real_stream--rtp-caching=100",
-            "stillImageSource":"-re -i rtsp://10.0.1.93:554/user=admin&password=XXXXXX&channel=2&stream=1.sdp?real_stream--rtp-caching=100",
-            "maxStreams":2,
-            "maxWidth":1280,
-            "maxHeight":720,
-            "maxFPS":50
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+			"name": "Outside Front",
+			"videoConfig": {
+				"source": "-re -i rtsp://10.0.1.93:554/user=admin&password=XXXXXX&channel=1&stream=0.sdp?real_stream--rtp-caching=100",
+				"stillImageSource": "-re -i rtsp://10.0.1.93:554/user=admin&password=XXXXXX&channel=1&stream=1.sdp?real_stream--rtp-caching=100",
+				"maxStreams": 2,
+				"maxWidth": 1280,
+				"maxHeight": 720,
+				"maxFPS": 50
+			}
+		},
+		{
+			"name": "Outside Rear",
+			"videoConfig": {
+				"source": "-re -i rtsp://10.0.1.93:554/user=admin&password=XXXXXX&channel=2&stream=0.sdp?real_stream--rtp-caching=100",
+				"stillImageSource": "-re -i rtsp://10.0.1.93:554/user=admin&password=XXXXXX&channel=2&stream=1.sdp?real_stream--rtp-caching=100",
+				"maxStreams": 2,
+				"maxWidth": 1280,
+				"maxHeight": 720,
+				"maxFPS": 50
+			}
+		}
+	]
 }
 ```

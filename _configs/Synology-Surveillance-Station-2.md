@@ -9,24 +9,20 @@ When using Surveillance Station to connect and record the camera there is no poi
 
 ```json
 {
-"platforms": [
-        {
-            "cameras": [
-                {
-                    "name": "My Camera",
-                    "videoConfig": {
-                        "source": "-re -i rtsp://syno:1234567890abcdef1234567890abcdef@localhost:554/Sms=1.unicast",
-                        "maxWidth": 1920,
-                        "maxHeight": 1080,
-                        "maxFPS": 30,
-                        "maxBitrate": 3000,
-                        "vcodec": "copy",
-                        "audio": true
-                    }
-                }
-            ],
-            "platform": "Camera-ffmpeg"
-        }
-    ]
+	"platforms": [{
+		"cameras": [{
+			"name": "My Camera",
+			"videoConfig": {
+				"source": "-re -i rtsp://syno:1234567890abcdef1234567890abcdef@localhost:554/Sms=1.unicast",
+				"maxWidth": 1920,
+				"maxHeight": 1080,
+				"maxFPS": 30,
+				"maxBitrate": 3000,
+				"vcodec": "copy",
+				"audio": true
+			}
+		}],
+		"platform": "Camera-ffmpeg"
+	}]
 }
 ```

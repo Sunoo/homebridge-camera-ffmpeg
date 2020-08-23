@@ -10,17 +10,17 @@ Working through http
 
 ```json
 {
-   "name":"Bedroom",
-   "videoConfig":{
-      "source":"-re -i http://src/video -i http://src/audio.opus",
-      "stillImageSource":"-i http://src/shot.jpg",
-      "maxStreams":2,
-      "maxWidth":640,
-      "maxHeight":480,
-      "maxFPS":30,
-      "audio": true,
-      "mapvideo": "0",
-      "mapaudio": "1"
-   }
-},
+	"name": "Bedroom",
+	"videoConfig": {
+		"source": "-re -i http://src/video -i http://src/audio.opus",
+		"stillImageSource": "-i http://src/shot.jpg",
+		"maxStreams": 2,
+		"maxWidth": 640,
+		"maxHeight": 480,
+		"maxFPS": 30,
+		"audio": true,
+		"mapvideo": "0",
+		"mapaudio": "1"
+	}
+}
 ```

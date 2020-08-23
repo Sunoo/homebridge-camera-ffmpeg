@@ -10,20 +10,18 @@ date: 2019-09-24
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"ReoLink",
-         "videoConfig":{
-            "source": "-rtsp_transport tcp -i rtsp://USER:PASSWORD@XXX.XXX.XXX.XXX:XXX/h264Preview_01_main",
-            "stillImageSource": "-i http://XXX.XXX.XXX.XXX:XXXX/image.jpeg",
-            "maxStreams":2,
-            "maxWidth":1280,
-            "maxHeight":720,
-            "maxFPS":30
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "ReoLink",
+		"videoConfig": {
+			"source": "-rtsp_transport tcp -i rtsp://USER:PASSWORD@XXX.XXX.XXX.XXX:XXX/h264Preview_01_main",
+			"stillImageSource": "-i http://XXX.XXX.XXX.XXX:XXXX/image.jpeg",
+			"maxStreams": 2,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"maxFPS": 30
+		}
+	}]
 }
 ```
 

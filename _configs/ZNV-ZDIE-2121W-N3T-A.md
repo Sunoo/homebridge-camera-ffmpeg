@@ -13,22 +13,20 @@ date: 2018-04-20
 
 ```json
 {
-    "platform": "Camera-ffmpeg",
-    "cameras": [
-        {
-            "name": "ZNVCam",
-            "uploader": false,
-            "videoConfig": {
-                "source": "-rtsp_transport tcp -re -I rtsp://<admin>:<password>@192.168.0.254:554/ch0_0.h264",
-                "maxStreams": 2,
-                "maxWidth": 1280,
-                "maxHeight": 720,
-                "packetSize": 188,
-                "maxFPS": 30,
-                "maxBitrate": 300,
-                "debug": false
-            }
-        }
-    ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "ZNVCam",
+		"uploader": false,
+		"videoConfig": {
+			"source": "-rtsp_transport tcp -re -I rtsp://<admin>:<password>@192.168.0.254:554/ch0_0.h264",
+			"maxStreams": 2,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"packetSize": 188,
+			"maxFPS": 30,
+			"maxBitrate": 300,
+			"debug": false
+		}
+	}]
 }
 ```

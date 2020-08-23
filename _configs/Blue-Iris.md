@@ -7,20 +7,18 @@ If you have a Blue Iris server, you can add any camera with the following config
 
 ```json
 {
-      "platform": "Camera-IP",
-      "cameras": [
-            {
-              "name": "My First Camera",
-              "videoConfig": {
-                "source": "-re -i http://user:password@serverip/h264/camshortname/temp.ts",
-                "stillImageSource": "-i http://user:password@serverip/image/camshortname?q=75",
-                "maxStreams": 2,
-                "maxWidth": 1280,
-                "maxHeight": 1024,
-                "maxFPS": 15
-              }
-            }
-      ]
+	"platform": "Camera-IP",
+	"cameras": [{
+		"name": "My First Camera",
+		"videoConfig": {
+			"source": "-re -i http://user:password@serverip/h264/camshortname/temp.ts",
+			"stillImageSource": "-i http://user:password@serverip/image/camshortname?q=75",
+			"maxStreams": 2,
+			"maxWidth": 1280,
+			"maxHeight": 1024,
+			"maxFPS": 15
+		}
+	}]
 }
 ```
 

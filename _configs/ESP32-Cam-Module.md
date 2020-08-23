@@ -7,23 +7,21 @@ date: 2019-12-22
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name": "ESP32-Cam",
-         "manufacturer": "espressif",
-         "model": "ESP32-Cam",
-         "serialNumber": "XXXXXXXXX",
-         "videoConfig": {
-             "source": "-re -f mjpeg -i http://XXX.XXX.XXX.XXX:81/stream",
-             "stillImageSource": "-f mjpeg -i http://XXX.XXX.XXX.XXX/capture",
-             "maxStreams": 2,
-             "maxWidth": 1600,
-             "maxHeight": 1200,
-             "maxFPS": 25
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "ESP32-Cam",
+		"manufacturer": "espressif",
+		"model": "ESP32-Cam",
+		"serialNumber": "XXXXXXXXX",
+		"videoConfig": {
+			"source": "-re -f mjpeg -i http://XXX.XXX.XXX.XXX:81/stream",
+			"stillImageSource": "-f mjpeg -i http://XXX.XXX.XXX.XXX/capture",
+			"maxStreams": 2,
+			"maxWidth": 1600,
+			"maxHeight": 1200,
+			"maxFPS": 25
+		}
+	}]
 }
 ```
 

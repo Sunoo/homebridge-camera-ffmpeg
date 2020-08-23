@@ -16,19 +16,17 @@ To resolve playback issues I had to use the OMX fork to get the PI 2 and FFMPEG 
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"Front Porch Camera",
-         "videoConfig":{
-            "source":"-f mjpeg -i http://alice:8080/video",
-            "stillImageSource":"-i http://alice:8080/shot.jpg",
-            "maxStreams":2,
-            "maxWidth":1920,
-            "maxHeight":1080,
-            "maxFPS":30
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Front Porch Camera",
+		"videoConfig": {
+			"source": "-f mjpeg -i http://alice:8080/video",
+			"stillImageSource": "-i http://alice:8080/shot.jpg",
+			"maxStreams": 2,
+			"maxWidth": 1920,
+			"maxHeight": 1080,
+			"maxFPS": 30
+		}
+	}]
 }
 ```

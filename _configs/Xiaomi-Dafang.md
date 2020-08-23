@@ -15,20 +15,18 @@ I run this config for my 3 Cams.
 
 ```json
 {
-   "platform":"Camera-ffmpeg",
-   "cameras":[
-      {
-         "name":"Camera 1",
-         "videoConfig":{
-            "source":"-rtsp_transport tcp -i rtsp://ip-address/unicast",
-            "stillImageSource":"-rtsp_transport tcp -i rtsp://ip-address/unicast -vframes 1 -r 1",
-            "maxStreams":5,
-            "maxWidth":1280,
-            "maxHeight":720,
-            "maxFPS":25,
-            "vcodec":"h264_omx"
-         }
-      }
-   ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Camera 1",
+		"videoConfig": {
+			"source": "-rtsp_transport tcp -i rtsp://ip-address/unicast",
+			"stillImageSource": "-rtsp_transport tcp -i rtsp://ip-address/unicast -vframes 1 -r 1",
+			"maxStreams": 5,
+			"maxWidth": 1280,
+			"maxHeight": 720,
+			"maxFPS": 25,
+			"vcodec": "h264_omx"
+		}
+	}]
 }
 ```

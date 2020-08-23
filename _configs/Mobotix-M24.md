@@ -8,19 +8,17 @@ date: 2018-02-08
 
 ```json
 {
-    "platform":"Camera-ffmpeg",
-    "cameras":[
-      {
-          "name": "Mobotix M24",
-          "videoConfig": {
-            "source": "-f mxg -i http://user:password@192.168.100.100/control/faststream.jpg?stream=MxPEG",
-            "stillImageSource": "-i http://user:password@192.168.100.100/cgi-bin/image.jpg",
-            "maxStreams": 3,
-            "maxWidth": 1920,
-            "maxHeight": 1080,
-            "maxFPS": 30
-          }
-      }
-    ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Mobotix M24",
+		"videoConfig": {
+			"source": "-f mxg -i http://user:password@192.168.100.100/control/faststream.jpg?stream=MxPEG",
+			"stillImageSource": "-i http://user:password@192.168.100.100/cgi-bin/image.jpg",
+			"maxStreams": 3,
+			"maxWidth": 1920,
+			"maxHeight": 1080,
+			"maxFPS": 30
+		}
+	}]
 }
 ```

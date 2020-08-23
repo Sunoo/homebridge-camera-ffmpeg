@@ -14,19 +14,17 @@ The rest of the `config.json` file is similar to the above Xioami Xiaofang `conf
 
 ```json
 {
-  "platform": "Camera-ffmpeg-omx",
-  "cameras": [
-    {
-      "name": "Garage Camera",
-      "videoConfig": {
-      	"source": "-re -i rtsp://192.168.2.128/unicast",
-        "stillImageSource": "-i rtsp://192.168.2.128/unicast -vframes 1 -r 1",
-      	"maxStreams": 2,
-      	"maxWidth": 1920,
-      	"maxHeight": 1080,
-      	"maxFPS": 30
-      }
-    }
-  ]
+	"platform": "Camera-ffmpeg-omx",
+	"cameras": [{
+		"name": "Garage Camera",
+		"videoConfig": {
+			"source": "-re -i rtsp://192.168.2.128/unicast",
+			"stillImageSource": "-i rtsp://192.168.2.128/unicast -vframes 1 -r 1",
+			"maxStreams": 2,
+			"maxWidth": 1920,
+			"maxHeight": 1080,
+			"maxFPS": 30
+		}
+	}]
 }
 ```

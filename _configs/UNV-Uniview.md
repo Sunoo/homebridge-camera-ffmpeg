@@ -24,23 +24,21 @@ U-Code Off
 ## config.json
 
 ```json
-[
-    {
-        "name": "Front of House",
-        "videoConfig": {
-            "source": "-rtsp_transport tcp -re -i rtsp://username:password@ipaddress:554/unicast/c1/s1/live",
-            "maxStreams": 2,
-            "maxWidth": 1280,
-            "maxHeight": 720,
-            "maxFPS": 10,
-            "maxBitrate": 256,
-            "mapvideo": "0:0",
-            "mapaudio": "0:1",
-            "vcodec": "copy",
-            "packetSize": 376,
-            "audio": false,
-            "debug": true
-        }
-    }
-]
+{
+	"name": "Front of House",
+	"videoConfig": {
+		"source": "-rtsp_transport tcp -re -i rtsp://username:password@ipaddress:554/unicast/c1/s1/live",
+		"maxStreams": 2,
+		"maxWidth": 1280,
+		"maxHeight": 720,
+		"maxFPS": 10,
+		"maxBitrate": 256,
+		"mapvideo": "0:0",
+		"mapaudio": "0:1",
+		"vcodec": "copy",
+		"packetSize": 376,
+		"audio": false,
+		"debug": true
+	}
+}
 ```

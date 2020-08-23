@@ -22,19 +22,17 @@ It may be worth mentioning, there are several streams available coming from the 
 
 ```json
 {
-    "platform":"Camera-ffmpeg",
-    "cameras":[
-      {
-          "name":"Y-Cam",
-          "videoConfig":{
-            "source":"-rtsp_transport tcp -re -i rtsp://user:pass@ip:554/live/0/mjpeg.sdp",
-            "stillImageSource":"-f mjpeg -i http://user:pass@ip:554/live/0/mjpeg.jpg",
-            "maxStreams":2,
-            "maxWidth":1920,
-            "maxHeight":1080,
-            "maxFPS":30
-          }
-      }
-    ]
+	"platform": "Camera-ffmpeg",
+	"cameras": [{
+		"name": "Y-Cam",
+		"videoConfig": {
+			"source": "-rtsp_transport tcp -re -i rtsp://user:pass@ip:554/live/0/mjpeg.sdp",
+			"stillImageSource": "-f mjpeg -i http://user:pass@ip:554/live/0/mjpeg.jpg",
+			"maxStreams": 2,
+			"maxWidth": 1920,
+			"maxHeight": 1080,
+			"maxFPS": 30
+		}
+	}]
 }
 ```
