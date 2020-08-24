@@ -129,8 +129,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   }
 
   private determineResolution(request: SnapshotRequest | VideoInfo, isSnapshot = false): ResolutionInfo {
-    let width = request.width;
-    let height = request.height;
+    let width = Math.floor(request.width / 2) * 2;
+    let height = Math.floor(request.height / 2) * 2;
     if (!isSnapshot) {
       if ((this.videoConfig.forceMax && this.videoConfig.maxWidth) ||
         (request.width > this.videoConfig.maxWidth)) {
@@ -151,7 +151,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         vf.push('scale=' + (width > 0 ? '\'min(' + width + ',iw)\'' : 'iw') + ':' +
           (height > 0 ? '\'min(' + height + ',ih)\'' : 'ih') +
           (this.videoConfig.preserveRatio ? ':force_original_aspect_ratio=decrease' : ''));
-        vf.push('scale=trunc(iw/2)*2:trunc(ih/2)*2'); // Force to fit encoder restrictions
+        if (this.videoConfig.preserveRatio) {
+          vf.push('scale=trunc(iw/2)*2:trunc(ih/2)*2'); // Force to fit encoder restrictions
+        }
       }
     }
 
@@ -334,7 +336,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         ' -f null' +
         ' -ar ' + request.audio.sample_rate + 'k' +
         ' -b:a ' + request.audio.max_bit_rate + 'k' +
-        ' -ac 1' +
+        ' -ac ' + request.audio.channel +
         ' -payload_type ' + request.audio.pt;
 
       ffmpegArgs += // Audio Stream
@@ -363,10 +365,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       }
       activeSession.timeout = setTimeout(() => {
         activeSession.socket?.close();
-        this.log.info('Device appears to be inactive for over 5 seconds. Stopping stream.', this.cameraName);
+        this.log.info('Device appears to be inactive. Stopping stream.', this.cameraName);
         this.controller.forceStopStreamingSession(request.sessionID);
         this.stopStream(request.sessionID);
-      }, 5000);
+      }, request.video.rtcp_interval * 2 * 1000);
     });
     activeSession.socket.bind(sessionInfo.videoReturnPort, sessionInfo.localAddress);
 
