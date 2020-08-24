@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2.6.0 (2020-??-??)
+
+### Changes
+
+- This plugin now includes experimental two-way audio support. Be aware that this feature is likely to be tweaked in the future, and a configuration that works now may need to be altered in the future.
+- Better detection of audio and video streams. There should be very few scenarios where `mapvideo` or `mapaudio` are needed anymore, as FFmpeg's stream auto-selection is now set up.
+
+### Bug Fixes
+
+- Correct handling of inactive camera timeouts. You should no longer see timeout messages after cleanly closing a camera stream.
+
+### Breaking Changes
+
+- `additionalCommandline` has been replaced by `encoderOptions` to better reflect it's intended use.
+
 ## v2.5.0 (2020-08-23)
 
 ### Changes

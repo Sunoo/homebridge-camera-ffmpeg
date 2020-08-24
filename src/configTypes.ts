@@ -29,6 +29,7 @@ export type CameraConfig = {
 export type VideoConfig = {
   source: string;
   stillImageSource: string;
+  returnAudioTarget: string;
   maxStreams: number;
   maxWidth: number;
   maxHeight: number;
@@ -39,9 +40,10 @@ export type VideoConfig = {
   vcodec: string;
   packetSize: number;
   videoFilter: string;
-  additionalCommandline: string;
+  encoderParameters: string;
   mapvideo: string;
   mapaudio: string;
   audio: boolean;
   debug: boolean;
+  debugReturn: boolean;
 };

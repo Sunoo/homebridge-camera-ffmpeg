@@ -20,6 +20,7 @@ import {
   VideoInfo
 } from 'homebridge';
 import { spawn } from 'child_process';
+import { createSocket, Socket } from 'dgram';
 import getPort from 'get-port';
 import os from 'os';
 import { networkInterfaceDefault } from 'systeminformation';
@@ -28,10 +29,10 @@ import { FfmpegProcess } from './ffmpeg';
 import { Logger } from './logger';
 const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
-export type SessionInfo = {
+type SessionInfo = {
   address: string; // address of the HAP controller
   localAddress: string;
-  addressVersion: ('ipv6' | 'ipv4');
+  ipv6: boolean;
 
   videoPort: number;
   videoReturnPort: number;
@@ -52,10 +53,17 @@ type ResolutionInfo = {
   videoFilter: string;
 };
 
+type ActiveSession = {
+  mainProcess?: FfmpegProcess;
+  returnProcess?: FfmpegProcess;
+  timeout?: NodeJS.Timeout;
+  socket?: Socket;
+};
+
 export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly hap: HAP;
   private readonly log: Logger;
-  private readonly name: string;
+  private readonly cameraName: string;
   private readonly videoConfig: VideoConfig;
   private readonly videoProcessor: string;
   private readonly interfaceName?: string;
@@ -63,7 +71,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
   // keep track of sessions
   pendingSessions: Record<string, SessionInfo> = {};
-  ongoingSessions: Record<string, FfmpegProcess> = {};
+  ongoingSessions: Record<string, ActiveSession> = {};
   timeouts: Record<string, NodeJS.Timeout> = {};
 
   constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string, interfaceName?: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
@@ -71,7 +79,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.videoConfig = cameraConfig.videoConfig;
     this.hap = hap;
 
-    this.name = cameraConfig.name;
+    this.cameraName = cameraConfig.name;
     this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
     this.interfaceName = interfaceName;
 
@@ -106,6 +114,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           }
         },
         audio: {
+          twoWayAudio: !!this.videoConfig.returnAudioTarget,
           codecs: [
             {
               type: AudioStreamingCodecType.AAC_ELD,
@@ -152,9 +161,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
     const resolution = this.determineResolution(request);
 
-    this.log.debug('Snapshot requested: ' + request.width + ' x ' + request.height, this.name, this.videoConfig.debug);
+    this.log.debug('Snapshot requested: ' + request.width + ' x ' + request.height, this.cameraName, this.videoConfig.debug);
     this.log.debug('Sending snapshot: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
-      (resolution.height > 0 ? resolution.height : 'native'), this.name, this.videoConfig.debug);
+      (resolution.height > 0 ? resolution.height : 'native'), this.cameraName, this.videoConfig.debug);
 
     let ffmpegArgs = this.videoConfig.stillImageSource || this.videoConfig.source;
 
@@ -167,24 +176,24 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       const ffmpeg = spawn(this.videoProcessor, ffmpegArgs.split(/\s+/), { env: process.env });
 
       let imageBuffer = Buffer.alloc(0);
-      this.log.debug('Snapshot command: ' + this.videoProcessor + ' ' + ffmpegArgs, this.name, this.videoConfig.debug);
+      this.log.debug('Snapshot command: ' + this.videoProcessor + ' ' + ffmpegArgs, this.cameraName, this.videoConfig.debug);
       ffmpeg.stdout.on('data', (data: Uint8Array) => {
         imageBuffer = Buffer.concat([imageBuffer, data]);
       });
       const log = this.log;
       ffmpeg.on('error', (error: string) => {
-        log.error('An error occurred while making snapshot request: ' + error, this.name);
+        log.error('An error occurred while making snapshot request: ' + error, this.cameraName);
       });
       ffmpeg.on('close', () => {
         callback(undefined, imageBuffer);
       });
     } catch (err) {
-      this.log.error(err, this.name);
+      this.log.error(err, this.cameraName);
       callback(err);
     }
   }
 
-  async getIpAddress(addressVersion: ('ipv6' | 'ipv4'), interfaceName?: string): Promise<string> {
+  async getIpAddress(ipv6: boolean, interfaceName?: string): Promise<string> {
     if (!interfaceName) {
       interfaceName = await networkInterfaceDefault();
     }
@@ -192,8 +201,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const externalInfo = interfaces[interfaceName]?.filter((info) => {
       return !info.internal;
     });
+    const preferredFamily = ipv6 ? 'IPv6' : 'IPv4';
     const addressInfo = externalInfo?.find((info) => {
-      return info.family.toLowerCase() === addressVersion;
+      return info.family === preferredFamily;
     }) || externalInfo?.[0];
     if (!addressInfo) {
       throw new Error('Unable to get network address for "' + interfaceName + '"!');
@@ -207,13 +217,15 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const audioReturnPort = await getPort();
     const audioSSRC = this.hap.CameraController.generateSynchronisationSource();
 
+    const ipv6 = request.addressVersion === 'ipv6';
+
     let currentAddress: string;
     try {
-      currentAddress = await this.getIpAddress(request.addressVersion, this.interfaceName);
+      currentAddress = await this.getIpAddress(ipv6, this.interfaceName);
     } catch (ex) {
       if (this.interfaceName) {
-        this.log.warn(ex + ' Falling back to default.', this.name);
-        currentAddress = await this.getIpAddress(request.addressVersion);
+        this.log.warn(ex + ' Falling back to default.', this.cameraName);
+        currentAddress = await this.getIpAddress(ipv6);
       } else {
         throw ex;
       }
@@ -222,7 +234,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const sessionInfo: SessionInfo = {
       address: request.targetAddress,
       localAddress: currentAddress,
-      addressVersion: request.addressVersion,
+      ipv6: ipv6,
 
       videoPort: request.video.port,
       videoReturnPort: videoReturnPort,
@@ -263,9 +275,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const sessionInfo = this.pendingSessions[request.sessionID];
     const vcodec = this.videoConfig.vcodec || 'libx264';
     const mtu = this.videoConfig.packetSize || 1316; // request.video.mtu is not used
-    const mapvideo = this.videoConfig.mapvideo || '0:0';
-    const mapaudio = this.videoConfig.mapaudio || '0:1';
-    const additionalCommandline = this.videoConfig.additionalCommandline || '-preset ultrafast -tune zerolatency';
+    let encoderParameters = this.videoConfig.encoderParameters;
+    if (!encoderParameters && vcodec === 'libx264') {
+      encoderParameters = '-preset ultrafast -tune zerolatency';
+    }
 
     const resolution = this.determineResolution(request.video, this.videoConfig.forceMax);
 
@@ -285,21 +298,21 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     }
 
     this.log.debug('Video stream requested: ' + request.video.width + ' x ' + request.video.height + ', ' +
-      request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.name, this.videoConfig.debug);
+      request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.cameraName, this.videoConfig.debug);
     this.log.info('Starting video stream: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
       (resolution.height > 0 ? resolution.height : 'native') + ', ' + (fps > 0 ? fps : 'native') +
-      ' fps, ' + (videoBitrate > 0 ? videoBitrate : '???') + ' kbps', this.name);
+      ' fps, ' + (videoBitrate > 0 ? videoBitrate : '???') + ' kbps', this.cameraName);
 
     let ffmpegArgs = this.videoConfig.source;
 
     ffmpegArgs += // Video
-      ' -map ' + mapvideo +
+      (this.videoConfig.mapvideo ? ' -map ' + this.videoConfig.mapvideo : ' -an -sn -dn') +
       ' -codec:v ' + vcodec +
       ' -pix_fmt yuv420p' +
       ' -color_range mpeg' +
       (fps > 0 ? ' -r ' + fps : '') +
       ' -f rawvideo' +
-      ' ' + additionalCommandline +
+      (encoderParameters ? ' ' + encoderParameters : '') +
       (resolution.videoFilter.length > 0 ? ' -filter:v ' + resolution.videoFilter : '') +
       (videoBitrate > 0 ? ' -b:v ' + videoBitrate + 'k' : '') +
       ' -payload_type ' + request.video.pt;
@@ -314,7 +327,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     if (this.videoConfig.audio) {
       ffmpegArgs += // Audio
-        ' -map ' + mapaudio +
+        (this.videoConfig.mapaudio ? ' -map ' + this.videoConfig.mapaudio : ' -vn -sn -dn') +
         ' -codec:a libfdk_aac' +
         ' -profile:a aac_eld' +
         ' -flags +global_header' +
@@ -337,10 +350,63 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       ffmpegArgs += ' -loglevel level+verbose';
     }
 
-    const ffmpeg = new FfmpegProcess(this.name, request.sessionID, this.videoProcessor, ffmpegArgs, this.log,
-      sessionInfo, this.videoConfig.debug, this, callback);
+    const activeSession: ActiveSession = {};
 
-    this.ongoingSessions[request.sessionID] = ffmpeg;
+    activeSession.socket = createSocket(sessionInfo.ipv6 ? 'udp6' : 'udp4');
+    activeSession.socket.on('error', (err: Error) => {
+      this.log.error('Socket error: ' + err.name, this.cameraName);
+      this.stopStream(request.sessionID);
+    });
+    activeSession.socket.on('message', () => {
+      if (activeSession.timeout) {
+        clearTimeout(activeSession.timeout);
+      }
+      activeSession.timeout = setTimeout(() => {
+        activeSession.socket?.close();
+        this.log.info('Device appears to be inactive for over 5 seconds. Stopping stream.', this.cameraName);
+        this.controller.forceStopStreamingSession(request.sessionID);
+        this.stopStream(request.sessionID);
+      }, 5000);
+    });
+    activeSession.socket.bind(sessionInfo.videoReturnPort, sessionInfo.localAddress);
+
+    activeSession.mainProcess = new FfmpegProcess(this.cameraName, request.sessionID, this.videoProcessor,
+      ffmpegArgs, this.log, this.videoConfig.debug, this, callback);
+
+    if (this.videoConfig.returnAudioTarget) {
+      let ffmpegReturnArgs =
+        '-hide_banner' +
+        ' -protocol_whitelist pipe,udp,rtp,file,crypto' +
+        ' -f sdp' +
+        ' -c:a libfdk_aac' +
+        ' -i pipe:' +
+        ' ' + this.videoConfig.returnAudioTarget;
+
+      if (this.videoConfig.debugReturn) {
+        ffmpegReturnArgs += ' -loglevel level+verbose';
+      }
+
+      const ipVer = sessionInfo.ipv6 ? 'IP6' : 'IP4';
+
+      const sdpReturnAudio =
+        'v=0\r\n' +
+        'o=- 0 0 IN ' + ipVer + ' ' + sessionInfo.address + '\r\n' +
+        's=Talk\r\n' +
+        'c=IN ' + ipVer + ' ' + sessionInfo.address + '\r\n' +
+        't=0 0\r\n' +
+        'm=audio ' + sessionInfo.audioReturnPort + ' RTP/AVP 110\r\n' +
+        'b=AS:24\r\n' +
+        'a=rtpmap:110 MPEG4-GENERIC/16000/1\r\n' +
+        'a=fmtp:110 ' +
+          'profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; ' +
+          'config=F8F0212C00BC00\r\n' +
+        'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:' + sessionInfo.audioSRTP.toString('base64') + '\r\n';
+      activeSession.returnProcess = new FfmpegProcess(this.cameraName + '] [Two-way', request.sessionID,
+        this.videoProcessor, ffmpegReturnArgs, this.log, this.videoConfig.debugReturn, this);
+      activeSession.returnProcess.getStdin()?.end(sdpReturnAudio);
+    }
+
+    this.ongoingSessions[request.sessionID] = activeSession;
     delete this.pendingSessions[request.sessionID];
   }
 
@@ -351,7 +417,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         break;
       case StreamRequestTypes.RECONFIGURE:
         this.log.debug('Received request to reconfigure: ' + request.video.width + ' x ' + request.video.height + ', ' +
-          request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps (Ignored)', this.name, this.videoConfig.debug);
+          request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps (Ignored)', this.cameraName, this.videoConfig.debug);
         callback();
         break;
       case StreamRequestTypes.STOP:
@@ -363,16 +429,19 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
   public stopStream(sessionId: string): void {
     try {
-      if (this.ongoingSessions[sessionId]) {
-        const ffmpegProcess = this.ongoingSessions[sessionId];
-        if (ffmpegProcess) {
-          ffmpegProcess.stop();
+      const session = this.ongoingSessions[sessionId];
+      if (session) {
+        if (session.timeout) {
+          clearTimeout(session.timeout);
         }
+        session.socket?.close();
+        session.mainProcess?.stop();
+        session.returnProcess?.stop();
       }
       delete this.ongoingSessions[sessionId];
-      this.log.info('Stopped video stream.', this.name);
+      this.log.info('Stopped video stream.', this.cameraName);
     } catch (err) {
-      this.log.error('Error occurred terminating FFmpeg process: ' + err, this.name);
+      this.log.error('Error occurred terminating FFmpeg process: ' + err, this.cameraName);
     }
   }
 }
