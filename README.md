@@ -91,6 +91,7 @@ Other users have been sharing configurations that work for them on our GitHub si
 
 ### Optional videoConfig Parameters
 
+- `returnAudioTarget`: _(EXPERIMENTAL)_ The FFmpeg output command for directing audio back to a two-way capable camera.
 - `maxStreams`: The maximum number of streams that will be allowed at once to this camera. (Default: `2`)
 - `maxWidth`: The maximum width used for video streamed to HomeKit. If set to 0, the resolution of the source is used. If not set, will use any size HomeKit requests.
 - `maxHeight`: The maximum height used for video streamed to HomeKit. If set to 0, the resolution of the source is used. If not set, will use any size HomeKit requests.
@@ -101,11 +102,12 @@ Other users have been sharing configurations that work for them on our GitHub si
 - `vcodec`: Set the codec used for encoding video sent to HomeKit, must be H.264-based.  You can change to a hardware accelerated video codec with this option, if one is available. (Default: `libx264`)
 - `audio`: Enables audio streaming from camera. (Default: `false`)
 - `packetSize`: If audio or video is choppy try a smaller value, should be set to a multiple of 188. (Default: `1316`)
-- `mapvideo`: Selects the stream used for video. (Default: `0:0`)
-- `mapaudio`: Selects the stream used for audio. (Default: `0:1`)
+- `mapvideo`: Selects the stream used for video. (Default: FFmpeg [automatically selects](https://ffmpeg.org/ffmpeg.html#Automatic-stream-selection) a video stream)
+- `mapaudio`: Selects the stream used for audio. (Default: FFmpeg [automatically selects](https://ffmpeg.org/ffmpeg.html#Automatic-stream-selection) an audio stream)
 - `videoFilter`: Allows additional video filter options to be passed to FFmpeg. If set to 'none', all video filters are disabled.
-- `additionalCommandline`: Allows additional command line options to be passed to FFmpeg. (Default: `-preset ultrafast -tune zerolatency`)
-- `debug`: Includes debugging output from FFmpeg in the Homebridge log. (Default: `false`)
+- `encoderParameters`: Options to be passed to the video encoder. (Default: `-preset ultrafast -tune zerolatency` if using libx264)
+- `debug`: Includes debugging output from the main FFmpeg process in the Homebridge log. (Default: `false`)
+- `debugReturn`: Includes debugging output from the FFmpeg used for return audio in the Homebridge log. (Default: `false`)
 
 #### More Complicated Example
 
