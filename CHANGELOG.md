@@ -2,20 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
-## v2.6.0 (2020-??-??)
+## v3.0.0 (2020-08-24)
 
 ### Changes
 
-- This plugin now includes experimental two-way audio support. Be aware that this feature is likely to be tweaked in the future, and a configuration that works now may need to be altered in the future.
+- This plugin now includes __experimental__ two-way audio support. Be aware that this feature is likely to be tweaked in the future, and a configuration that works now may need to be altered in the future.
 - Better detection of audio and video streams. There should be very few scenarios where `mapvideo` or `mapaudio` are needed anymore, as FFmpeg's stream auto-selection is now set up.
+- Default `videoFilter` can be disabled by including `none` in your comma-delimited list of filters.
+- Further reorganization of the config UI.
 
 ### Bug Fixes
 
-- Correct handling of inactive camera timeouts. You should no longer see timeout messages after cleanly closing a camera stream.
+- Corrected handling of inactive camera timeouts. You should no longer see timeout messages after cleanly closing a camera stream.
+- Fixed `forceMax` not applying to resolution in some scenarios.
 
 ### Breaking Changes
 
 - `additionalCommandline` has been replaced by `encoderOptions` to better reflect it's intended use.
+- `preserveRatio` has been removed and is now active as long as the default `videoFilter` list is active.
 
 ## v2.5.0 (2020-08-23)
 
