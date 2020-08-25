@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.1 (2020-08-25)
+
+### Bug Fixes
+
+- Fixed an issue with inactive camera timeouts that could cause zombie FFmpeg processes.
+
 ## v3.0.0 (2020-08-24)
 
 ### Changes

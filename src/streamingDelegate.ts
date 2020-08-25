@@ -367,7 +367,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         clearTimeout(activeSession.timeout);
       }
       activeSession.timeout = setTimeout(() => {
-        activeSession.socket?.close();
         this.log.info('Device appears to be inactive. Stopping stream.', this.cameraName);
         this.controller.forceStopStreamingSession(request.sessionID);
         this.stopStream(request.sessionID);
@@ -434,20 +433,28 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   }
 
   public stopStream(sessionId: string): void {
-    try {
-      const session = this.ongoingSessions[sessionId];
-      if (session) {
-        if (session.timeout) {
-          clearTimeout(session.timeout);
-        }
-        session.socket?.close();
-        session.mainProcess?.stop();
-        session.returnProcess?.stop();
+    const session = this.ongoingSessions[sessionId];
+    if (session) {
+      if (session.timeout) {
+        clearTimeout(session.timeout);
       }
-      delete this.ongoingSessions[sessionId];
-      this.log.info('Stopped video stream.', this.cameraName);
-    } catch (err) {
-      this.log.error('Error occurred terminating FFmpeg process: ' + err, this.cameraName);
+      try {
+        session.socket?.close();
+      } catch (err) {
+        this.log.error('Error occurred closing socket: ' + err, this.cameraName);
+      }
+      try {
+        session.mainProcess?.stop();
+      } catch (err) {
+        this.log.error('Error occurred terminating main FFmpeg process: ' + err, this.cameraName);
+      }
+      try {
+        session.returnProcess?.stop();
+      } catch (err) {
+        this.log.error('Error occurred terminating two-way FFmpeg process: ' + err, this.cameraName);
+      }
     }
+    delete this.ongoingSessions[sessionId];
+    this.log.info('Stopped video stream.', this.cameraName);
   }
 }
