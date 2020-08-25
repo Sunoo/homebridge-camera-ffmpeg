@@ -141,9 +141,9 @@
                 "description": "If your camera also provides a URL for a still image, that can be defined here with the same syntax as 'source'. If not set, the plugin will grab one frame from 'source'."
               },
               "returnAudioTarget": {
-                "title": "Return Audio Target (EXPERIMENTAL)",
+                "title": "Two-way Audio Target (EXPERIMENTAL - WIP)",
                 "type": "string",
-                "description": "The FFmpeg output command for directing audio back to a two-way capable camera."
+                "description": "The FFmpeg output command for directing audio back to a two-way capable camera. This feature is still in development and a configuration that works today may not work in the future."
               },
               "maxStreams": {
                 "title": "Maximum Concurrent Streams",
@@ -215,11 +215,11 @@
                 "description": "If audio or video is choppy try a smaller value."
               },
               "videoFilter": {
-                "title": "Additional Video Filter Options",
+                "title": "Additional Video Filters",
                 "type": "string",
-                "description": "Allows additional video filter options to be passed to FFmpeg. If set to 'none', all video filters are disabled."
+                "description": "Comma-delimited list of additional video filters for FFmpeg to run on the video. If 'none' is included, the default video filters are disabled."
               },
-              "encoderParameters": {
+              "encoderOptions": {
                 "title": "Encoder Options",
                 "type": "string",
                 "placeholder": "-preset ultrafast -tune zerolatency",
@@ -241,14 +241,14 @@
                 "description": "Enables audio streaming from camera."
               },
               "debug": {
-                "title": "Debug Logging",
+                "title": "FFmpeg Debug Logging",
                 "type": "boolean",
                 "description": "Includes debugging output from the main FFmpeg process in the Homebridge log."
               },
               "debugReturn": {
-                "title": "Return Audio Debug Logging",
+                "title": "Two-way FFmpeg Debug Logging",
                 "type": "boolean",
-                "description": "Includes debugging output from the FFmpeg used for return audio in the Homebridge log."
+                "description": "Includes debugging output from the FFmpeg process used for two-way audio in the Homebridge log."
               }
             }
           }
@@ -293,14 +293,13 @@
               "expandable": true,
               "expanded": false,
               "items": [
+                "cameras[].unbridge",
+                "cameras[].videoConfig.maxStreams",
                 "cameras[].videoConfig.maxWidth",
                 "cameras[].videoConfig.maxHeight",
                 "cameras[].videoConfig.maxFPS",
                 "cameras[].videoConfig.maxBitrate",
-                "cameras[].videoConfig.forceMax",
-                "cameras[].videoConfig.preserveRatio",
-                "cameras[].videoConfig.videoFilter",
-                "cameras[].videoConfig.additionalCommandline"
+                "cameras[].videoConfig.forceMax"
               ]
             },
             {
@@ -310,15 +309,24 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "cameras[].videoConfig.returnAudioTarget",
+                {
+                  "key": "cameras[]",
+                  "type": "section",
+                  "title": "EXPERIMENTAL - WIP",
+                  "expandable": true,
+                  "expanded": false,
+                  "items": [
+                    "cameras[].videoConfig.returnAudioTarget",
+                    "cameras[].videoConfig.debugReturn"
+                  ]
+                },
                 "cameras[].videoConfig.vcodec",
+                "cameras[].videoConfig.packetSize",
                 "cameras[].videoConfig.mapvideo",
                 "cameras[].videoConfig.mapaudio",
-                "cameras[].videoConfig.maxStreams",
-                "cameras[].videoConfig.packetSize",
-                "cameras[].unbridge",
-                "cameras[].videoConfig.debug",
-                "cameras[].videoConfig.debugReturn"
+                "cameras[].videoConfig.videoFilter",
+                "cameras[].videoConfig.encoderOptions",
+                "cameras[].videoConfig.debug"
               ]
             },
             {

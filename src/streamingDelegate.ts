@@ -128,9 +128,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.controller = new hap.CameraController(options);
   }
 
-  private determineResolution(request: SnapshotRequest | VideoInfo, isSnapshot = false): ResolutionInfo {
-    let width = Math.floor(request.width / 2) * 2;
-    let height = Math.floor(request.height / 2) * 2;
+  private determineResolution(request: SnapshotRequest | VideoInfo, isSnapshot: boolean): ResolutionInfo {
+    let width = request.width;
+    let height = request.height;
     if (!isSnapshot) {
       if ((this.videoConfig.forceMax && this.videoConfig.maxWidth) ||
         (request.width > this.videoConfig.maxWidth)) {
@@ -142,26 +142,29 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       }
     }
 
-    const vf: Array<string> = [];
-    if (this.videoConfig.videoFilter !== 'none') {
-      if (this.videoConfig.videoFilter) {
-        vf.push(this.videoConfig.videoFilter);
-      }
+    const filters: Array<string> = this.videoConfig.videoFilter?.split(',') || [];
+    const noneFilter = filters.indexOf('none');
+    if (noneFilter >= 0) {
+      filters.splice(noneFilter, 1);
+    }
+    if (noneFilter < 0) {
       if (width > 0 || height > 0) {
-        vf.push('scale=' + (width > 0 ? '\'min(' + width + ',iw)\'' : 'iw') + ':' +
+        filters.push('scale=' + (width > 0 ? '\'min(' + width + ',iw)\'' : 'iw') + ':' +
           (height > 0 ? '\'min(' + height + ',ih)\'' : 'ih') +
-          (this.videoConfig.preserveRatio ? ':force_original_aspect_ratio=decrease' : ''));
-        if (this.videoConfig.preserveRatio) {
-          vf.push('scale=trunc(iw/2)*2:trunc(ih/2)*2'); // Force to fit encoder restrictions
-        }
+          ':force_original_aspect_ratio=decrease');
+        filters.push('scale=trunc(iw/2)*2:trunc(ih/2)*2'); // Force to fit encoder restrictions
       }
     }
 
-    return {width: width, height: height, videoFilter: vf.join(',')};
+    return {
+      width: width,
+      height: height,
+      videoFilter: filters.join(',')
+    };
   }
 
   handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
-    const resolution = this.determineResolution(request);
+    const resolution = this.determineResolution(request, true);
 
     this.log.debug('Snapshot requested: ' + request.width + ' x ' + request.height, this.cameraName, this.videoConfig.debug);
     this.log.debug('Sending snapshot: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
@@ -277,12 +280,12 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const sessionInfo = this.pendingSessions[request.sessionID];
     const vcodec = this.videoConfig.vcodec || 'libx264';
     const mtu = this.videoConfig.packetSize || 1316; // request.video.mtu is not used
-    let encoderParameters = this.videoConfig.encoderParameters;
-    if (!encoderParameters && vcodec === 'libx264') {
-      encoderParameters = '-preset ultrafast -tune zerolatency';
+    let encoderOptions = this.videoConfig.encoderOptions;
+    if (!encoderOptions && vcodec === 'libx264') {
+      encoderOptions = '-preset ultrafast -tune zerolatency';
     }
 
-    const resolution = this.determineResolution(request.video, this.videoConfig.forceMax);
+    const resolution = this.determineResolution(request.video, false);
 
     let fps = (this.videoConfig.forceMax && this.videoConfig.maxFPS) ||
       (request.video.fps > this.videoConfig.maxFPS) ?
@@ -314,7 +317,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       ' -color_range mpeg' +
       (fps > 0 ? ' -r ' + fps : '') +
       ' -f rawvideo' +
-      (encoderParameters ? ' ' + encoderParameters : '') +
+      (encoderOptions ? ' ' + encoderOptions : '') +
       (resolution.videoFilter.length > 0 ? ' -filter:v ' + resolution.videoFilter : '') +
       (videoBitrate > 0 ? ' -b:v ' + videoBitrate + 'k' : '') +
       ' -payload_type ' + request.video.pt;
@@ -399,6 +402,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         'm=audio ' + sessionInfo.audioReturnPort + ' RTP/AVP 110\r\n' +
         'b=AS:24\r\n' +
         'a=rtpmap:110 MPEG4-GENERIC/16000/1\r\n' +
+        'a=rtcp-mux\r\n' + // FFmpeg ignores this, but might as well
         'a=fmtp:110 ' +
           'profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; ' +
           'config=F8F0212C00BC00\r\n' +

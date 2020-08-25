@@ -36,11 +36,10 @@ export type VideoConfig = {
   maxFPS: number;
   maxBitrate: number;
   forceMax: boolean;
-  preserveRatio: boolean;
   vcodec: string;
   packetSize: number;
   videoFilter: string;
-  encoderParameters: string;
+  encoderOptions: string;
   mapvideo: string;
   mapaudio: string;
   audio: boolean;
