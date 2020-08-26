@@ -1,7 +1,12 @@
 name: Publish Beta
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch'
+        required: true
+        default: 'master'
 
 jobs:
   build:
@@ -9,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.2
         with:
-          ref: beta
+          ref: ${{github.event.inputs.ref}}
       - uses: actions/setup-node@v2.1.1
         with:
           node-version: 10
@@ -30,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.3.2
         with:
-          ref: beta
+          ref: ${{github.event.inputs.ref}}
       - uses: actions/setup-node@v2.1.1
         with:
           node-version: 10
