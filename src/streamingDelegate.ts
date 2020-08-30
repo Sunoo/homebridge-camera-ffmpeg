@@ -21,13 +21,13 @@ import {
 } from 'homebridge';
 import { spawn } from 'child_process';
 import { createSocket, Socket } from 'dgram';
+import ffmpegPath from 'ffmpeg-for-homebridge';
 import getPort from 'get-port';
 import os from 'os';
 import { networkInterfaceDefault } from 'systeminformation';
 import { CameraConfig, VideoConfig } from './configTypes';
 import { FfmpegProcess } from './ffmpeg';
 import { Logger } from './logger';
-const pathToFfmpeg = require('ffmpeg-for-homebridge'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 type SessionInfo = {
   address: string; // address of the HAP controller
@@ -80,7 +80,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.hap = hap;
 
     this.cameraName = cameraConfig.name;
-    this.videoProcessor = videoProcessor || pathToFfmpeg || 'ffmpeg';
+    this.videoProcessor = videoProcessor || ffmpegPath || 'ffmpeg';
     this.interfaceName = interfaceName;
 
     api.on(APIEvent.SHUTDOWN, () => {
