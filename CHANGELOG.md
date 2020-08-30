@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.2 (2020-08-30)
+
+### Changes
+
+- Allow `=` in the URL for HTTP automation for systems that require it. Everything after the `=` will be ignored.
+
 ## v3.0.1 (2020-08-25)
 
 ### Bug Fixes

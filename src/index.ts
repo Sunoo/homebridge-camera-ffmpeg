@@ -47,10 +47,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.api = api;
     this.config = config as unknown as FfmpegPlatformConfig;
 
-    if (!config) {
-      return;
-    }
-
     if (this.config.cameras) {
       this.config.cameras.forEach((cameraConfig: CameraConfig) => {
         let error = false;
@@ -352,7 +348,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         if (request.url) {
           const parseurl = url.parse(request.url);
           if (parseurl.pathname && parseurl.query) {
-            const name = decodeURIComponent(parseurl.query);
+            const name = decodeURIComponent(parseurl.query).split('=')[0];
             results = this.automationHandler(parseurl.pathname, name);
           }
         }
