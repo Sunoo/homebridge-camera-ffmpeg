@@ -12,5 +12,6 @@ Because many cameras do not natively support MQTT or HTTP calls in the format Ho
 
 - [homebridge-ftp-motion](https://www.npmjs.com/package/homebridge-ftp-motion) by Sunoo: Any camera that supports uploading to FTP.
 - [homebridge-smtp-motion](https://www.npmjs.com/package/homebridge-smtp-motion) by Sunoo: Any camera that can send emails over SMTP.
+- [homebridge-dahua-alerts](https://www.npmjs.com/package/homebridge-dahua-alerts) by kushagharahi: Cameras made by Dahua or Lorex.
 
 If you know of any additional plugins that add support for other cameras, please [open an Issue](https://github.com/Sunoo/homebridge-camera-ffmpeg/issues) and it will be added to this list.
