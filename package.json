@@ -70,7 +70,7 @@
     "typescript": "^4.0.2"
   },
   "dependencies": {
-    "ffmpeg-for-homebridge": "^0.0.7",
+    "ffmpeg-for-homebridge": "^0.0.8",
     "get-port": "^5.1.1",
     "mqtt": "^4.2.1",
     "systeminformation": "^4.27.0"
