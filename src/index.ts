@@ -13,8 +13,6 @@ import {
 } from 'homebridge';
 import http from 'http';
 import mqtt from 'mqtt';
-import os from 'os';
-import { networkInterfaceDefault } from 'systeminformation';
 import url from 'url';
 import { CameraConfig, FfmpegPlatformConfig } from './configTypes';
 import { Logger } from './logger';
@@ -78,27 +76,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           }
         }
       });
-    }
-
-    if (!this.config.interfaceName) {
-      const interfaces = os.networkInterfaces();
-      const publicNics: Array<string> = [];
-      for (const [nic, details] of Object.entries(interfaces)) {
-        const externalInfo = details?.find((info) => {
-          return !info.internal;
-        });
-        if (externalInfo) {
-          publicNics.push(nic);
-        }
-      }
-      if (publicNics.length > 1) {
-        networkInterfaceDefault()
-          .then((defaultInterfaceName) => {
-            this.log.warn('Multiple network interfaces detected ("' + publicNics.join('", "') + '"). ' +
-              'If you encounter issues with streaming video you may need to set interfaceName. ' +
-              'If not set, "' + defaultInterfaceName + '" will be used.');
-          });
-      }
     }
 
     api.on(APIEvent.DID_FINISH_LAUNCHING, this.didFinishLaunching.bind(this));

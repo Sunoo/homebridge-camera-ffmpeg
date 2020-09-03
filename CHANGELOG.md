@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.3 (2020-09-02)
+
+### Changes
+
+- Updated dependencies.
+
+### Note
+
+- Homebridge 1.1.3 is now out. It is highly recommended to upgrade as it should completely resolve the issue that caused live video not to work while snapshots continued to update. Once you upgrade, `interfaceName` will no longer have any impact. At some point in the future this plugin will drop support for Homebridge 1.1.2 and lower and also remove the `interfaceName` option.
+
 ## v3.0.2 (2020-08-30)
 
 ### Changes
