@@ -41,7 +41,7 @@ Requires Raspberry Pi 2 or newer!
 
 ~~`sudo apt install v4l2loopback-dkms`~~
 
-Note: currently the version supplied with raspbian buster will not work with the current linux kernel! To use a newer version of v4l2loopback on raspbian buster download and install it from [here](http://archive.raspbian.org/raspbian/pool/main/v/v4l2loopback/):
+Note: currently the version supplied with raspbian buster (i.e. 0.12.1) will not work with the current linux kernel! To use a newer version of v4l2loopback on raspbian buster download and install it from [here](http://archive.raspbian.org/raspbian/pool/main/v/v4l2loopback/):
 ```bash
 cd /tmp
 wget http://archive.raspbian.org/raspbian/pool/main/v/v4l2loopback/v4l2loopback-dkms_0.12.5-1_all.deb
@@ -75,7 +75,7 @@ Activate with `sudo systemctl enable camera-loopback` and start with `sudo syste
 
 Use the *Basic Config* (see above) and replace `/dev/video0` with `/dev/video1` and set `maxStreams` to `3`
 
-*Note: more then three streams tend to crash.*
+*Note: more than three streams tend to crash.*
 
 
 ## Native h264
