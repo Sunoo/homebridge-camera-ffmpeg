@@ -1,5 +1,5 @@
 ---
-title: Raspberry Pi camera v1.3
+title: Raspberry Pi camera remote
 comment: connected to another RasPi
 author: Jan Kaiser
 date: 2019-08-02
