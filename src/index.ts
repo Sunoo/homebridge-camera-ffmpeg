@@ -67,10 +67,17 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         }
 
         if (!error) {
-          const uuid = hap.uuid.generate(cameraConfig.name);
+          var uuid;
+          if (cameraConfig.uuid) {
+            uuid = cameraConfig.uuid;
+            this.log.debug('Used provided accessory UUID (' + uuid + ').', cameraConfig.name);
+          } else {
+            uuid = hap.uuid.generate(cameraConfig.name);
+            this.log.info('Used name to generate the accessory UUID (' + uuid + ').', cameraConfig.name);
+          }
           if (this.cameraConfigs.has(uuid)) {
-            // Camera names must be unique
-            this.log.warn('Multiple cameras are configured with this name. Duplicate cameras will be skipped.', cameraConfig.name);
+            // uuid must be unique
+            this.log.warn('Multiple accessories are configured with the same UUID. Duplicate cameras will be skipped.', cameraConfig.name);
           } else {
             this.cameraConfigs.set(uuid, cameraConfig);
           }
@@ -262,7 +269,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
   private automationHandler(fullpath: string, name: string): AutomationReturn {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => {
-      return curAcc.displayName == name;
+      return curAcc.displayName == name || curAcc.UUID == name;
     });
     if (accessory) {
       const path = fullpath.split('/').filter((value) => value.length > 0);

@@ -14,6 +14,7 @@ export type FfmpegPlatformConfig = {
 
 export type CameraConfig = {
   name: string;
+  uuid: string;
   manufacturer: string;
   model: string;
   serialNumber: string;
