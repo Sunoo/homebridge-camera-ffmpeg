@@ -39,18 +39,11 @@ Requires Raspberry Pi 2 or newer!
 
 ### Step1: Install v4l2loopback
 
-~~`sudo apt install v4l2loopback-dkms`~~
-
-Note: currently the version supplied with raspbian buster (i.e. 0.12.1) will not work with the current linux kernel! To use a newer version of v4l2loopback on raspbian buster download and install it from [here](http://archive.raspbian.org/raspbian/pool/main/v/v4l2loopback/):
-```bash
-cd /tmp
-wget http://archive.raspbian.org/raspbian/pool/main/v/v4l2loopback/v4l2loopback-dkms_0.12.5-1_all.deb
-sudo apt install ./v4l2loopback-dkms_0.12.5-1_all.deb
-```
+`sudo apt install v4l2loopback-dkms`
 
 ### Step2: Adjust GPU RAM split
 
-Edit `/boot/config.txt` and change `gpu_mem=128` to `gpu_mem=256`.
+Edit `/boot/config.txt` and change `gpu_mem=128` to `gpu_mem=256` (or use `raspi-config`).
 
 ### Step3: Start the loopback device on boot
 
@@ -60,8 +53,8 @@ Create file `/etc/systemd/system/camera-loopback.service`
 Description=Set up loopback cameras
 
 [Service]
-ExecStartPre=/sbin/modprobe v4l2loopback devices=3
-ExecStart=/usr/bin/ffmpeg -f video4linux2 -input_format yuv420p -video_size 1280x720 -i /dev/video0 -codec copy -f v4l2 /dev/video1
+ExecStartPre=/sbin/modprobe v4l2loopback devices=2
+ExecStart=/usr/local/bin/ffmpeg -f video4linux2 -input_format yuv420p -video_size 1280x720 -i /dev/video0 -codec copy -f v4l2 /dev/video1
 Restart=always
 RestartSec=2
 
