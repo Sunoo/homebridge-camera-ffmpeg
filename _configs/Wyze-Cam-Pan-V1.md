@@ -1,5 +1,6 @@
 ---
 title: Wyze Cam Pan V1
+comment: running on Raspberry Pi 4b
 author: techeadred
 date: 2020-12-07
 ---
