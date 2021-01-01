@@ -1,6 +1,6 @@
 ---
 title: Helper Plugins
-order: 4
+order: 5
 ---
 Because many cameras do not natively support MQTT or HTTP calls in the format Homebridge Camera FFmpeg uses, additional plugins have been written by various developers to add support for methods used by various cameras. 
 
