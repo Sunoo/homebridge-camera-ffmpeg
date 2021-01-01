@@ -10,12 +10,11 @@ date: 2020-12-25
 {
 	"name": "Camera Front Door",
 	"videoConfig": {
-		"source": "-i rtsp://user:password@192.168.0.2/ISAPI/Streaming/channels/101/HighResolutionVideo",
-		"stillImageSource": "http://user:password@192.168.0.2/ISAPI/Streaming/channels/101/picture"
+		"source": "-i rtsp://user:password@192.168.0.2/ISAPI/Streaming/channels/101/HighResolutionVideo"
 	}
 }
 ```
 
 **Additional Information**
 
-There are other APIs that work as well, such as rtsp://user:password@192.168.0.2/ISAPI/Streaming/channels/101/ for example, but I found this work to work best for me. The still image Source is not updated automatically on homekit, but the live stream works nice.
+There are other APIs that work as well, such as rtsp://user:password@192.168.0.2/ISAPI/Streaming/channels/101/ for example, but I found this work to work best for me.
