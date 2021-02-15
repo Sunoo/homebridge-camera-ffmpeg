@@ -56,13 +56,24 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         if (!cameraConfig.videoConfig) {
           this.log.error('The videoConfig section is missing from the config. This camera will be skipped.', cameraConfig.name);
           error = true;
-        } else if (!cameraConfig.videoConfig.source) {
-          this.log.error('There is no source configured for this camera. This camera will be skipped.', cameraConfig.name);
-          error = true;
         } else {
-          const sourceArgs = cameraConfig.videoConfig.source.split(/\s+/);
-          if (!sourceArgs.includes('-i')) {
-            this.log.warn('The source for this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
+          if (!cameraConfig.videoConfig.source) {
+            this.log.error('There is no source configured for this camera. This camera will be skipped.', cameraConfig.name);
+            error = true;
+          } else {
+            const sourceArgs = cameraConfig.videoConfig.source.split(/\s+/);
+            if (!sourceArgs.includes('-i')) {
+              this.log.warn('The source for this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
+            }
+          }
+          if (cameraConfig.videoConfig.stillImageSource) {
+            const stillArgs = cameraConfig.videoConfig.stillImageSource.split(/\s+/);
+            if (!stillArgs.includes('-i')) {
+              this.log.warn('The stillImageSource for this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
+            }
+          }
+          if (cameraConfig.videoConfig.vcodec === 'copy' && !!cameraConfig.videoConfig.videoFilter) {
+            this.log.warn('A videoFilter is defined, but the copy vcodec is being used. This will be ignored.', cameraConfig.name);
           }
         }
 
@@ -295,7 +306,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         mqtttopic = this.config.topic;
       }
       this.log.info('Setting up MQTT connection with topic ' + mqtttopic + '...');
-      const client = mqtt.connect('mqtt://' + this.config.mqtt + ':' + portmqtt, {
+      this.log.debug((this.config.tlsmqtt ? 'mqtts://' : 'mqtt://') + this.config.mqtt + ':' + portmqtt);
+      const client = mqtt.connect((this.config.tlsmqtt ? 'mqtts://' : 'mqtt://') + this.config.mqtt + ':' + portmqtt, {
         'username': this.config.usermqtt,
         'password': this.config.passmqtt
       });

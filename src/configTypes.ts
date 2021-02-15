@@ -4,6 +4,7 @@ export type FfmpegPlatformConfig = {
   interfaceName: string;
   mqtt: string;
   portmqtt: number;
+  tlsmqtt: boolean;
   usermqtt: string;
   passmqtt: string;
   topic: string;

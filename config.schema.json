@@ -35,6 +35,11 @@
       "placeholder": "1883",
       "description": "The port of the MQTT broker."
     },
+    "tlsmqtt": {
+      "title": "MQTT TLS",
+      "type": "boolean",
+      "description": "Use TLS to connect to the MQTT broker."
+    },
     "usermqtt": {
       "title": "MQTT Username",
       "type": "string",
@@ -370,6 +375,7 @@
           "items": [
             "mqtt",
             "portmqtt",
+            "tlsmqtt",
             "usermqtt",
             "passmqtt",
             "topic"

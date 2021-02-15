@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## v3.0.4 (2021-02-15)
+
+### Changes
+
+- Added warning when attempting to use videoFilter with the copy vcodec.
+- Added support for connecting to an MQTT with TLS.
+- Updated dependencies.
+
 ## v3.0.3 (2020-09-02)
 
 ### Changes

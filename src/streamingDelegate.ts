@@ -372,7 +372,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         this.stopStream(request.sessionID);
       }, request.video.rtcp_interval * 2 * 1000);
     });
-    activeSession.socket.bind(sessionInfo.videoReturnPort, sessionInfo.localAddress);
+    activeSession.socket.bind(sessionInfo.videoReturnPort);
 
     activeSession.mainProcess = new FfmpegProcess(this.cameraName, request.sessionID, this.videoProcessor,
       ffmpegArgs, this.log, this.videoConfig.debug, this, callback);

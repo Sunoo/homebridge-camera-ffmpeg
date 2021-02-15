@@ -140,6 +140,7 @@ Other users have been sharing configurations that work for them on our GitHub si
 
 - `mqtt`: Defines the hostname or IP of the MQTT broker to connect to for MQTT-based automation. If not set, MQTT support is not started. See the project site for [more information on using MQTT](https://sunoo.github.io/homebridge-camera-ffmpeg/automation/mqtt.html).
 - `portmqtt`: The port of the MQTT broker. (Default: `1883`)
+- `tlsmqtt`: Use TLS to connect to the MQTT broker.
 - `usermqtt`: The username used to connect to your MQTT broker. If not set, no authentication is used.
 - `passmqtt`: The password used to connect to your MQTT broker. If not set, no authentication is used.
 - `topic`: The base MQTT topic to subscribe to. (Default: `homebridge`)
