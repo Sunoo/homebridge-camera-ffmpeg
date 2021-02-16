@@ -74,12 +74,12 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   ongoingSessions: Record<string, ActiveSession> = {};
   timeouts: Record<string, NodeJS.Timeout> = {};
 
-  constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor: string, interfaceName?: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+  constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor?: string, interfaceName?: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
     this.log = log;
-    this.videoConfig = cameraConfig.videoConfig;
+    this.videoConfig = cameraConfig.videoConfig!;
     this.hap = hap;
 
-    this.cameraName = cameraConfig.name;
+    this.cameraName = cameraConfig.name!;
     this.videoProcessor = videoProcessor || ffmpegPath || 'ffmpeg';
     this.interfaceName = interfaceName;
 
@@ -90,7 +90,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     });
 
     const options: CameraControllerOptions = {
-      cameraStreamCount: cameraConfig.videoConfig.maxStreams || 2, // HomeKit requires at least 2 streams, but 1 is also just fine
+      cameraStreamCount: this.videoConfig.maxStreams || 2, // HomeKit requires at least 2 streams, but 1 is also just fine
       delegate: this,
       streamingOptions: {
         supportedCryptoSuites: [hap.SRTPCryptoSuites.AES_CM_128_HMAC_SHA1_80],
@@ -132,12 +132,12 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     let width = request.width;
     let height = request.height;
     if (!isSnapshot) {
-      if ((this.videoConfig.forceMax && this.videoConfig.maxWidth) ||
-        (request.width > this.videoConfig.maxWidth)) {
+      if (this.videoConfig.maxWidth !== undefined &&
+        (this.videoConfig.forceMax || request.width > this.videoConfig.maxWidth)) {
         width = this.videoConfig.maxWidth;
       }
-      if ((this.videoConfig.forceMax && this.videoConfig.maxHeight) ||
-        (request.height > this.videoConfig.maxHeight)) {
+      if (this.videoConfig.maxHeight !== undefined &&
+        (this.videoConfig.forceMax || request.height > this.videoConfig.maxHeight)) {
         height = this.videoConfig.maxHeight;
       }
     }
@@ -170,7 +170,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.log.debug('Sending snapshot: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
       (resolution.height > 0 ? resolution.height : 'native'), this.cameraName, this.videoConfig.debug);
 
-    let ffmpegArgs = this.videoConfig.stillImageSource || this.videoConfig.source;
+    let ffmpegArgs = this.videoConfig.stillImageSource || this.videoConfig.source!;
 
     ffmpegArgs += // Still
       ' -frames:v 1' +
@@ -287,11 +287,11 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     const resolution = this.determineResolution(request.video, false);
 
-    let fps = (this.videoConfig.forceMax && this.videoConfig.maxFPS) ||
-      (request.video.fps > this.videoConfig.maxFPS) ?
+    let fps = (this.videoConfig.maxFPS !== undefined &&
+      (this.videoConfig.forceMax || request.video.fps > this.videoConfig.maxFPS)) ?
       this.videoConfig.maxFPS : request.video.fps;
-    let videoBitrate = (this.videoConfig.forceMax && this.videoConfig.maxBitrate) ||
-      (request.video.max_bit_rate > this.videoConfig.maxBitrate) ?
+    let videoBitrate = (this.videoConfig.maxBitrate !== undefined &&
+      (this.videoConfig.forceMax || request.video.max_bit_rate > this.videoConfig.maxBitrate)) ?
       this.videoConfig.maxBitrate : request.video.max_bit_rate;
 
     if (vcodec === 'copy') {
@@ -308,7 +308,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       (resolution.height > 0 ? resolution.height : 'native') + ', ' + (fps > 0 ? fps : 'native') +
       ' fps, ' + (videoBitrate > 0 ? videoBitrate : '???') + ' kbps', this.cameraName);
 
-    let ffmpegArgs = this.videoConfig.source;
+    let ffmpegArgs = this.videoConfig.source!;
 
     ffmpegArgs += // Video
       (this.videoConfig.mapvideo ? ' -map ' + this.videoConfig.mapvideo : ' -an -sn -dn') +

@@ -43,51 +43,49 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   constructor(log: Logging, config: PlatformConfig, api: API) {
     this.log = new Logger(log);
     this.api = api;
-    this.config = config as unknown as FfmpegPlatformConfig;
+    this.config = config as FfmpegPlatformConfig;
 
-    if (this.config.cameras) {
-      this.config.cameras.forEach((cameraConfig: CameraConfig) => {
-        let error = false;
+    this.config.cameras?.forEach((cameraConfig: CameraConfig) => {
+      let error = false;
 
-        if (!cameraConfig.name) {
-          this.log.error('One of your cameras has no name configured. This camera will be skipped.');
-          error = true;
-        }
-        if (!cameraConfig.videoConfig) {
-          this.log.error('The videoConfig section is missing from the config. This camera will be skipped.', cameraConfig.name);
+      if (!cameraConfig.name) {
+        this.log.error('One of your cameras has no name configured. This camera will be skipped.');
+        error = true;
+      }
+      if (!cameraConfig.videoConfig) {
+        this.log.error('The videoConfig section is missing from the config. This camera will be skipped.', cameraConfig.name);
+        error = true;
+      } else {
+        if (!cameraConfig.videoConfig.source) {
+          this.log.error('There is no source configured for this camera. This camera will be skipped.', cameraConfig.name);
           error = true;
         } else {
-          if (!cameraConfig.videoConfig.source) {
-            this.log.error('There is no source configured for this camera. This camera will be skipped.', cameraConfig.name);
-            error = true;
-          } else {
-            const sourceArgs = cameraConfig.videoConfig.source.split(/\s+/);
-            if (!sourceArgs.includes('-i')) {
-              this.log.warn('The source for this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
-            }
-          }
-          if (cameraConfig.videoConfig.stillImageSource) {
-            const stillArgs = cameraConfig.videoConfig.stillImageSource.split(/\s+/);
-            if (!stillArgs.includes('-i')) {
-              this.log.warn('The stillImageSource for this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
-            }
-          }
-          if (cameraConfig.videoConfig.vcodec === 'copy' && !!cameraConfig.videoConfig.videoFilter) {
-            this.log.warn('A videoFilter is defined, but the copy vcodec is being used. This will be ignored.', cameraConfig.name);
+          const sourceArgs = cameraConfig.videoConfig.source.split(/\s+/);
+          if (!sourceArgs.includes('-i')) {
+            this.log.warn('The source for this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
           }
         }
+        if (cameraConfig.videoConfig.stillImageSource) {
+          const stillArgs = cameraConfig.videoConfig.stillImageSource.split(/\s+/);
+          if (!stillArgs.includes('-i')) {
+            this.log.warn('The stillImageSource for this camera is missing "-i", it is likely misconfigured.', cameraConfig.name);
+          }
+        }
+        if (cameraConfig.videoConfig.vcodec === 'copy' && cameraConfig.videoConfig.videoFilter) {
+          this.log.warn('A videoFilter is defined, but the copy vcodec is being used. This will be ignored.', cameraConfig.name);
+        }
+      }
 
-        if (!error) {
-          const uuid = hap.uuid.generate(cameraConfig.name);
-          if (this.cameraConfigs.has(uuid)) {
-            // Camera names must be unique
-            this.log.warn('Multiple cameras are configured with this name. Duplicate cameras will be skipped.', cameraConfig.name);
-          } else {
-            this.cameraConfigs.set(uuid, cameraConfig);
-          }
+      if (!error) {
+        const uuid = hap.uuid.generate(cameraConfig.name!);
+        if (this.cameraConfigs.has(uuid)) {
+          // Camera names must be unique
+          this.log.warn('Multiple cameras are configured with this name. Duplicate cameras will be skipped.', cameraConfig.name);
+        } else {
+          this.cameraConfigs.set(uuid, cameraConfig);
         }
-      });
-    }
+      }
+    });
 
     api.on(APIEvent.DID_FINISH_LAUNCHING, this.didFinishLaunching.bind(this));
   }
@@ -306,7 +304,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         mqtttopic = this.config.topic;
       }
       this.log.info('Setting up MQTT connection with topic ' + mqtttopic + '...');
-      this.log.debug((this.config.tlsmqtt ? 'mqtts://' : 'mqtt://') + this.config.mqtt + ':' + portmqtt);
       const client = mqtt.connect((this.config.tlsmqtt ? 'mqtts://' : 'mqtt://') + this.config.mqtt + ':' + portmqtt, {
         'username': this.config.usermqtt,
         'password': this.config.passmqtt
@@ -349,7 +346,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
 
     for (const [uuid, cameraConfig] of this.cameraConfigs) {
       if (cameraConfig.unbridge) {
-        const accessory = new Accessory(cameraConfig.name, uuid);
+        const accessory = new Accessory(cameraConfig.name!, uuid);
         this.log.info('Configuring unbridged accessory...', accessory.displayName);
         this.setupAccessory(accessory, cameraConfig);
         this.api.publishExternalAccessories(PLUGIN_NAME, [accessory]);
@@ -357,7 +354,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       } else {
         const cachedAccessory = this.cachedAccessories.find((curAcc: PlatformAccessory) => curAcc.UUID === uuid);
         if (!cachedAccessory) {
-          const accessory = new Accessory(cameraConfig.name, uuid);
+          const accessory = new Accessory(cameraConfig.name!, uuid);
           this.log.info('Configuring bridged accessory...', accessory.displayName);
           this.setupAccessory(accessory, cameraConfig);
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);

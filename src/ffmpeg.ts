@@ -8,7 +8,7 @@ export class FfmpegProcess {
   private readonly process: ChildProcess;
 
   constructor(cameraName: string, sessionId: string, videoProcessor: string, ffmpegArgs: string, log: Logger,
-    debug: boolean, delegate: StreamingDelegate, callback?: StreamRequestCallback) {
+    debug = false, delegate: StreamingDelegate, callback?: StreamRequestCallback) {
     log.debug('Stream command: ' + videoProcessor + ' ' + ffmpegArgs, cameraName, debug);
 
     let started = false;
