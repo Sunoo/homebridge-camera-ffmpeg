@@ -14,6 +14,7 @@ import {
 import http from 'http';
 import mqtt from 'mqtt';
 import url from 'url';
+import { AutomationReturn } from './autoTypes';
 import { CameraConfig, FfmpegPlatformConfig } from './configTypes';
 import { Logger } from './logger';
 import { StreamingDelegate } from './streamingDelegate';
@@ -24,11 +25,6 @@ let Accessory: typeof PlatformAccessory;
 
 const PLUGIN_NAME = 'homebridge-camera-ffmpeg';
 const PLATFORM_NAME = 'Camera-ffmpeg';
-
-type AutomationReturn = {
-  error: boolean;
-  message: string;
-};
 
 class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logger;
@@ -192,6 +188,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           const log = this.log;
           const timer = setTimeout(() => {
             log.debug('Doorbell handler timeout.', accessory.displayName);
+            this.doorbellTimers.delete(accessory.UUID);
             doorbellTrigger.updateCharacteristic(hap.Characteristic.On, false);
           }, timeoutConfig * 1000);
           this.doorbellTimers.set(accessory.UUID, timer);
@@ -240,6 +237,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           const log = this.log;
           const timer = setTimeout(() => {
             log.debug('Motion handler timeout.', accessory.displayName);
+            this.motionTimers.delete(accessory.UUID);
             motionSensor.updateCharacteristic(hap.Characteristic.MotionDetected, false);
             if (motionTrigger) {
               motionTrigger.updateCharacteristic(hap.Characteristic.On, false);
@@ -249,7 +247,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         }
         return {
           error: false,
-          message: 'Motion switched on.'
+          message: 'Motion switched on.',
+          cooldownActive: !!timeout
         };
       } else {
         motionSensor.updateCharacteristic(hap.Characteristic.MotionDetected, false);
@@ -339,7 +338,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           }
         }
         response.writeHead(results.error ? 500 : 200);
-        response.write(results.message);
+        response.write(JSON.stringify(results));
         response.end();
       });
     }
