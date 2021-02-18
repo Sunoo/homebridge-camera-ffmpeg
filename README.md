@@ -163,7 +163,6 @@ Other users have been sharing configurations that work for them on our GitHub si
 ### Rarely Needed Parameters
 
 - `videoProcessor`: Defines which video processor is used to decode and encode videos, must take the same parameters as FFmpeg. Common uses would be `avconv` or the path to a custom-compiled version of FFmpeg. If not set, will use the included version of FFmpeg, or the version of FFmpeg installed on the system if no included version is available.
-- `interfaceName`: Selects which network interface to use for video streaming to HomeKit. If you have multiple active network interfaces in your system, you may need to set this. If not set, the first available network interface is used, and a mismatch will cause HomeKit to discard the video stream.
 
 #### Rare Option Example
 
@@ -171,7 +170,6 @@ Other users have been sharing configurations that work for them on our GitHub si
 {
   "platform": "Camera-ffmpeg",
   "videoProcessor": "/usr/bin/ffmpeg",
-  "interfaceName": "eth0",
   "cameras": []
 }
 ```

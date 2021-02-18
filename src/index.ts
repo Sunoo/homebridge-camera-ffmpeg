@@ -150,8 +150,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       }
     }
 
-    const delegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap,
-      this.config.videoProcessor, this.config.interfaceName);
+    const delegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap, this.config.videoProcessor);
 
     accessory.configureController(delegate.controller);
   }
