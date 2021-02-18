@@ -124,6 +124,11 @@
             "minimum": 0,
             "description": "The number of seconds after triggering to reset the motion sensor. Set to 0 to disable resetting of motion trigger for MQTT or HTTP."
           },
+          "motionDoorbell": {
+            "title": "Trigger Doorbell with Motion",
+            "type": "boolean",
+            "description": "Rings the doorbell when motion is activated. This allows for motion alerts to appear on Apple TVs."
+          },
           "unbridge": {
             "title": "Unbridge Camera",
             "type": "boolean",
@@ -344,7 +349,8 @@
                 "cameras[].motion",
                 "cameras[].doorbell",
                 "cameras[].switches",
-                "cameras[].motionTimeout"
+                "cameras[].motionTimeout",
+                "cameras[].motionDoorbell"
               ]
             }
           ]

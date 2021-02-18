@@ -58,6 +58,7 @@ Other users have been sharing configurations that work for them on our GitHub si
 - `doorbell`: Exposes the doorbell device for this camera. This can be triggered with [dummy switches](https://sunoo.github.io/homebridge-camera-ffmpeg/automation/switch.html), [MQTT messages](https://sunoo.github.io/homebridge-camera-ffmpeg/automation/mqtt.html), or [via HTTP](https://sunoo.github.io/homebridge-camera-ffmpeg/automation/http.html), depending on what features are enabled in the config. (Default: `false`)
 - `switches`: Enables dummy switches to trigger motion and/or doorbell, if either of those are enabled. When enabled there will be an additional switch that triggers the motion or doorbell event. See the project site for [more detailed instructions](https://sunoo.github.io/homebridge-camera-ffmpeg/automation/switch.html). (Default: `false`)
 - `motionTimeout`: The number of seconds after triggering to reset the motion sensor. Set to 0 to disable resetting of motion trigger for MQTT or HTTP. (Default: `1`)
+- `motionDoorbell`: Rings the doorbell when motion is activated. This allows for motion alerts to appear on Apple TVs. (Default: `false`)
 - `manufacturer`: Set the manufacturer name for display in the Home app. (Default: `Homebridge`)
 - `model`: Set the model for display in the Home app. (Default: `Camera FFmpeg`)
 - `serialNumber`: Set the serial number for display in the Home app. (Default: `SerialNumber`)

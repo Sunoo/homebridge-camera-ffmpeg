@@ -225,11 +225,15 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       }
       const motionTrigger = accessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
       if (active) {
+        const config = this.cameraConfigs.get(accessory.UUID);
         motionSensor.updateCharacteristic(hap.Characteristic.MotionDetected, true);
         if (motionTrigger) {
           motionTrigger.updateCharacteristic(hap.Characteristic.On, true);
         }
-        let timeoutConfig = this.cameraConfigs.get(accessory.UUID)?.motionTimeout ?? 1;
+        if (config?.motionDoorbell) {
+          this.doorbellHandler(accessory, true);
+        }
+        let timeoutConfig = config?.motionTimeout ?? 1;
         if (timeoutConfig < minimumTimeout) {
           timeoutConfig = minimumTimeout;
         }
