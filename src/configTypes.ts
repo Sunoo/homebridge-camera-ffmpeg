@@ -26,6 +26,7 @@ export type CameraConfig = {
   switches?: boolean;
   motionTimeout?: number;
   motionDoorbell?: boolean;
+  mqtt?: MqttCameraConfig;
   unbridge?: boolean;
   videoConfig?: VideoConfig;
 };
@@ -49,4 +50,13 @@ export type VideoConfig = {
   audio?: boolean;
   debug?: boolean;
   debugReturn?: boolean;
+};
+
+export type MqttCameraConfig = {
+  motionTopic?: string;
+  motionMessage?: string;
+  motionResetTopic?: string;
+  motionResetMessage?: string;
+  doorbellTopic?: string;
+  doorbellMessage?: string;
 };

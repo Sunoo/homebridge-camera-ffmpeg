@@ -13,7 +13,6 @@ import {
 } from 'homebridge';
 import http from 'http';
 import mqtt from 'mqtt';
-import url from 'url';
 import { AutomationReturn } from './autoTypes';
 import { CameraConfig, FfmpegPlatformConfig } from './configTypes';
 import { Logger } from './logger';
@@ -26,6 +25,12 @@ let Accessory: typeof PlatformAccessory;
 const PLUGIN_NAME = 'homebridge-camera-ffmpeg';
 const PLATFORM_NAME = 'Camera-ffmpeg';
 
+type MqttAction = {
+  accessory: PlatformAccessory;
+  active: boolean;
+  doorbell: boolean;
+};
+
 class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly log: Logger;
   private readonly api: API;
@@ -35,6 +40,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly accessories: Array<PlatformAccessory> = [];
   private readonly motionTimers: Map<string, NodeJS.Timeout> = new Map();
   private readonly doorbellTimers: Map<string, NodeJS.Timeout> = new Map();
+  private readonly mqttActions: Map<string, Map<string, Array<MqttAction>>> = new Map();
 
   constructor(log: Logging, config: PlatformConfig, api: API) {
     this.log = new Logger(log);
@@ -86,6 +92,14 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     api.on(APIEvent.DID_FINISH_LAUNCHING, this.didFinishLaunching.bind(this));
   }
 
+  addMqttAction(topic: string, message: string, details: MqttAction): void {
+    const messageMap = this.mqttActions.get(topic) || new Map();
+    const actionArray = messageMap.get(message) || [];
+    actionArray.push(details);
+    messageMap.set(message, actionArray);
+    this.mqttActions.set(topic, messageMap);
+  }
+
   setupAccessory(accessory: PlatformAccessory, cameraConfig: CameraConfig): void {
     accessory.on(PlatformAccessoryEvent.IDENTIFY, () => {
       this.log.info('Identify requested.', accessory.displayName);
@@ -130,7 +144,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
             this.doorbellHandler(accessory, state as boolean);
-            callback(null, state);
+            callback();
           });
         accessory.addService(doorbellTrigger);
       }
@@ -144,7 +158,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           .getCharacteristic(hap.Characteristic.On)
           .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
             this.motionHandler(accessory, state as boolean, 1);
-            callback(null, state);
+            callback();
           });
         accessory.addService(motionTrigger);
       }
@@ -153,6 +167,31 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     const delegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap, this.config.videoProcessor);
 
     accessory.configureController(delegate.controller);
+
+    if (this.config.mqtt) {
+      if (cameraConfig.mqtt) {
+        if (cameraConfig.mqtt.motionTopic) {
+          this.addMqttAction(cameraConfig.mqtt.motionTopic, cameraConfig.mqtt.motionMessage || cameraConfig.name!,
+            {accessory: accessory, active: true, doorbell: false});
+        }
+        if (cameraConfig.mqtt.motionResetTopic) {
+          this.addMqttAction(cameraConfig.mqtt.motionResetTopic, cameraConfig.mqtt.motionResetMessage || cameraConfig.name!,
+            {accessory: accessory, active: false, doorbell: false});
+        }
+        if (cameraConfig.mqtt.doorbellTopic) {
+          this.addMqttAction(cameraConfig.mqtt.doorbellTopic, cameraConfig.mqtt.doorbellMessage || cameraConfig.name!,
+            {accessory: accessory, active: true, doorbell: true});
+        }
+      }
+      if (this.config.topic) {
+        this.addMqttAction(this.config.topic + '/motion', cameraConfig.name!,
+          {accessory: accessory, active: true, doorbell: false});
+        this.addMqttAction(this.config.topic + '/motion/reset', cameraConfig.name!,
+          {accessory: accessory, active: false, doorbell: false});
+        this.addMqttAction(this.config.topic + '/doorbell', cameraConfig.name!,
+          {accessory: accessory, active: true, doorbell: true});
+      }
+    }
   }
 
   configureAccessory(accessory: PlatformAccessory): void {
@@ -271,7 +310,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     }
   }
 
-  private automationHandler(fullpath: string, name: string): AutomationReturn {
+  private httpHandler(fullpath: string, name: string): AutomationReturn {
     const accessory = this.accessories.find((curAcc: PlatformAccessory) => {
       return curAcc.displayName == name;
     });
@@ -299,53 +338,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   }
 
   didFinishLaunching(): void {
-    if (this.config.mqtt) {
-      const portmqtt = this.config.portmqtt || '1883';
-      let mqtttopic = 'homebridge';
-      if (this.config.topic && this.config.topic != 'homebridge/motion') {
-        mqtttopic = this.config.topic;
-      }
-      this.log.info('Setting up MQTT connection with topic ' + mqtttopic + '...');
-      const client = mqtt.connect((this.config.tlsmqtt ? 'mqtts://' : 'mqtt://') + this.config.mqtt + ':' + portmqtt, {
-        'username': this.config.usermqtt,
-        'password': this.config.passmqtt
-      });
-      client.on('connect', () => {
-        this.log.info('MQTT connected.');
-        client.subscribe(mqtttopic + '/#');
-      });
-      client.on('message', (topic: string, message: Buffer) => {
-        if (topic.startsWith(mqtttopic)) {
-          const path = topic.substr(mqtttopic.length);
-          const name = message.toString();
-          this.automationHandler(path, name);
-        }
-      });
-    }
-    if (this.config.porthttp) {
-      this.log.info('Setting up ' + (this.config.localhttp ? 'localhost-only ' : '') +
-        'HTTP server on port ' + this.config.porthttp + '...');
-      const server = http.createServer();
-      const hostname = this.config.localhttp ? 'localhost' : undefined;
-      server.listen(this.config.porthttp, hostname);
-      server.on('request', (request: http.IncomingMessage, response: http.ServerResponse) => {
-        let results: AutomationReturn = {
-          error: true,
-          message: 'Malformed URL.'
-        };
-        if (request.url) {
-          const parseurl = url.parse(request.url);
-          if (parseurl.pathname && parseurl.query) {
-            const name = decodeURIComponent(parseurl.query).split('=')[0];
-            results = this.automationHandler(parseurl.pathname, name);
-          }
-        }
-        response.writeHead(results.error ? 500 : 200);
-        response.write(JSON.stringify(results));
-        response.end();
-      });
-    }
-
     for (const [uuid, cameraConfig] of this.cameraConfigs) {
       if (cameraConfig.unbridge) {
         const accessory = new Accessory(cameraConfig.name!, uuid);
@@ -365,6 +357,60 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           this.accessories.push(cachedAccessory);
         }
       }
+    }
+
+    if (this.config.mqtt) {
+      const portmqtt = this.config.portmqtt || '1883';
+      this.log.info('Setting up MQTT connection...');
+      const client = mqtt.connect((this.config.tlsmqtt ? 'mqtts://' : 'mqtt://') + this.config.mqtt + ':' + portmqtt, {
+        'username': this.config.usermqtt,
+        'password': this.config.passmqtt
+      });
+      client.on('connect', () => {
+        this.log.info('MQTT connected.');
+        for (const [topic] of this.mqttActions) {
+          this.log.debug('Subscribing to MQTT topic: ' + topic);
+          client.subscribe(topic);
+        }
+      });
+      client.on('message', (topic: string, message: Buffer) => {
+        const messageMap = this.mqttActions.get(topic);
+        if (messageMap) {
+          const actionArray = messageMap.get(message.toString());
+          if (actionArray) {
+            for (const action of actionArray) {
+              if (action.doorbell) {
+                this.doorbellHandler(action.accessory, action.active);
+              } else {
+                this.motionHandler(action.accessory, action.active);
+              }
+            }
+          }
+        }
+      });
+    }
+    if (this.config.porthttp) {
+      this.log.info('Setting up ' + (this.config.localhttp ? 'localhost-only ' : '') +
+        'HTTP server on port ' + this.config.porthttp + '...');
+      const server = http.createServer();
+      const hostname = this.config.localhttp ? 'localhost' : undefined;
+      server.listen(this.config.porthttp, hostname);
+      server.on('request', (request: http.IncomingMessage, response: http.ServerResponse) => {
+        let results: AutomationReturn = {
+          error: true,
+          message: 'Malformed URL.'
+        };
+        if (request.url) {
+          const spliturl = request.url.split('?');
+          if (spliturl.length == 2) {
+            const name = decodeURIComponent(spliturl[1]).split('=')[0];
+            results = this.httpHandler(spliturl[0], name);
+          }
+        }
+        response.writeHead(results.error ? 500 : 200);
+        response.write(JSON.stringify(results));
+        response.end();
+      });
     }
 
     this.cachedAccessories.forEach((accessory: PlatformAccessory) => {

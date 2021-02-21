@@ -137,6 +137,39 @@ Other users have been sharing configurations that work for them on our GitHub si
 }
 ```
 
+### Camera MQTT Parameters
+
+- `motionTopic`: The MQTT topic to watch for motion alerts.
+- `motionMessage`: The message to watch for to trigger motion alerts. Will use the name of the camera if blank.
+- `motionResetTopic`: The MQTT topic to watch for motion resets.
+- `motionResetMessage`: The message to watch for to trigger motion resets. Will use the name of the camera if blank.
+- `doorbellTopic`: The MQTT topic to watch for doorbell alerts.
+- `doorbellMessage`: The message to watch for to trigger doorbell alerts. Will use the name of the camera if blank.
+
+#### Camera MQTT Example
+
+```json
+{
+  "platform": "Camera-ffmpeg",
+  "cameras": [
+    {
+      "name": "Camera Name",
+      "videoConfig": {
+        "source": "-i rtsp://myfancy_rtsp_stream"
+      },
+      "mqtt": {
+        "motionTopic": "home/camera",
+        "motionMessage": "ON",
+        "motionResetTopic": "home/camera",
+        "motionResetMessage": "OFF",
+        "doorbellTopic": "home/doobell",
+        "doorbellMessage": "ON"
+      }
+    }
+  ]
+}
+```
+
 ### Automation Parameters
 
 - `mqtt`: Defines the hostname or IP of the MQTT broker to connect to for MQTT-based automation. If not set, MQTT support is not started. See the project site for [more information on using MQTT](https://sunoo.github.io/homebridge-camera-ffmpeg/automation/mqtt.html).

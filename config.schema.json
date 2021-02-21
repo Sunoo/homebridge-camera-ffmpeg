@@ -255,6 +255,45 @@
                 "description": "Includes debugging output from the FFmpeg process used for two-way audio in the Homebridge log."
               }
             }
+          },
+          "mqtt": {
+            "title": "MQTT Configuration",
+            "type": "object",
+            "properties": {
+              "motionTopic": {
+                "title": "Motion Topic",
+                "type": "string",
+                "placeholder": "homebridge/motion",
+                "description": "The MQTT topic to watch for motion alerts."
+              },
+              "motionMessage": {
+                "title": "Motion Message",
+                "type": "string",
+                "description": "The message to watch for to trigger motion alerts. Will use the name of the camera if blank."
+              },
+              "motionResetTopic": {
+                "title": "Motion Reset Topic",
+                "type": "string",
+                "placeholder": "homebridge/motion/reset",
+                "description": "The MQTT topic to watch for motion resets."
+              },
+              "motionResetMessage": {
+                "title": "Motion Reset Message",
+                "type": "string",
+                "description": "The message to watch for to trigger motion resets. Will use the name of the camera if blank."
+              },
+              "doorbellTopic": {
+                "title": "Doorbell Topic",
+                "type": "string",
+                "placeholder": "homebridge/doorbell",
+                "description": "The MQTT topic to watch for doorbell alerts."
+              },
+              "doorbellMessage": {
+                "title": "Doorbell Message",
+                "type": "string",
+                "description": "The message to watch for to trigger doorbell alerts. Will use the name of the camera if blank."
+              }
+            }
           }
         }
       }
@@ -344,7 +383,22 @@
                 "cameras[].doorbell",
                 "cameras[].switches",
                 "cameras[].motionTimeout",
-                "cameras[].motionDoorbell"
+                "cameras[].motionDoorbell",
+                {
+                  "key": "cameras[]",
+                  "type": "section",
+                  "title": "MQTT Settings",
+                  "expandable": true,
+                  "expanded": false,
+                  "items": [
+                    "cameras[].mqtt.motionTopic",
+                    "cameras[].mqtt.motionMessage",
+                    "cameras[].mqtt.motionResetTopic",
+                    "cameras[].mqtt.motionResetMessage",
+                    "cameras[].mqtt.doorbellTopic",
+                    "cameras[].mqtt.doorbellMessage"
+                  ]
+                }
               ]
             }
           ]
