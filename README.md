@@ -177,7 +177,6 @@ Other users have been sharing configurations that work for them on our GitHub si
 - `tlsmqtt`: Use TLS to connect to the MQTT broker. (Default: `false`)
 - `usermqtt`: The username used to connect to your MQTT broker. If not set, no authentication is used.
 - `passmqtt`: The password used to connect to your MQTT broker. If not set, no authentication is used.
-- `topic`: The base MQTT topic to subscribe to. (Default: `homebridge`)
 - `porthttp`: The port to listen on for HTTP-based automation. If not set, HTTP support is not started. See the project site for [more information on using HTTP](https://sunoo.github.io/homebridge-camera-ffmpeg/automation/http.html).
 - `localhttp`: Only allow HTTP calls from localhost. Useful if using helper plugins that translate to HTTP. (Default: `false`)
 
@@ -187,7 +186,6 @@ Other users have been sharing configurations that work for them on our GitHub si
 {
   "platform": "Camera-ffmpeg",
   "mqtt": "127.0.0.1",
-  "topic": "homebridge",
   "porthttp": "8080",
   "cameras": []
 }

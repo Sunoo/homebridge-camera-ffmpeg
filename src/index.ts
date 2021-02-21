@@ -183,14 +183,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
             {accessory: accessory, active: true, doorbell: true});
         }
       }
-      if (this.config.topic) {
-        this.addMqttAction(this.config.topic + '/motion', cameraConfig.name!,
-          {accessory: accessory, active: true, doorbell: false});
-        this.addMqttAction(this.config.topic + '/motion/reset', cameraConfig.name!,
-          {accessory: accessory, active: false, doorbell: false});
-        this.addMqttAction(this.config.topic + '/doorbell', cameraConfig.name!,
-          {accessory: accessory, active: true, doorbell: true});
-      }
     }
   }
 

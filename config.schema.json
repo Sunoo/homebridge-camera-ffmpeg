@@ -44,12 +44,6 @@
       "type": "string",
       "description": "The password used to connect to your MQTT broker. If not set, no authentication is used."
     },
-    "topic": {
-      "title": "MQTT Topic",
-      "type": "string",
-      "placeholder": "homebridge",
-      "description": "The base MQTT topic to subscribe to."
-    },
     "porthttp": {
       "title": "HTTP Port",
       "type": "integer",
@@ -431,8 +425,7 @@
             "portmqtt",
             "tlsmqtt",
             "usermqtt",
-            "passmqtt",
-            "topic"
+            "passmqtt"
           ]
         }
       ]

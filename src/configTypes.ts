@@ -9,7 +9,6 @@ export type FfmpegPlatformConfig = {
   tlsmqtt?: boolean;
   usermqtt?: string;
   passmqtt?: string;
-  topic?: string;
   porthttp?: number;
   localhttp?: boolean;
   cameras?: Array<CameraConfig>;
