@@ -61,9 +61,11 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly hap: HAP;
   private readonly log: Logger;
   private readonly cameraName: string;
+  private readonly unbridge: boolean;
   private readonly videoConfig: VideoConfig;
   private readonly videoProcessor: string;
   readonly controller: CameraController;
+  private snapshotPromise?: Promise<Buffer>;
 
   // keep track of sessions
   pendingSessions: Record<string, SessionInfo> = {};
@@ -72,10 +74,11 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
   constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor?: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
     this.log = log;
-    this.videoConfig = cameraConfig.videoConfig!;
     this.hap = hap;
 
     this.cameraName = cameraConfig.name!;
+    this.unbridge = cameraConfig.unbridge ?? false;
+    this.videoConfig = cameraConfig.videoConfig!;
     this.videoProcessor = videoProcessor || ffmpegPath || 'ffmpeg';
 
     api.on(APIEvent.SHUTDOWN, () => {
@@ -114,6 +117,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
             {
               type: AudioStreamingCodecType.AAC_ELD,
               samplerate: AudioStreamingSamplerate.KHZ_16
+              /*type: AudioStreamingCodecType.OPUS,
+              samplerate: AudioStreamingSamplerate.KHZ_24*/
             }
           ]
         }
@@ -141,14 +146,11 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const noneFilter = filters.indexOf('none');
     if (noneFilter >= 0) {
       filters.splice(noneFilter, 1);
-    }
-    if (noneFilter < 0) {
-      if (width > 0 || height > 0) {
-        filters.push('scale=' + (width > 0 ? '\'min(' + width + ',iw)\'' : 'iw') + ':' +
-          (height > 0 ? '\'min(' + height + ',ih)\'' : 'ih') +
-          ':force_original_aspect_ratio=decrease');
-        filters.push('scale=trunc(iw/2)*2:trunc(ih/2)*2'); // Force to fit encoder restrictions
-      }
+    } else if (width > 0 || height > 0) {
+      filters.push('scale=' + (width > 0 ? '\'min(' + width + ',iw)\'' : 'iw') + ':' +
+        (height > 0 ? '\'min(' + height + ',ih)\'' : 'ih') +
+        ':force_original_aspect_ratio=decrease');
+      filters.push('scale=trunc(iw/2)*2:trunc(ih/2)*2'); // Force to fit encoder restrictions
     }
 
     return {
@@ -158,35 +160,92 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     };
   }
 
-  handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): void {
-    const resolution = this.determineResolution(request, true);
+  fetchSnapshot(): Promise<Buffer> {
+    this.snapshotPromise = new Promise((resolve) => {
+      const startTime = Date.now();
+      const ffmpegArgs = (this.videoConfig.stillImageSource || this.videoConfig.source!) + // Still
+        ' -frames:v 1' +
+        ' -f image2 -';
 
-    this.log.debug('Snapshot requested: ' + request.width + ' x ' + request.height, this.cameraName, this.videoConfig.debug);
-    this.log.debug('Sending snapshot: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
-      (resolution.height > 0 ? resolution.height : 'native'), this.cameraName, this.videoConfig.debug);
-
-    let ffmpegArgs = this.videoConfig.stillImageSource || this.videoConfig.source!;
-
-    ffmpegArgs += // Still
-      ' -frames:v 1' +
-      (resolution.videoFilter ? ' -filter:v ' + resolution.videoFilter : '') +
-      ' -f image2 -';
-
-    try {
+      this.log.debug('Snapshot command: ' + this.videoProcessor + ' ' + ffmpegArgs, this.cameraName, this.videoConfig.debug);
       const ffmpeg = spawn(this.videoProcessor, ffmpegArgs.split(/\s+/), { env: process.env });
 
-      let imageBuffer = Buffer.alloc(0);
-      this.log.debug('Snapshot command: ' + this.videoProcessor + ' ' + ffmpegArgs, this.cameraName, this.videoConfig.debug);
-      ffmpeg.stdout.on('data', (data: Uint8Array) => {
-        imageBuffer = Buffer.concat([imageBuffer, data]);
+      let snapshotBuffer = Buffer.alloc(0);
+      ffmpeg.stdout.on('data', (data) => {
+        snapshotBuffer = Buffer.concat([snapshotBuffer, data]);
       });
-      const log = this.log;
-      ffmpeg.on('error', (error: string) => {
-        log.error('An error occurred while making snapshot request: ' + error, this.cameraName);
+      ffmpeg.on('error', (error: Error) => {
+        this.log.error('An error occurred while making snapshot request: ' + error.message, this.cameraName);
       });
       ffmpeg.on('close', () => {
-        callback(undefined, imageBuffer);
+        resolve(snapshotBuffer);
+
+        setTimeout(() => {
+          this.snapshotPromise = undefined;
+        }, 3 * 1000); // Expire cached snapshot after 3 seconds
+
+        const runtime = (Date.now() - startTime) / 1000;
+        let message = 'Fetching snapshot took ' + runtime + ' seconds.';
+        if (runtime < 5) {
+          this.log.debug(message, this.cameraName, this.videoConfig.debug);
+        } else {
+          if (!this.unbridge) {
+            message += ' It is highly recommended you switch to unbridge mode.';
+          }
+          if (runtime < 22) {
+            this.log.warn(message, this.cameraName);
+          } else {
+            message += ' The request has timed out and the snapshot has not been refreshed in HomeKit.';
+            this.log.error(message, this.cameraName);
+          }
+        }
       });
+    });
+    return this.snapshotPromise;
+  }
+
+  resizeSnapshot(snapshot: Buffer, resolution: ResolutionInfo): Promise<Buffer> {
+    return new Promise<Buffer>((resolve) => {
+      const ffmpegArgs = '-i pipe:' + // Resize
+        ' -frames:v 1' +
+        (resolution.videoFilter ? ' -filter:v ' + resolution.videoFilter : '') +
+        ' -f image2 -';
+
+      const ffmpeg = spawn(this.videoProcessor, ffmpegArgs.split(/\s+/), { env: process.env });
+
+      let resizeBuffer = Buffer.alloc(0);
+      this.log.debug('Resize command: ' + this.videoProcessor + ' ' + ffmpegArgs, this.cameraName, this.videoConfig.debug);
+      ffmpeg.stdout.on('data', (data) => {
+        resizeBuffer = Buffer.concat([resizeBuffer, data]);
+      });
+      const log = this.log;
+      ffmpeg.on('error', (error: Error) => {
+        log.error('An error occurred while resizing snapshot: ' + error.message, this.cameraName);
+      });
+      ffmpeg.on('close', () => {
+        resolve(resizeBuffer);
+      });
+      ffmpeg.stdin.end(snapshot);
+    });
+  }
+
+  async handleSnapshotRequest(request: SnapshotRequest, callback: SnapshotRequestCallback): Promise<void> {
+    const resolution = this.determineResolution(request, true);
+
+    try {
+      const cachedSnapshot = !!this.snapshotPromise;
+
+      this.log.debug('Snapshot requested: ' + request.width + ' x ' + request.height,
+        this.cameraName, this.videoConfig.debug);
+
+      const snapshot = await (this.snapshotPromise || this.fetchSnapshot());
+
+      this.log.debug('Sending snapshot: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
+        (resolution.height > 0 ? resolution.height : 'native') +
+        (cachedSnapshot ? ' (cached)' : ''), this.cameraName, this.videoConfig.debug);
+
+      const resized = await this.resizeSnapshot(snapshot, resolution);
+      callback(undefined, resized);
     } catch (err) {
       this.log.error(err, this.cameraName);
       callback(err);
@@ -269,7 +328,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       request.video.fps + ' fps, ' + request.video.max_bit_rate + ' kbps', this.cameraName, this.videoConfig.debug);
     this.log.info('Starting video stream: ' + (resolution.width > 0 ? resolution.width : 'native') + ' x ' +
       (resolution.height > 0 ? resolution.height : 'native') + ', ' + (fps > 0 ? fps : 'native') +
-      ' fps, ' + (videoBitrate > 0 ? videoBitrate : '???') + ' kbps', this.cameraName);
+      ' fps, ' + (videoBitrate > 0 ? videoBitrate : '???') + ' kbps' +
+      (this.videoConfig.audio ? (' (' + request.audio.codec + ')') : ''), this.cameraName);
 
     let ffmpegArgs = this.videoConfig.source!;
 
@@ -294,29 +354,38 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       '?rtcpport=' + sessionInfo.videoPort + '&pkt_size=' + mtu;
 
     if (this.videoConfig.audio) {
-      ffmpegArgs += // Audio
-        (this.videoConfig.mapaudio ? ' -map ' + this.videoConfig.mapaudio : ' -vn -sn -dn') +
-        ' -codec:a libfdk_aac' +
-        ' -profile:a aac_eld' +
-        ' -flags +global_header' +
-        ' -f null' +
-        ' -ar ' + request.audio.sample_rate + 'k' +
-        ' -b:a ' + request.audio.max_bit_rate + 'k' +
-        ' -ac ' + request.audio.channel +
-        ' -payload_type ' + request.audio.pt;
+      if (request.audio.codec === AudioStreamingCodecType.OPUS || request.audio.codec === AudioStreamingCodecType.AAC_ELD) {
+        ffmpegArgs += // Audio
+          (this.videoConfig.mapaudio ? ' -map ' + this.videoConfig.mapaudio : ' -vn -sn -dn') +
+          (request.audio.codec === AudioStreamingCodecType.OPUS ?
+            ' -codec:a libopus' +
+            ' -application lowdelay' :
+            ' -codec:a libfdk_aac' +
+            ' -profile:a aac_eld') +
+          ' -flags +global_header' +
+          ' -f null' +
+          ' -ar ' + request.audio.sample_rate + 'k' +
+          ' -b:a ' + request.audio.max_bit_rate + 'k' +
+          ' -ac ' + request.audio.channel +
+          ' -payload_type ' + request.audio.pt;
 
-      ffmpegArgs += // Audio Stream
-        ' -ssrc ' + sessionInfo.audioSSRC +
-        ' -f rtp' +
-        ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
-        ' -srtp_out_params ' + sessionInfo.audioSRTP.toString('base64') +
-        ' srtp://' + sessionInfo.address + ':' + sessionInfo.audioPort +
-        '?rtcpport=' + sessionInfo.audioPort + '&pkt_size=188';
+        ffmpegArgs += // Audio Stream
+          ' -ssrc ' + sessionInfo.audioSSRC +
+          ' -f rtp' +
+          ' -srtp_out_suite AES_CM_128_HMAC_SHA1_80' +
+          ' -srtp_out_params ' + sessionInfo.audioSRTP.toString('base64') +
+          ' srtp://' + sessionInfo.address + ':' + sessionInfo.audioPort +
+          '?rtcpport=' + sessionInfo.audioPort + '&pkt_size=188';
+      } else {
+        this.log.error('Unsupported audio codec requested: ' + request.audio.codec, this.cameraName);
+      }
     }
 
     if (this.videoConfig.debug) {
       ffmpegArgs += ' -loglevel level+verbose';
     }
+
+    ffmpegArgs += ' -progress pipe:1';
 
     const activeSession: ActiveSession = {};
 
@@ -333,7 +402,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         this.log.info('Device appears to be inactive. Stopping stream.', this.cameraName);
         this.controller.forceStopStreamingSession(request.sessionID);
         this.stopStream(request.sessionID);
-      }, request.video.rtcp_interval * 2 * 1000);
+      }, request.video.rtcp_interval * 5 * 1000);
     });
     activeSession.socket.bind(sessionInfo.videoReturnPort);
 

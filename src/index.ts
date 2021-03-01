@@ -47,6 +47,11 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.api = api;
     this.config = config as FfmpegPlatformConfig;
 
+    if (__dirname.includes('hoobs')) {
+      this.log.warn('This plugin has not been tested under HOOBS, it is highly recommended that ' +
+        'you switch to Homebridge: https://git.io/Jtxb0');
+    }
+
     this.config.cameras?.forEach((cameraConfig: CameraConfig) => {
       let error = false;
 
@@ -254,8 +259,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         this.motionTimers.delete(accessory.UUID);
       }
       const motionTrigger = accessory.getServiceById(hap.Service.Switch, 'MotionTrigger');
+      const config = this.cameraConfigs.get(accessory.UUID);
       if (active) {
-        const config = this.cameraConfigs.get(accessory.UUID);
         motionSensor.updateCharacteristic(hap.Characteristic.MotionDetected, true);
         if (motionTrigger) {
           motionTrigger.updateCharacteristic(hap.Characteristic.On, true);
@@ -288,6 +293,9 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         motionSensor.updateCharacteristic(hap.Characteristic.MotionDetected, false);
         if (motionTrigger) {
           motionTrigger.updateCharacteristic(hap.Characteristic.On, false);
+        }
+        if (config?.motionDoorbell) {
+          this.doorbellHandler(accessory, false);
         }
         return {
           error: false,

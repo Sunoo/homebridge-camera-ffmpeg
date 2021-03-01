@@ -118,7 +118,7 @@
             "description": "Rings the doorbell when motion is activated. This allows for motion alerts to appear on Apple TVs."
           },
           "unbridge": {
-            "title": "Unbridge Camera",
+            "title": "Unbridge Camera (Recommended)",
             "type": "boolean",
             "description": "Bridged cameras can cause slowdowns of the entire Homebridge instance. If unbridged, the camera will need to be added to HomeKit manually."
           },
@@ -310,6 +310,7 @@
             "cameras[].videoConfig.source",
             "cameras[].videoConfig.stillImageSource",
             "cameras[].videoConfig.audio",
+            "cameras[].unbridge",
             {
               "key": "cameras[]",
               "type": "section",
@@ -330,7 +331,6 @@
               "expandable": true,
               "expanded": false,
               "items": [
-                "cameras[].unbridge",
                 "cameras[].videoConfig.maxStreams",
                 "cameras[].videoConfig.maxWidth",
                 "cameras[].videoConfig.maxHeight",

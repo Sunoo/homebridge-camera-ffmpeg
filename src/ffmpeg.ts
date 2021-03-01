@@ -4,6 +4,18 @@ import { Writable } from 'stream';
 import { Logger } from './logger';
 import { StreamingDelegate } from './streamingDelegate';
 
+interface FfmpegProgress {
+  frame?: number;
+  fps?: number;
+  stream_0_0_q?: number;
+  bitrate?: number;
+  total_size?: number;
+  out_time_us?: number;
+  dup_frames?: number;
+  drop_frames?: number;
+  speed?: number;
+}
+
 export class FfmpegProcess {
   private readonly process: ChildProcess;
 
@@ -12,29 +24,37 @@ export class FfmpegProcess {
     log.debug('Stream command: ' + videoProcessor + ' ' + ffmpegArgs, cameraName, debug);
 
     let started = false;
+    const startTime = Date.now();
     this.process = spawn(videoProcessor, ffmpegArgs.split(/\s+/), { env: process.env });
 
-    if (this.process.stdin) {
-      this.process.stdin.on('error', (error: Error) => {
-        if (!error.message.includes('EPIPE')) {
-          log.error(error.message, cameraName);
+    this.process.stdout?.on('data', () => {
+      //const progress = this.parseProgress(data);
+      if (!started) {
+        started = true;
+        if (callback) {
+          callback();
         }
-      });
-    }
-    if (this.process.stderr) {
-      this.process.stderr.on('data', (data) => {
-        if (!started) {
-          started = true;
-          if (callback) {
-            callback();
-          }
+        const runtime = (Date.now() - startTime) / 1000;
+        const message = 'Getting the first frames took ' + runtime + ' seconds.';
+        if (runtime < 5) {
+          log.debug(message, cameraName, debug);
+        } else if (runtime < 22) {
+          log.warn(message, cameraName);
+        } else {
+          log.error(message, cameraName);
         }
-
-        if (debug) {
-          data.toString().split(/\n/).forEach((line: string) => {
-            log.debug(line, cameraName, debug);
-          });
-        }
+      }
+    });
+    this.process.stdin?.on('error', (error: Error) => {
+      if (!error.message.includes('EPIPE')) {
+        log.error(error.message, cameraName);
+      }
+    });
+    if (debug) {
+      this.process.stderr?.on('data', (data) => {
+        data.toString().split('\n').forEach((line: string) => {
+          log.debug(line, cameraName, true);
+        });
       });
     }
     this.process.on('error', (error: Error) => {
@@ -63,6 +83,28 @@ export class FfmpegProcess {
         }
       }
     });
+  }
+
+  parseProgress(data: Uint8Array): FfmpegProgress | undefined {
+    const input = data.toString();
+
+    if (input.indexOf('frame=') == 0) {
+      const progress: any = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
+      input.split('\n').forEach((line) => {
+        const split = line.split('=', 2);
+
+        const key = split[0];
+        const value = parseFloat(split[1]);
+
+        if (!isNaN(value)) {
+          progress[key] = value;
+        }
+      });
+
+      return progress;
+    } else {
+      return undefined;
+    }
   }
 
   public stop(): void {
