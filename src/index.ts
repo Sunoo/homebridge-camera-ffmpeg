@@ -47,11 +47,6 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     this.api = api;
     this.config = config as FfmpegPlatformConfig;
 
-    if (__dirname.includes('hoobs')) {
-      this.log.warn('This plugin has not been tested under HOOBS, it is highly recommended that ' +
-        'you switch to Homebridge: https://git.io/Jtxb0');
-    }
-
     this.config.cameras?.forEach((cameraConfig: CameraConfig) => {
       let error = false;
 
@@ -220,9 +215,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           doorbellTrigger.updateCharacteristic(hap.Characteristic.On, true);
           let timeoutConfig = this.cameraConfigs.get(accessory.UUID)?.motionTimeout;
           timeoutConfig = timeoutConfig && timeoutConfig > 0 ? timeoutConfig : 1;
-          const log = this.log;
           const timer = setTimeout(() => {
-            log.debug('Doorbell handler timeout.', accessory.displayName);
+            this.log.debug('Doorbell handler timeout.', accessory.displayName);
             this.doorbellTimers.delete(accessory.UUID);
             doorbellTrigger.updateCharacteristic(hap.Characteristic.On, false);
           }, timeoutConfig * 1000);
@@ -273,9 +267,8 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
           timeoutConfig = minimumTimeout;
         }
         if (timeoutConfig > 0) {
-          const log = this.log;
           const timer = setTimeout(() => {
-            log.debug('Motion handler timeout.', accessory.displayName);
+            this.log.debug('Motion handler timeout.', accessory.displayName);
             this.motionTimers.delete(accessory.UUID);
             motionSensor.updateCharacteristic(hap.Characteristic.MotionDetected, false);
             if (motionTrigger) {
