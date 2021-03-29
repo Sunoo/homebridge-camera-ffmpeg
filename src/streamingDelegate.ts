@@ -409,7 +409,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
       activeSession.socket = createSocket(sessionInfo.ipv6 ? 'udp6' : 'udp4');
       activeSession.socket.on('error', (err: Error) => {
-        this.log.error('Socket error: ' + err.name, this.cameraName);
+        this.log.error('Socket error: ' + err.message, this.cameraName);
         this.stopStream(request.sessionID);
       });
       activeSession.socket.on('message', () => {
