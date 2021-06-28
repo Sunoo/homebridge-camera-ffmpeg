@@ -72,7 +72,9 @@ export class FfmpegProcess {
     this.process.on('exit', (code: number, signal: NodeJS.Signals) => {
       const message = 'FFmpeg exited with code: ' + code + ' and signal: ' + signal;
 
-      if (code == null || code === 255) {
+      if (code == 0) {
+          log.debug(message + ' (Graceful)', cameraName, debug);
+      } else if (code == null || code === 255) {
         if (this.process.killed) {
           log.debug(message + ' (Expected)', cameraName, debug);
         } else {
@@ -123,7 +125,7 @@ export class FfmpegProcess {
   }
 
   public stop(): void {
-    this.process.kill('SIGKILL');
+    this.process.stdin.write("q\r\n"); 
   }
 
   public getStdin(): Writable {
