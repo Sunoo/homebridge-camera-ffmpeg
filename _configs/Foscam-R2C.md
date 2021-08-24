@@ -26,11 +26,13 @@ date: 2021-08-23
 
 I chose the sub stream. I VERY much doubt that matters. what does matter is the stream settings. On the camera itself, I set the settings for substream to:
 
+```
 Stream Type: User Defined
 Resolution: VGA(640x480)
 Bit Rate: 512k
 Frame Rate: 15
 Key Frame Interval: 10
+```
 
 Those settings are IMPORTANT and are what made this work. I used the app "Foscam VMS" to set those settings on the camera
 
