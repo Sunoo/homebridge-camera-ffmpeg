@@ -259,7 +259,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         if (motionTrigger) {
           motionTrigger.updateCharacteristic(hap.Characteristic.On, true);
         }
-        if (config?.motionDoorbell) {
+        if (!timeout && config?.motionDoorbell) {
           this.doorbellHandler(accessory, true);
         }
         let timeoutConfig = config?.motionTimeout ?? 1;

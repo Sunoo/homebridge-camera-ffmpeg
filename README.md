@@ -1,17 +1,12 @@
 # Homebridge Camera FFmpeg
 
-[![npm](https://badgen.net/npm/v/homebridge-camera-ffmpeg) ![npm](https://badgen.net/npm/dt/homebridge-camera-ffmpeg)](https://www.npmjs.com/package/homebridge-camera-ffmpeg) [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![npm](https://badgen.net/npm/v/homebridge-camera-ffmpeg) ![npm](https://badgen.net/npm/dt/homebridge-camera-ffmpeg)](https://www.npmjs.com/package/homebridge-camera-ffmpeg) [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins) [![certified-hoobs-plugin](https://badgen.net/badge/HOOBS/certified/yellow)](https://plugins.hoobs.org/plugin/homebridge-camera-ffmpeg)
 
 [Homebridge](https://homebridge.io) Plugin Providing [FFmpeg](https://www.ffmpeg.org)-based Camera Support
 
 ## Installation
 
-Before installing this plugin, you should install Homebridge using the [official instructions](https://github.com/homebridge/homebridge/wiki).
-
-### Install via Homebridge Config UI X
-
-1. Search for `Camera FFmpeg` on the Plugins tab of [Config UI X](https://www.npmjs.com/package/homebridge-config-ui-x).
-2. Install the `Homebridge Camera FFmpeg` plugin and use the form to enter your camera configurations.
+This plugin is supported under both [Homebridge](https://homebridge.io) and [HOOBS](https://hoobs.org/). It is highly recommended that you use either [Homebridge Config UI X](https://www.npmjs.com/package/homebridge-config-ui-x) or the HOOBS UI to install and configure this plugin.
 
 ### Manual Installation
 

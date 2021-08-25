@@ -26,7 +26,7 @@
     "portmqtt": {
       "title": "MQTT Port",
       "type": "integer",
-      "placeholder": "1883",
+      "placeholder": 1883,
       "description": "The port of the MQTT broker."
     },
     "tlsmqtt": {
@@ -47,7 +47,7 @@
     "porthttp": {
       "title": "HTTP Port",
       "type": "integer",
-      "placeholder": "8080",
+      "placeholder": 8080,
       "description": "The port to listen on for HTTP-based automation. If not set, HTTP support is not started."
     },
     "localhttp": {

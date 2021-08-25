@@ -1,5 +1,6 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { StreamRequestCallback } from 'homebridge';
+import os from 'os';
 import readline from 'readline';
 import { Writable } from 'stream';
 import { Logger } from './logger';
@@ -21,6 +22,8 @@ type FfmpegProgress = {
 
 export class FfmpegProcess {
   private readonly process: ChildProcessWithoutNullStreams;
+  private killTimeout?: NodeJS.Timeout;
+  readonly stdin: Writable;
 
   constructor(cameraName: string, sessionId: string, videoProcessor: string, ffmpegArgs: string, log: Logger,
     debug = false, delegate: StreamingDelegate, callback?: StreamRequestCallback) {
@@ -29,6 +32,7 @@ export class FfmpegProcess {
     let started = false;
     const startTime = Date.now();
     this.process = spawn(videoProcessor, ffmpegArgs.split(/\s+/), { env: process.env });
+    this.stdin = this.process.stdin;
 
     this.process.stdout.on('data', (data) => {
       const progress = this.parseProgress(data);
@@ -56,7 +60,7 @@ export class FfmpegProcess {
         callback();
         callback = undefined;
       }
-      if (line.match(/\[(panic|fatal|error)\]/)) {
+      if (debug && line.match(/\[(panic|fatal|error)\]/)) { // For now only write anything out when debug is set
         log.error(line, cameraName);
       } else if (debug) {
         log.debug(line, cameraName, true);
@@ -70,13 +74,17 @@ export class FfmpegProcess {
       delegate.stopStream(sessionId);
     });
     this.process.on('exit', (code: number, signal: NodeJS.Signals) => {
+      if (this.killTimeout) {
+        clearTimeout(this.killTimeout);
+      }
+
       const message = 'FFmpeg exited with code: ' + code + ' and signal: ' + signal;
 
-      if (code == 0) {
-          log.debug(message + ' (Graceful)', cameraName, debug);
+      if (this.killTimeout && code === 0) {
+        log.debug(message + ' (Expected)', cameraName, debug);
       } else if (code == null || code === 255) {
         if (this.process.killed) {
-          log.debug(message + ' (Expected)', cameraName, debug);
+          log.debug(message + ' (Forced)', cameraName, debug);
         } else {
           log.error(message + ' (Unexpected)', cameraName);
         }
@@ -125,10 +133,9 @@ export class FfmpegProcess {
   }
 
   public stop(): void {
-    this.process.stdin.write("q\r\n"); 
-  }
-
-  public getStdin(): Writable {
-    return this.process.stdin;
+    this.process.stdin.write('q' + os.EOL);
+    this.killTimeout = setTimeout(() => {
+      this.process.kill('SIGKILL');
+    }, 2 * 1000);
   }
 }

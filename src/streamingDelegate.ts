@@ -22,7 +22,7 @@ import {
 import { spawn } from 'child_process';
 import { createSocket, Socket } from 'dgram';
 import ffmpegPath from 'ffmpeg-for-homebridge';
-import getPort from 'get-port';
+import pickPort, { pickPortOptions } from 'pick-port';
 import { CameraConfig, VideoConfig } from './configTypes';
 import { FfmpegProcess } from './ffmpeg';
 import { Logger } from './logger';
@@ -189,7 +189,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       });
       ffmpeg.stderr.on('data', (data) => {
         data.toString().split('\n').forEach((line: string) => {
-          if (line.length > 0) {
+          if (this.videoConfig.debug && line.length > 0) { // For now only write anything out when debug is set
             this.log.error(line, this.cameraName + '] [Snapshot');
           }
         });
@@ -273,12 +273,17 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   }
 
   async prepareStream(request: PrepareStreamRequest, callback: PrepareStreamCallback): Promise<void> {
-    const videoReturnPort = await getPort();
-    const videoSSRC = this.hap.CameraController.generateSynchronisationSource();
-    const audioReturnPort = await getPort();
-    const audioSSRC = this.hap.CameraController.generateSynchronisationSource();
-
     const ipv6 = request.addressVersion === 'ipv6';
+
+    const options: pickPortOptions = {
+      type: 'udp',
+      ip: ipv6 ? '::' : '0.0.0.0',
+      reserveTimeout: 15
+    };
+    const videoReturnPort = await pickPort(options);
+    const videoSSRC = this.hap.CameraController.generateSynchronisationSource();
+    const audioReturnPort = await pickPort(options);
+    const audioSSRC = this.hap.CameraController.generateSynchronisationSource();
 
     const sessionInfo: SessionInfo = {
       address: request.targetAddress,
@@ -455,7 +460,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           'a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:' + sessionInfo.audioSRTP.toString('base64') + '\r\n';
         activeSession.returnProcess = new FfmpegProcess(this.cameraName + '] [Two-way', request.sessionID,
           this.videoProcessor, ffmpegReturnArgs, this.log, this.videoConfig.debugReturn, this);
-        activeSession.returnProcess.getStdin().end(sdpReturnAudio);
+        activeSession.returnProcess.stdin.end(sdpReturnAudio);
       }
 
       this.ongoingSessions.set(request.sessionID, activeSession);
