@@ -5,7 +5,7 @@ date: 2020-08-24
 ---
 ## Main config
 
-This uses MJPEG and no audio and results in little to no delay in playing, however, the video might get jittery.
+This uses MJPEG with no audio. Results in little to no delay when starting up, however the video might get jittery after a while.
 
 ```json
 {
@@ -14,8 +14,8 @@ This uses MJPEG and no audio and results in little to no delay in playing, howev
     "model": "DCS-933L",
     "firmwareRevision": "1.15.01",
     "videoConfig": {
-        "source": "-re -f mjpeg -i http://user:pass@IP_ADDR/mjpeg.cgi",
-        "stillImageSource": "-i http://user:pass@IP_ADDR/image/jpeg.cgi",
+        "source": "-re -f mjpeg -i http://user:pass@IP/mjpeg.cgi",
+        "stillImageSource": "-i http://user:pass@IP/image/jpeg.cgi",
         "maxStreams": 6,
         "maxWidth": 0,
         "maxHeight": 0,
@@ -32,42 +32,44 @@ This uses MJPEG and no audio and results in little to no delay in playing, howev
 
 This uses H264. There's approx. 5 secs delay at the start, then smooth video throughout.
 
+From main config:
+
 ```json
 {
     "videoConfig": {
-        "source": "-re -i http://user:pass@IP_ADDR/dgh264.raw"
+        "source": "-re -i http://user:pass@IP/dgh264.raw"
     }
 }
 ```
 
 ## H264 audio config
 
-There's approx 10 secs delay at the start, however audio doesn't cut out. Best option if you want reliable audio and video.
+There's approx 10 secs delay at the start and audio is functional. Best option if you want reliable audio and video.
 
 From main config:
 
 ```json
 {
     "videoConfig": {
-        "source": "-re -i http://user:pass@IP_ADDR/dgh264.raw -i http://user:pass@IP_ADDR/dgaudio.cgi",
+        "source": "-re -i http://user:pass@IP/dgh264.raw -i http://user:pass@IP/dgaudio.cgi",
         "mapaudio": "1:0",
         "audio": true
     }
 }
 ```
 
-## Audio config (using MJPEG)
+## MJPEG audio config
 
 (Not recommended)
 
-This results in a delay of approx 10 secs. In my testing, I've found that audio would often cut out, so the H264 audio config is the best bet.
+This also results in a delay of ~10 secs. In my testing, I've found that audio would often cut out, so the H264 audio config is the best bet.
 
 From main config:
 
 ```json
 {
     "videoConfig": {
-        "source": "-re -f mjpeg -i http://username:password@IP_ADDR/mjpeg.cgi -i http://user:pass@IP_ADDR/audio.cgi",
+        "source": "-re -f mjpeg -i http://user:pass@IP/mjpeg.cgi -i http://user:pass@IP/audio.cgi",
         "mapaudio": "1:0",
         "audio": true
     }
@@ -76,4 +78,4 @@ From main config:
 
 ## Additional Information
 
-Tested on Raspberry Pi 4 Ubuntu (64-bit).
+Tested on Raspberry Pi 4 running Ubuntu 20.04 (64-bit).
