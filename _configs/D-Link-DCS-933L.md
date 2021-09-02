@@ -1,7 +1,7 @@
 ---
 title: D-Link DCS-933L
 author: Agneev Mukherjee
-date: 2020-08-24
+date: 2021-09-02
 ---
 ## Main config
 
