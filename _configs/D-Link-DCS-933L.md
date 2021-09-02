@@ -28,9 +28,9 @@ This uses MJPEG with no audio. Results in little to no delay when starting up, h
 }
 ```
 
-## H264 config
+## H.264 config
 
-This uses H264. There's approx. 5 secs delay at the start, then smooth video throughout.
+This uses H.264 with no audio. There's approx. 5 secs delay at the start, then smooth video throughout.
 
 From main config:
 
@@ -42,9 +42,9 @@ From main config:
 }
 ```
 
-## H264 audio config
+## H.264 audio config
 
-There's approx 10 secs delay at the start and audio is functional. Best option if you want reliable audio and video.
+There's ~10 secs delay at the start and audio is functional. Best option if you want reliable audio and video.
 
 From main config:
 
@@ -62,7 +62,7 @@ From main config:
 
 (Not recommended)
 
-This also results in a delay of ~10 secs. In my testing, I've found that audio would often cut out, so the H264 audio config is the best bet.
+This also results in a delay of ~10 secs. In my testing, I've found that audio would often cut out, so the H.264 audio config is the best bet.
 
 From main config:
 
