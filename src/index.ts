@@ -1,3 +1,4 @@
+
 import {
   API,
   APIEvent,
@@ -9,7 +10,8 @@ import {
   Logging,
   PlatformAccessory,
   PlatformAccessoryEvent,
-  PlatformConfig
+  PlatformConfig,
+  RTPStreamManagement
 } from 'homebridge';
 import http from 'http';
 import mqtt from 'mqtt';
@@ -135,23 +137,18 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       accessory.removeService(doorbellSwitch);
     }
 
-    if (cameraConfig.doorbell) {
-      const doorbell = new hap.Service.Doorbell(cameraConfig.name + ' Doorbell');
-      accessory.addService(doorbell);
-      if (cameraConfig.switches) {
-        const doorbellTrigger = new hap.Service.Switch(cameraConfig.name + ' Doorbell Trigger', 'DoorbellTrigger');
-        doorbellTrigger
-          .getCharacteristic(hap.Characteristic.On)
-          .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
-            this.doorbellHandler(accessory, state as boolean);
-            callback();
-          });
-        accessory.addService(doorbellTrigger);
-      }
-    }
+    const delegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap, accessory, this.config.videoProcessor);
+
+    accessory.configureController(delegate.controller);
+
+
+    // add motion sensor after accessory.configureController. Secure Video creates it own linked motion service
     if (cameraConfig.motion) {
+      this.log.debug("add motion stuff", cameraConfig.name);
       const motionSensor = new hap.Service.MotionSensor(cameraConfig.name);
-      accessory.addService(motionSensor);
+      
+      if(!accessory.getService(hap.Service.MotionSensor)) accessory.addService(motionSensor);
+      else this.log.debug("found motion sensor service", cameraConfig.name);
       if (cameraConfig.switches) {
         const motionTrigger = new hap.Service.Switch(cameraConfig.name + ' Motion Trigger', 'MotionTrigger');
         motionTrigger
@@ -164,9 +161,27 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
       }
     }
 
-    const delegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap, this.config.videoProcessor);
-
-    accessory.configureController(delegate.controller);
+    // add doorbell  after accessory.configureController. Secure Video creates it own linked doorbell service
+    if (cameraConfig.doorbell) {
+      const doorbell = new hap.Service.Doorbell(cameraConfig.name + ' Doorbell');
+      if(!accessory.getService(hap.Service.Doorbell)) accessory.addService(doorbell);
+      else this.log.debug("found doorbell sensor service", cameraConfig.name);
+      if (cameraConfig.switches) {
+        const doorbellTrigger = new hap.Service.Switch(cameraConfig.name + ' Doorbell Trigger', 'DoorbellTrigger');
+        doorbellTrigger
+          .getCharacteristic(hap.Characteristic.On)
+          .on(CharacteristicEventTypes.SET, (state: CharacteristicValue, callback: CharacteristicSetCallback) => {
+            this.doorbellHandler(accessory, state as boolean);
+            callback();
+          });
+        accessory.addService(doorbellTrigger);
+      }
+    }
+    
+    for (let rtp of delegate.controller.streamManagements) {
+      this.log.info("StreamMngt: "+rtp.getService().getCharacteristic(hap.Characteristic.Active).value.toString());
+    }
+    this.log.info("recMngt:"+ accessory.getService(hap.Service.CameraRecordingManagement).getCharacteristic(hap.Characteristic.Active).value.toString());
 
     if (this.config.mqtt) {
       if (cameraConfig.mqtt) {

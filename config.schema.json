@@ -247,6 +247,20 @@
                 "title": "Two-way FFmpeg Debug Logging",
                 "type": "boolean",
                 "description": "Includes debugging output from the FFmpeg process used for two-way audio in the Homebridge log."
+              },
+              "recording": {
+                "title": "Enable Homekit Secure Video Recording",
+                "type": "boolean",
+                "required": true,
+                "default": false,
+                "description": "Enables Homekit Secure Video and records video on motion and doorbell events. Requires a home hub and iCloud plan with at least 200GB of storage."
+              },
+              "prebuffer": {
+                "title": "Enables prebuffering for Homekit Secure Video recording",
+                "type": "boolean",
+                "required": true,
+                "default": false,
+                "description": "If prebuffering is enabled the video is recorded permanent to be able to capture even the seconds before motion was detected or the doorbell event."
               }
             }
           },
@@ -354,7 +368,9 @@
                   "expanded": false,
                   "items": [
                     "cameras[].videoConfig.returnAudioTarget",
-                    "cameras[].videoConfig.debugReturn"
+                    "cameras[].videoConfig.debugReturn",
+                    "cameras[].videoConfig.recording",
+                    "cameras[].videoConfig.prebuffer"
                   ]
                 },
                 "cameras[].videoConfig.vcodec",

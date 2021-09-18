@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {
   API,
   APIEvent,
@@ -17,7 +18,11 @@ import {
   StreamingRequest,
   StreamRequestCallback,
   StreamRequestTypes,
-  VideoInfo
+  VideoInfo,
+  AudioRecordingCodec,
+  AudioRecordingSamplerate,
+  AudioRecordingCodecType,
+  PlatformAccessory
 } from 'homebridge';
 import { spawn } from 'child_process';
 import { createSocket, Socket } from 'dgram';
@@ -26,6 +31,8 @@ import pickPort, { pickPortOptions } from 'pick-port';
 import { CameraConfig, VideoConfig } from './configTypes';
 import { FfmpegProcess } from './ffmpeg';
 import { Logger } from './logger';
+import { FRAGMENTS_LENGTH, PREBUFFER_LENGTH, RecordingDelegate } from './recordingDelegate';
+
 
 type SessionInfo = {
   address: string; // address of the HAP controller
@@ -68,26 +75,53 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly videoProcessor: string;
   readonly controller: CameraController;
   private snapshotPromise?: Promise<Buffer>;
+  private readonly api:API;
+  private recording:boolean;
+  private prebuffer:boolean;
 
   // keep track of sessions
   pendingSessions: Map<string, SessionInfo> = new Map();
   ongoingSessions: Map<string, ActiveSession> = new Map();
   timeouts: Map<string, NodeJS.Timeout> = new Map();
 
-  constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, videoProcessor?: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+  constructor(log: Logger, cameraConfig: CameraConfig, api: API, hap: HAP, accessory:PlatformAccessory, videoProcessor?: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
     this.log = log;
     this.hap = hap;
+    this.api = api;
 
     this.cameraName = cameraConfig.name!;
     this.unbridge = cameraConfig.unbridge ?? false;
     this.videoConfig = cameraConfig.videoConfig!;
     this.videoProcessor = videoProcessor || ffmpegPath || 'ffmpeg';
+    this.recording = cameraConfig.videoConfig.recording ?? false;
+    this.prebuffer = this.recording && cameraConfig.videoConfig.prebuffer;
+
+
+    this.log.debug(this.recording ? "Recording on": "recording off");
+    this.log.debug(this.prebuffer ? "Prebuffering on": "prebuffering off");
 
     api.on(APIEvent.SHUTDOWN, () => {
       for (const session in this.ongoingSessions) {
         this.stopStream(session);
       }
     });
+
+    const recordingCodecs: AudioRecordingCodec[] = [];
+
+    const samplerate: AudioRecordingSamplerate[] = [];
+    for (const sr of [AudioRecordingSamplerate.KHZ_32]) {
+        samplerate.push(sr);
+    }
+
+    for (const type of [AudioRecordingCodecType.AAC_LC]) {
+        const entry: AudioRecordingCodec = {
+            type,
+            bitrateMode: 0,
+            samplerate,
+            audioChannels: 1,
+        }
+        recordingCodecs.push(entry);
+    }
 
     const options: CameraControllerOptions = {
       cameraStreamCount: this.videoConfig.maxStreams || 2, // HomeKit requires at least 2 streams, but 1 is also just fine
@@ -124,9 +158,44 @@ export class StreamingDelegate implements CameraStreamingDelegate {
             }
           ]
         }
+      },
+      recording: /*!this.recording ? undefined : */ {
+        options: {
+          prebufferLength: PREBUFFER_LENGTH,
+          eventTriggerOptions: 0x01 | 0x02,
+          mediaContainerConfigurations: [{
+            type: 0,
+            fragmentLength: FRAGMENTS_LENGTH
+          }],
+          video: {
+            codec:{
+              profiles: [hap.H264Profile.BASELINE, hap.H264Profile.MAIN, hap.H264Profile.HIGH],
+              levels: [hap.H264Level.LEVEL3_1, hap.H264Level.LEVEL3_2, hap.H264Level.LEVEL4_0]
+            },
+            resolutions: [
+              [320, 180, 30],
+              [320, 240, 15], // Apple Watch requires this configuration
+              [320, 240, 30],
+              [480, 270, 30],
+              [480, 360, 30],
+              [640, 360, 30],
+              [640, 480, 30],
+              [1280, 720, 30],
+              [1280, 960, 30],
+              [1920, 1080, 30],
+              [1600, 1200, 30]
+            ]
+          },
+          audio: {
+            codecs:recordingCodecs,
+
+          },
+          motionService:true,
+          doorbellService:true
+        },
+        delegate: new RecordingDelegate(this.log, this.cameraName, this.videoConfig, this.api, this.hap, this.videoProcessor)
       }
     };
-
     this.controller = new hap.CameraController(options);
   }
 
@@ -166,6 +235,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     return resInfo;
   }
+
 
   fetchSnapshot(snapFilter?: string): Promise<Buffer> {
     this.snapshotPromise = new Promise((resolve, reject) => {
@@ -267,8 +337,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       const resized = await this.resizeSnapshot(snapshot, resolution.resizeFilter);
       callback(undefined, resized);
     } catch (err) {
-      this.log.error(err, this.cameraName);
-      callback(err);
+      this.log.error(err as string, this.cameraName);
+      callback(err as Error);
     }
   }
 
