@@ -140,7 +140,11 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     const delegate = new StreamingDelegate(this.log, cameraConfig, this.api, hap, accessory, this.config.videoProcessor);
 
     accessory.configureController(delegate.controller);
-
+   
+    if(cameraConfig.videoConfig.prebuffer) {
+      this.log.debug("Start prebuffering...", cameraConfig.name);
+      delegate.recordingDelegate.startPreBuffer();
+    }
 
     // add motion sensor after accessory.configureController. Secure Video creates it own linked motion service
     if (cameraConfig.motion) {
@@ -177,12 +181,12 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         accessory.addService(doorbellTrigger);
       }
     }
-    
+    /*
     for (let rtp of delegate.controller.streamManagements) {
-      this.log.info("StreamMngt: "+rtp.getService().getCharacteristic(hap.Characteristic.Active).value.toString());
+      this.log.debug("StreamMngt: "+rtp.getService().getCharacteristic(hap.Characteristic.Active).value.toString());
     }
-    this.log.info("recMngt:"+ accessory.getService(hap.Service.CameraRecordingManagement).getCharacteristic(hap.Characteristic.Active).value.toString());
-
+    this.log.debug("recMngt:"+ accessory.getService(hap.Service.CameraRecordingManagement).getCharacteristic(hap.Characteristic.Active).value.toString());
+*/
     if (this.config.mqtt) {
       if (cameraConfig.mqtt) {
         if (cameraConfig.mqtt.motionTopic) {

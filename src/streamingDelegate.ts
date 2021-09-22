@@ -78,6 +78,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly api:API;
   private recording:boolean;
   private prebuffer:boolean;
+  recordingDelegate:RecordingDelegate;
 
   // keep track of sessions
   pendingSessions: Map<string, SessionInfo> = new Map();
@@ -95,8 +96,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.videoProcessor = videoProcessor || ffmpegPath || 'ffmpeg';
     this.recording = cameraConfig.videoConfig.recording ?? false;
     this.prebuffer = this.recording && cameraConfig.videoConfig.prebuffer;
-
-
+    
     this.log.debug(this.recording ? "Recording on": "recording off");
     this.log.debug(this.prebuffer ? "Prebuffering on": "prebuffering off");
 
@@ -122,6 +122,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         }
         recordingCodecs.push(entry);
     }
+    if(this.recording)
+    this.recordingDelegate = new RecordingDelegate(this.log, this.cameraName, this.videoConfig, this.api, this.hap, this.videoProcessor);
 
     const options: CameraControllerOptions = {
       cameraStreamCount: this.videoConfig.maxStreams || 2, // HomeKit requires at least 2 streams, but 1 is also just fine
@@ -193,10 +195,11 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           motionService:true,
           doorbellService:true
         },
-        delegate: new RecordingDelegate(this.log, this.cameraName, this.videoConfig, this.api, this.hap, this.videoProcessor)
+        delegate: this.recordingDelegate
       }
     };
     this.controller = new hap.CameraController(options);
+    //if(this.prebuffer) this.recordingDelegate.startPreBuffer();
   }
 
   private determineResolution(request: SnapshotRequest | VideoInfo, isSnapshot: boolean): ResolutionInfo {

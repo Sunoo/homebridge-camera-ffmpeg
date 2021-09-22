@@ -1,5 +1,5 @@
 import { API, APIEvent, AudioRecordingCodecType, AudioRecordingSamplerateValues, CameraController, CameraRecordingConfiguration, CameraRecordingDelegate, H264Level, H264Profile, HAP } from 'homebridge';
-import { CameraConfig, VideoConfig } from './configTypes';
+import { VideoConfig } from './configTypes';
 import ffmpegPath from 'ffmpeg-for-homebridge';
 import { Logger } from './logger';
 import { ChildProcess, ChildProcessWithoutNullStreams, spawn, StdioNull, StdioPipe } from 'child_process';
@@ -7,6 +7,7 @@ import fs from 'fs';
 import { AddressInfo, Socket, Server, createServer } from 'net';
 import { once } from 'events';
 import { Readable } from 'stream';
+import { Mp4Session, PreBuffer } from './prebuffer';
 
 export interface MP4Atom {
     header: Buffer;
@@ -24,6 +25,71 @@ export interface FFMpegFragmentedMP4Session {
 export const PREBUFFER_LENGTH = 4000;
 export const FRAGMENTS_LENGTH = 4000;
 
+export async function listenServer(server: Server) {
+    while (true) {
+        const port = 10000 + Math.round(Math.random() * 30000);
+        server.listen(port);
+        try {
+            await once(server, 'listening');
+            return (server.address() as AddressInfo).port;
+        }
+        catch (e) {
+        }
+    }
+}
+
+export async function readLength(readable: Readable, length: number): Promise<Buffer> {
+    if (!length) {
+        return Buffer.alloc(0);
+    }
+
+    {
+        const ret = readable.read(length);
+        if (ret) {
+            return ret;
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        const r = () => {
+            const ret = readable.read(length);
+            if (ret) {
+                cleanup();
+                resolve(ret);
+            }
+        };
+
+        const e = () => {
+            cleanup();
+            reject(new Error(`stream ended during read for minimum ${length} bytes`))
+        };
+
+        const cleanup = () => {
+            readable.removeListener('readable', r);
+            readable.removeListener('end', e);
+        }
+
+        readable.on('readable', r);
+        readable.on('end', e);
+    });
+}
+
+export async function* parseFragmentedMP4(readable: Readable): AsyncGenerator<MP4Atom> {
+    while (true) {
+        const header = await readLength(readable, 8);
+        const length = header.readInt32BE(0) - 8;
+        const type = header.slice(4).toString();
+        const data = await readLength(readable, length);
+
+        yield {
+            header,
+            length,
+            type,
+            data,
+        };
+    }
+}
+
 export class RecordingDelegate implements CameraRecordingDelegate {
     private readonly hap: HAP;
     private readonly log: Logger;
@@ -31,10 +97,10 @@ export class RecordingDelegate implements CameraRecordingDelegate {
     private readonly videoConfig: VideoConfig;
     private process: ChildProcessWithoutNullStreams;
 
-   // private server: Server;
-
     private readonly videoProcessor: string;
     readonly controller: CameraController;
+    private preBufferSession: Mp4Session;
+    private preBuffer:PreBuffer;
 
     constructor(log: Logger, cameraName: string, videoConfig: VideoConfig, api: API, hap: HAP, videoProcessor?: string) { // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
 
@@ -45,8 +111,21 @@ export class RecordingDelegate implements CameraRecordingDelegate {
         this.videoProcessor = videoProcessor || ffmpegPath || 'ffmpeg';
 
         api.on(APIEvent.SHUTDOWN, () => {
-
+            if(this.preBufferSession) {
+                this.preBufferSession.process?.kill();
+                this.preBufferSession.server?.close();
+            }
         });
+    }
+
+    async startPreBuffer() {
+        if(this.videoConfig.prebuffer) {
+            // looks like the setupAcessory() is called multiple times during startup. Ensure that Prebuffer runs only once
+            if(!this.preBuffer) {
+                this.preBuffer = new PreBuffer(this.log, this.videoConfig.source, this.cameraName, this.videoProcessor);
+                if(!this.preBufferSession) this.preBufferSession = await this.preBuffer.startPreBuffer();
+            }
+        }
     }
 
     async * handleFragmentsRequests(configuration: CameraRecordingConfiguration): AsyncGenerator<Buffer, void, unknown> {
@@ -88,8 +167,14 @@ export class RecordingDelegate implements CameraRecordingDelegate {
 
         const ffmpegInput: string[] = [];
 
-        ffmpegInput.push(...this.videoConfig.source.split(" "));
-
+        if(this.videoConfig.prebuffer) {
+            let input:string[] = await this.preBuffer.getVideo(configuration.mediaContainerConfiguration.prebufferLength);
+            ffmpegInput.push(...input);
+        }
+        else {
+            ffmpegInput.push(...this.videoConfig.source.split(" "));
+        }
+        
         this.log.debug("Start recording...", this.cameraName);
         
         const session = await this.startFFMPegFragmetedMP4Session(this.videoProcessor, ffmpegInput, audioArgs, videoArgs);
@@ -110,17 +195,18 @@ export class RecordingDelegate implements CameraRecordingDelegate {
                     pending = [];
                     yield fragment;
                 }
-                this.log.info('mp4 box type '+ type+' and lenght: '+ length, this.cameraName);
+                this.log.debug('mp4 box type '+ type+' and lenght: '+ length, this.cameraName);
             }
         }
         catch (e) {
-            this.log.info("Recoding completed", this.cameraName);
-            this.log.debug(e, this.cameraName);
+            this.log.info("Recoding completed. "+e, this.cameraName);
+            /*
             const homedir = require('os').homedir();
             const path = require('path');
             const writeStream = fs.createWriteStream(homedir+path.sep+Date.now()+'_video.mp4');
             writeStream.write(filebuffer);
             writeStream.end();
+            */
         }
         finally {
             socket.destroy();
@@ -129,60 +215,12 @@ export class RecordingDelegate implements CameraRecordingDelegate {
         }
     }
 
-    async listenServer(server: Server) {
-        while (true) {
-            const port = 10000 + Math.round(Math.random() * 30000);
-            server.listen(port);
-            try {
-                await once(server, 'listening');
-                return (server.address() as AddressInfo).port;
-            }
-            catch (e) {
-            }
-        }
-    }
+    
 
     async startFFMPegFragmetedMP4Session(ffmpegPath: string, ffmpegInput: string[], audioOutputArgs: string[], videoOutputArgs: string[]): Promise<FFMpegFragmentedMP4Session> {
         return new Promise(async (resolve) => {
             const server = createServer(socket => {
                 server.close();
-
-                async function readLength(readable: Readable, length: number): Promise<Buffer> {
-                    if (!length) {
-                        return Buffer.alloc(0);
-                    }
-            
-                    {
-                        const ret = readable.read(length);
-                        if (ret) {
-                            return ret;
-                        }
-                    }
-            
-                    return new Promise((resolve, reject) => {
-                        const r = () => {
-                            const ret = readable.read(length);
-                            if (ret) {
-                                cleanup();
-                                resolve(ret);
-                            }
-                        };
-            
-                        const e = () => {
-                            cleanup();
-                            reject(new Error(`stream ended during read for minimum ${length} bytes`))
-                        };
-            
-                        const cleanup = () => {
-                            readable.removeListener('readable', r);
-                            readable.removeListener('end', e);
-                        }
-            
-                        readable.on('readable', r);
-                        readable.on('end', e);
-                    });
-                }
-
                 async function* generator() {
                     while (true) {
                         const header = await readLength(socket, 8);
@@ -204,7 +242,7 @@ export class RecordingDelegate implements CameraRecordingDelegate {
                     generator: generator(),
                 });
             });
-            const serverPort = await this.listenServer(server);
+            const serverPort = await listenServer(server);
             const args:string[] = [];
 
             args.push(...ffmpegInput);
@@ -222,8 +260,7 @@ export class RecordingDelegate implements CameraRecordingDelegate {
                 'tcp://127.0.0.1:'+serverPort
             );
 
-            this.log.info(ffmpegPath+" "+args.join(" "), this.cameraName);
-
+            this.log.debug(ffmpegPath+" "+args.join(" "), this.cameraName);
 
             let debug = false;
 
