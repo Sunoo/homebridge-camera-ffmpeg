@@ -267,8 +267,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       const resized = await this.resizeSnapshot(snapshot, resolution.resizeFilter);
       callback(undefined, resized);
     } catch (err) {
-      this.log.error(err, this.cameraName);
-      callback(err);
+      this.log.error(err as string, this.cameraName);
+      callback();
     }
   }
 
