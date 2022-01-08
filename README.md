@@ -58,7 +58,7 @@ Other users have been sharing configurations that work for them on our GitHub si
 - `model`: Set the model for display in the Home app. (Default: `Camera FFmpeg`)
 - `serialNumber`: Set the serial number for display in the Home app. (Default: `SerialNumber`)
 - `firmwareRevision`: Set the firmware revision for display in the Home app. (Default: current plugin version)
-- `unbridge`: Bridged cameras can cause slowdowns of the entire Homebridge instance. If unbridged, the camera will need to be added to HomeKit manually. (Default: `false`)
+- `unbridge`: Bridged cameras can cause slowdowns of the entire Homebridge instance. If unbridged, the camera will need to be added to HomeKit manually using the Apple Home Code of the main Homebdrige installation. (Default: `false`)
 
 #### Config Example with Manufacturer and Model Set
 
@@ -130,6 +130,24 @@ Other users have been sharing configurations that work for them on our GitHub si
     }
   ]
 }
+```
+
+### Unbridged Cameras 
+When using a camera in unbdirged mode, it won't show up as camera device in Homebridge's accessoires tab nor as device. You may only see their sensors and input devices (e.g. the microphone if `audio` is set to `true`, doorbell, motion and dummy switches if enabled. But these are optional.
+
+To **add the unbridged camera to Apple HomeKit**, one must open the HomeKit App on a corresponding iOS device configured to use HomeKit and connected to the Homebridge instance already up and running. Then select `Add Accessory`, click `More options...` and let the app search for nearby devices not yet bound to the HomeKit instance. It will discovery the unbridged camera then, given Homebridge is running in the same (sub)network and ask for a paring code. This is the main homebridge code which is shown on the dashboard of homebridge UI web interface underneath the QR code to be scanned when initially configuring the Homebridge bridge device in Apple HomeKit, typically on the left-hand side. You may also find the code in the logs, typically under ` /var/lib/homebridge/homebridge.log`, just after `Setup Payload: `:
+```raw
+...
+Setup Payload:
+X-HM://ABC123DEF4567
+Enter this code with your HomeKit app on your iOS device to pair with Homebridge:
+                       
+    ┌────────────┐     
+    │ 123-45-678 │     
+    └────────────┘     
+                       
+Starting to advertise 'camera #1' using ciao backend!
+...
 ```
 
 ### Camera MQTT Parameters
