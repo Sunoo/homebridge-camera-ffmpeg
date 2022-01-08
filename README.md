@@ -58,7 +58,7 @@ Other users have been sharing configurations that work for them on our GitHub si
 - `model`: Set the model for display in the Home app. (Default: `Camera FFmpeg`)
 - `serialNumber`: Set the serial number for display in the Home app. (Default: `SerialNumber`)
 - `firmwareRevision`: Set the firmware revision for display in the Home app. (Default: current plugin version)
-- `unbridge`: Bridged cameras can cause slowdowns of the entire Homebridge instance. If unbridged, the camera will need to be added to HomeKit manually. (Default: `false`)
+- `unbridge`: Bridged cameras can cause slowdowns of the entire Homebridge instance. If unbridged, the camera will need to be added to HomeKit manually. To do so Add Accesory > More options. Use the Homebridge's setup code. (Default: `false`)
 
 #### Config Example with Manufacturer and Model Set
 
