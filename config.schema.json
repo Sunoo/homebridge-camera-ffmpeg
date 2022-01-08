@@ -120,7 +120,7 @@
           "unbridge": {
             "title": "Unbridge Camera (Recommended)",
             "type": "boolean",
-            "description": "Bridged cameras can cause slowdowns of the entire Homebridge instance. If unbridged, the camera will need to be added to HomeKit manually."
+            "description": "Bridged cameras can cause slowdowns of the entire Homebridge instance. If unbridged, the camera will need to be added to HomeKit manually. To do so Add Accesory > More options. Use this Homebridge's setup code."
           },
           "videoConfig": {
             "title": "Video Configuration",
