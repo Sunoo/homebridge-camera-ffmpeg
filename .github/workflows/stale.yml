@@ -20,5 +20,8 @@ jobs:
         stale-issue-label: 'stale'
         days-before-stale: 28
         days-before-close: 7
+        days-before-pr-stale: -1
+        days-before-pr-close: -1
         exempt-issue-labels: 'long running,help wanted,tested config'
+        exempt-all-assignees: true
         remove-stale-when-updated: true
