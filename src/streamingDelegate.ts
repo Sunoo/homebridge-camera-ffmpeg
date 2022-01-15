@@ -26,6 +26,7 @@ import pickPort, { pickPortOptions } from 'pick-port';
 import { CameraConfig, VideoConfig } from './configTypes';
 import { FfmpegProcess } from './ffmpeg';
 import { Logger } from './logger';
+import { RtpDescription, RtpOptions, SipCall, SipOptions } from './sip-call'
 
 type SessionInfo = {
   address: string; // address of the HAP controller
@@ -42,6 +43,12 @@ type SessionInfo = {
   audioCryptoSuite: SRTPCryptoSuites;
   audioSRTP: Buffer;
   audioSSRC: number;
+
+  sipOptions: SipOptions;
+  rtpOptions: RtpOptions;
+
+  sipCall?: SipCall;
+  rtpDescription?: RtpDescription;
 };
 
 type ResolutionInfo = {
@@ -57,6 +64,7 @@ type ActiveSession = {
   returnProcess?: FfmpegProcess;
   timeout?: NodeJS.Timeout;
   socket?: Socket;
+  sipCall?: SipCall;
 };
 
 export class StreamingDelegate implements CameraStreamingDelegate {
@@ -68,7 +76,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly videoProcessor: string;
   readonly controller: CameraController;
   private snapshotPromise?: Promise<Buffer>;
-
+  
   // keep track of sessions
   pendingSessions: Map<string, SessionInfo> = new Map();
   ongoingSessions: Map<string, ActiveSession> = new Map();
@@ -114,7 +122,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           }
         },
         audio: {
-          twoWayAudio: !!this.videoConfig.returnAudioTarget,
+          //twoWayAudio: !!this.videoConfig.returnAudioTarget,
+          twoWayAudio: true,
           codecs: [
             {
               type: AudioStreamingCodecType.AAC_ELD,
@@ -285,6 +294,10 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const audioReturnPort = await pickPort(options);
     const audioSSRC = this.hap.CameraController.generateSynchronisationSource();
 
+    //const sipAudioPort = await pickPort(options);
+    const sipAudioPort = 12346;
+    const sipAudioSSRC = this.hap.CameraController.generateSynchronisationSource();
+
     const sessionInfo: SessionInfo = {
       address: request.targetAddress,
       ipv6: ipv6,
@@ -299,7 +312,21 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       audioReturnPort: audioReturnPort,
       audioCryptoSuite: request.audio.srtpCryptoSuite,
       audioSRTP: Buffer.concat([request.audio.srtp_key, request.audio.srtp_salt]),
-      audioSSRC: audioSSRC
+      audioSSRC: audioSSRC,
+
+      sipOptions: {
+        to: "sip:11@10.10.10.80",
+        from: "sip:user1@10.10.10.126",
+        localIp: "10.10.10.126",
+      },
+
+      rtpOptions: {
+        audio: {
+          port: sipAudioPort,
+          rtcpPort: sipAudioPort + 1,
+          ssrc: sipAudioSSRC
+        }
+      }
     };
 
     const response: PrepareStreamResponse = {
@@ -318,6 +345,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         srtp_salt: request.audio.srtp_salt
       }
     };
+
+    sessionInfo.sipCall = new SipCall(this.log, sessionInfo.sipOptions, sessionInfo.rtpOptions)
+    sessionInfo.rtpDescription = await sessionInfo.sipCall.invite()
 
     this.pendingSessions.set(request.sessionID, sessionInfo);
     callback(undefined, response);
@@ -358,6 +388,13 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         (this.videoConfig.audio ? (' (' + request.audio.codec + ')') : ''), this.cameraName);
 
       let ffmpegArgs = this.videoConfig.source!;
+
+      ffmpegArgs += // SIP audio via RTP
+      '-hide_banner' +
+      ' -protocol_whitelist pipe,udp,rtp,file,crypto' +
+      ' -f sdp' +
+      ' -c:a pcm_mulaw' +
+      ' -i pipe:';
 
       ffmpegArgs += // Video
         (this.videoConfig.mapvideo ? ' -map ' + this.videoConfig.mapvideo : ' -an -sn -dn') +
@@ -429,8 +466,29 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       });
       activeSession.socket.bind(sessionInfo.videoReturnPort);
 
+      if (sessionInfo.rtpDescription)
+      {
+        this.videoConfig.returnAudioTarget = 
+          ' -acodec pcm_mulaw' +
+          ' -ac 1' +
+          ' -ar 8k' +
+          ' -f rtp' +
+          (sessionInfo.rtpDescription.audio.ssrc !== undefined ? ' -ssrc ' + sessionInfo.rtpDescription.audio.ssrc : '') +
+          ' -payload_type 0' +
+          ' rtp://' + sessionInfo.rtpDescription.address + ':' + sessionInfo.rtpDescription.audio.port + '?rtcpport=' + sessionInfo.rtpDescription.audio.rtcpPort;
+      }
+
+      const sdpAudio =
+      'v=0\r\n' +
+      'o=- 0 0 IN IP4 ' + sessionInfo.address + '\r\n' +
+      's=Talk\r\n' +
+      'c=IN IP4 ' + sessionInfo.address + '\r\n' +
+      't=0 0\r\n' +
+      'm=audio ' + sessionInfo.rtpOptions.audio.port + ' RTP/AVP 0\r\n' +
+      'a=rtpmap:0 PCMU/8000\r\n';
       activeSession.mainProcess = new FfmpegProcess(this.cameraName, request.sessionID, this.videoProcessor,
         ffmpegArgs, this.log, this.videoConfig.debug, this, callback);
+      activeSession.mainProcess.stdin.end(sdpAudio);
 
       if (this.videoConfig.returnAudioTarget) {
         const ffmpegReturnArgs =
@@ -462,6 +520,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           this.videoProcessor, ffmpegReturnArgs, this.log, this.videoConfig.debugReturn, this);
         activeSession.returnProcess.stdin.end(sdpReturnAudio);
       }
+
+      activeSession.sipCall = sessionInfo.sipCall;
 
       this.ongoingSessions.set(request.sessionID, activeSession);
       this.pendingSessions.delete(request.sessionID);
@@ -509,6 +569,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       } catch (err) {
         this.log.error('Error occurred terminating two-way FFmpeg process: ' + err, this.cameraName);
       }
+      session.sipCall?.destroy();
     }
     this.ongoingSessions.delete(sessionId);
     this.log.info('Stopped video stream.', this.cameraName);
