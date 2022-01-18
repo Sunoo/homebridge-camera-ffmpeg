@@ -18,6 +18,12 @@ export interface RtpDescription {
   audio: RtpStreamOptions
 }
 
+export interface SipOptions {
+  to: string
+  from: string
+  localIp: string
+}
+
 interface UriOptions {
   name?: string
   uri: string
@@ -33,21 +39,21 @@ interface SipHeaders {
   via?: UriOptions[]
 }
 
-export interface SipRequest {
+interface SipRequest {
   uri: UriOptions | string
   method: string
   headers: SipHeaders
   content: string
 }
 
-export interface SipResponse {
+interface SipResponse {
   status: number
   reason: string
   headers: SipHeaders
   content: string
 }
 
-export interface SipClient {
+interface SipStack {
   send: (
     request: SipRequest | SipResponse,
     handler?: (response: SipResponse) => void
@@ -58,12 +64,6 @@ export interface SipClient {
     status: number,
     method: string
   ) => SipResponse
-}
-
-export interface SipOptions {
-  to: string
-  from: string
-  localIp: string
 }
 
 function getRandomId() {
@@ -113,34 +113,33 @@ export class SipCall {
   private fromParams = { tag: getRandomId() }
   private toParams: { tag?: string } = {}
   private callId = getRandomId()
-  private sipClient: SipClient
+  private sipStack: SipStack
   public onEndedByRemote?: () => void
   private destroyed = false
   private readonly log: Logger
-  public readonly sdp: string
 
   constructor(
     log: Logger,
     private sipOptions: SipOptions,
-    rtpOptions: RtpOptions,
   ) {
     this.log = log;
-    const { audio } = rtpOptions,
-          { from } = this.sipOptions,
-          host = this.sipOptions.localIp
+    const { from } = this.sipOptions,
+            host = this.sipOptions.localIp
 
-    this.sipClient = {
+    this.sipStack = {
       makeResponse: sip.makeResponse, 
       ...sip.create({
         host,
         hostname: host,
-        tcp: false,
         udp: true,
+        tcp: false,
+        tls: false,
+        ws: false
       },
       (request: SipRequest) => {
         if (request.method === 'BYE') {
           this.log.info('received BYE from remote end')
-          this.sipClient.send(this.sipClient.makeResponse(request, 200, 'Ok'))
+          this.sipStack.send(this.sipStack.makeResponse(request, 200, 'Ok'))
 
           if (this.destroyed) {
             if (this.onEndedByRemote) {
@@ -150,22 +149,6 @@ export class SipCall {
         } 
       }
     )}
-
-    this.sdp = [
-      'v=0',
-      `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${host}`,
-      's=Talk',
-      `c=IN IP4 ${host}`,
-      't=0 0',
-      `m=audio ${audio.port} RTP/AVP 0`,
-      //'a=rtpmap:0 PCMU/8000',
-      //`a=rtcp:${audio.rtcpPort}`,
-      //'a=ssrc:2315747900',
-      //'a=sendrecv'
-    ]
-      .filter((l) => l)
-      .join('\r\n')
-    this.sdp = this.sdp += '\r\n'
   }
 
   request({
@@ -187,7 +170,7 @@ export class SipCall {
 
     return new Promise<SipResponse>((resolve, reject) => {
       seq = seq || this.seq++
-      this.sipClient.send(
+      this.sipStack.send(
         {
           method,
           uri: this.sipOptions.to,
@@ -260,9 +243,28 @@ export class SipCall {
     })
   }
 
-  async invite() {
-    const { from } = this.sipOptions,
-      inviteResponse = await this.request({
+  async invite(rtpOptions: RtpOptions) {
+
+    const { audio } = rtpOptions,
+          { from } = this.sipOptions,
+            host = this.sipOptions.localIp;
+
+    const sdp = ([
+      'v=0',
+      `o=${from.split(':')[1].split('@')[0]} 3747 461 IN IP4 ${host}`,
+      's=Talk',
+      `c=IN IP4 ${host}`,
+      't=0 0',
+      `m=audio ${audio.port} RTP/AVP 0`,
+      //'a=rtpmap:0 PCMU/8000',
+      //`a=rtcp:${audio.rtcpPort}`,
+      //'a=ssrc:2315747900',
+      //'a=sendrecv'
+    ]
+      .filter((l) => l)
+      .join('\r\n')) + '\r\n';
+
+    const inviteResponse = await this.request({
         method: 'INVITE',
         headers: {
           supported: 'replaces, outbound',
@@ -271,7 +273,7 @@ export class SipCall {
           'content-type': 'application/sdp',
           contact: [{ uri: from }],
         },
-        content: this.sdp,
+        content: sdp,
       })
 
     return parseRtpDescription(this.log, inviteResponse)
@@ -285,6 +287,6 @@ export class SipCall {
 
   destroy() {
     this.destroyed = true
-    this.sipClient.destroy()
+    this.sipStack.destroy()
   }
 }
