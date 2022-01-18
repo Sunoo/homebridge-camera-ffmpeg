@@ -1,4 +1,3 @@
-//import { noop, Subject } from 'rxjs'
 import { Logger } from './logger';
 
 const sip = require('sip'),
@@ -115,10 +114,9 @@ export class SipCall {
   private toParams: { tag?: string } = {}
   private callId = getRandomId()
   private sipClient: SipClient
-  //public readonly onEndedByRemote = new Subject()
+  public onEndedByRemote?: () => void
   private destroyed = false
   private readonly log: Logger
-
   public readonly sdp: string
 
   constructor(
@@ -145,7 +143,9 @@ export class SipCall {
           this.sipClient.send(this.sipClient.makeResponse(request, 200, 'Ok'))
 
           if (this.destroyed) {
-            //this.onEndedByRemote.next(null)
+            if (this.onEndedByRemote) {
+              this.onEndedByRemote()
+            }
           }
         } 
       }
@@ -158,10 +158,10 @@ export class SipCall {
       `c=IN IP4 ${host}`,
       't=0 0',
       `m=audio ${audio.port} RTP/AVP 0`,
-      'a=rtpmap:0 PCMU/8000',
-      `a=rtcp:${audio.rtcpPort}`,
-      'a=ssrc:2315747900',
-      'a=sendrecv'
+      //'a=rtpmap:0 PCMU/8000',
+      //`a=rtcp:${audio.rtcpPort}`,
+      //'a=ssrc:2315747900',
+      //'a=sendrecv'
     ]
       .filter((l) => l)
       .join('\r\n')
@@ -230,8 +230,8 @@ export class SipCall {
           } else {
             if (method === 'INVITE') {
               // The ACK must be sent with every OK to keep the connection alive.
-              this.ackWithInfo(seq!).catch((e) => {
-                this.log.error('Failed to send SDP ACK and INFO')
+              this.acknowledge(seq!).catch((e) => {
+                this.log.error('Failed to send SDP ACK')
                 this.log.error(e)
               })
             }
@@ -242,12 +242,11 @@ export class SipCall {
     })
   }
 
-  private async ackWithInfo(seq: number) {
+  private async acknowledge(seq: number) {
     // Don't wait for ack, it won't ever come back.
     this.request({
       method: 'ACK',
       seq, // The ACK must have the original sequence number.
-    //}).catch(noop)
     }).catch()
   }
 

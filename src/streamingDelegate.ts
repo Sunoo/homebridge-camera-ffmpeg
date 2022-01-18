@@ -316,6 +316,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
       sipOptions: {
         to: "sip:11@10.10.10.80",
+        //to: "sip:11@10.10.10.22",
         from: "sip:user1@10.10.10.126",
         localIp: "10.10.10.126",
       },
@@ -347,7 +348,12 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     };
 
     sessionInfo.sipCall = new SipCall(this.log, sessionInfo.sipOptions, sessionInfo.rtpOptions)
-    sessionInfo.rtpDescription = await sessionInfo.sipCall.invite()
+
+    try {
+      sessionInfo.rtpDescription = await sessionInfo.sipCall.invite();
+    } catch(err) {
+      this.log.error('SIP INVITE failed: ' + err, this.cameraName);
+    }
 
     this.pendingSessions.set(request.sessionID, sessionInfo);
     callback(undefined, response);
@@ -475,7 +481,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           ' -f rtp' +
           (sessionInfo.rtpDescription.audio.ssrc !== undefined ? ' -ssrc ' + sessionInfo.rtpDescription.audio.ssrc : '') +
           ' -payload_type 0' +
-          ' rtp://' + sessionInfo.rtpDescription.address + ':' + sessionInfo.rtpDescription.audio.port + '?rtcpport=' + sessionInfo.rtpDescription.audio.rtcpPort;
+          ' rtp://' + sessionInfo.rtpDescription.address + ':' + sessionInfo.rtpDescription.audio.port + '?rtcpport=' + sessionInfo.rtpDescription.audio.rtcpPort; //+
+                                                                                                         //'&localrtpport=' + sessionInfo.rtpOptions.audio.port + // bind failed: Address already in use: two-way issue
+                                                                                                         //'&localrtcpport=' + sessionInfo.rtpOptions.audio.rtcpPort;
       }
 
       const sdpAudio =
@@ -569,7 +577,20 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       } catch (err) {
         this.log.error('Error occurred terminating two-way FFmpeg process: ' + err, this.cameraName);
       }
-      session.sipCall?.destroy();
+
+      try {
+        session.sipCall?.sendBye();
+      } catch(err) {
+        this.log.error('SIP BYE failed: ' + err, this.cameraName);
+      }
+      setTimeout(() => {
+          this.log.debug('Destroying SIP stack.', this.cameraName);
+          try {
+            session.sipCall?.destroy();
+          } catch(err) {
+            this.log.error('Destroying SIP stack failed: ' + err, this.cameraName);
+          }
+      }, 500);
     }
     this.ongoingSessions.delete(sessionId);
     this.log.info('Stopped video stream.', this.cameraName);
