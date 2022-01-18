@@ -141,10 +141,8 @@ export class SipCall {
           this.log.info('received BYE from remote end')
           this.sipStack.send(this.sipStack.makeResponse(request, 200, 'Ok'))
 
-          if (this.destroyed) {
-            if (this.onEndedByRemote) {
-              this.onEndedByRemote()
-            }
+          if (this.onEndedByRemote) {
+            this.onEndedByRemote()
           }
         } 
       }
@@ -244,6 +242,10 @@ export class SipCall {
   }
 
   async invite(rtpOptions: RtpOptions) {
+
+    // As we keep the SIP stack alive, we havw to reset call-related properties for each new call
+    this.callId = getRandomId();
+    this.toParams.tag = undefined;
 
     const { audio } = rtpOptions,
           { from } = this.sipOptions,
