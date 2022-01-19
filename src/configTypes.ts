@@ -28,6 +28,7 @@ export type CameraConfig = {
   mqtt?: MqttCameraConfig;
   unbridge?: boolean;
   videoConfig?: VideoConfig;
+  sipConfig?: SipConfig;
 };
 
 export type VideoConfig = {
@@ -58,4 +59,9 @@ export type MqttCameraConfig = {
   motionResetMessage?: string;
   doorbellTopic?: string;
   doorbellMessage?: string;
+};
+
+export type SipConfig = {
+  from: string;
+  to: string;
 };

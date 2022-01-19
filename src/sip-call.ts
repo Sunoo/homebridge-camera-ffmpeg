@@ -21,7 +21,7 @@ export interface RtpDescription {
 export interface SipOptions {
   to: string
   from: string
-  localIp: string
+  //localIp: string
 }
 
 interface UriOptions {
@@ -85,7 +85,7 @@ function getRtpDescription(
 
     return {
       port,
-      rtcpPort: (rtcpLine && Number(rtcpLine.match(/rtcp:(\S*)/)?.[1])) || port+1,
+      rtcpPort: (rtcpLine && Number(rtcpLine.match(/rtcp:(\S*)/)?.[1])) || port + 1, // if there is no explicit RTCP port, then use RTP port + 1
       ssrc:     (ssrcLine && Number(ssrcLine.match(/ssrc:(\S*)/)?.[1])) || undefined
     }
   } catch (e) {
@@ -123,9 +123,11 @@ export class SipCall {
     private sipOptions: SipOptions,
   ) {
     this.log = log;
-    const { from } = this.sipOptions,
-            host = this.sipOptions.localIp
+    const fromUri = sip.parseUri(this.sipOptions.from);
+    const host = fromUri.host;
 
+    const { from } = this.sipOptions
+            //host = this.sipOptions.localIp
     this.sipStack = {
       makeResponse: sip.makeResponse, 
       ...sip.create({
@@ -247,9 +249,11 @@ export class SipCall {
     this.callId = getRandomId();
     this.toParams.tag = undefined;
 
+    const fromUri = sip.parseUri(this.sipOptions.from);
+    const host = fromUri.host;    
     const { audio } = rtpOptions,
-          { from } = this.sipOptions,
-            host = this.sipOptions.localIp;
+          { from } = this.sipOptions
+            //host = this.sipOptions.localIp;
 
     const sdp = ([
       'v=0',

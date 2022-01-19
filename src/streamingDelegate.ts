@@ -23,10 +23,10 @@ import { spawn } from 'child_process';
 import { createSocket, Socket } from 'dgram';
 import ffmpegPath from 'ffmpeg-for-homebridge';
 import pickPort, { pickPortOptions } from 'pick-port';
-import { CameraConfig, VideoConfig } from './configTypes';
+import { CameraConfig, VideoConfig, SipConfig } from './configTypes';
 import { FfmpegProcess } from './ffmpeg';
 import { Logger } from './logger';
-import { RtpDescription, RtpOptions, SipCall, SipOptions } from './sip-call';
+import { RtpDescription, RtpOptions, SipCall } from './sip-call';
 import { RtpHelper } from './rtp';
 import { reservePorts } from '@homebridge/camera-utils';
 
@@ -46,11 +46,11 @@ type SessionInfo = {
   audioSRTP: Buffer;
   audioSSRC: number;
 
-  sipRtpOptions: RtpOptions;
+  sipRtpOptions?: RtpOptions;
   sipRemoteRtpDescription?: RtpDescription;
   rtpHelper?: RtpHelper;
-  rtpLocalAudioPort: number;
-  rtpLocalAudioPortRtcp: number;
+  rtpLocalAudioPort?: number;
+  rtpLocalAudioPortRtcp?: number;
 };
 
 type ResolutionInfo = {
@@ -76,8 +76,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
   private readonly unbridge: boolean;
   private readonly videoConfig: VideoConfig;
   private readonly videoProcessor: string;
-  private readonly sipOptions: SipOptions;
-  private readonly sipCall: SipCall;
+  private readonly sipConfig?: SipConfig;
+  private readonly sipCall?: SipCall;
   readonly controller: CameraController;
   private snapshotPromise?: Promise<Buffer>;
   
@@ -94,16 +94,20 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     this.unbridge = cameraConfig.unbridge ?? false;
     this.videoConfig = cameraConfig.videoConfig!;
     this.videoProcessor = videoProcessor || ffmpegPath || 'ffmpeg';
+    this.sipConfig = cameraConfig.sipConfig;
 
     api.on(APIEvent.SHUTDOWN, () => {
       for (const session in this.ongoingSessions) {
         this.stopStream(session);
       }
-      this.log.debug('Destroying SIP stack.', this.cameraName);
-      try {
-        this.sipCall.destroy();
-      } catch(err) {
-        this.log.error('Destroying SIP stack failed: ' + err, this.cameraName);
+
+      if (this.sipConfig) {
+        this.log.debug('Destroying SIP stack.', this.cameraName);
+        try {
+          this.sipCall?.destroy();
+        } catch(err) {
+          this.log.error('Destroying SIP stack failed: ' + err, this.cameraName);
+        }
       }
     });
 
@@ -132,8 +136,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           }
         },
         audio: {
-          //twoWayAudio: !!this.videoConfig.returnAudioTarget,
-          twoWayAudio: true,
+          twoWayAudio: !!this.videoConfig.returnAudioTarget || !!this.sipConfig,
           codecs: [
             {
               type: AudioStreamingCodecType.AAC_ELD,
@@ -146,14 +149,16 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       }
     };
 
-    this.sipOptions = {
-      //to: "sip:11@10.10.10.80",
-      to: "sip:11@10.10.10.22",
-      from: "sip:user1@10.10.10.126",
-      localIp: "10.10.10.126",
-    };
-  
-    this.sipCall = new SipCall(this.log, this.sipOptions);
+    if (this.sipConfig) {
+      this.sipCall = new SipCall(this.log, {
+          //to: "sip:11@10.10.10.80",
+          //to: "sip:11@10.10.10.22",
+          //from: "sip:user1@10.10.10.126",
+          from: this.sipConfig.from,
+          to: this.sipConfig.to
+          //localIp: "10.10.10.126",
+      });
+    }
 
     this.controller = new hap.CameraController(options);
   }
@@ -313,14 +318,6 @@ export class StreamingDelegate implements CameraStreamingDelegate {
     const audioReturnPort = await pickPort(options);
     const audioSSRC = this.hap.CameraController.generateSynchronisationSource();
 
-    const [
-      sipIncomingAudioPort, 
-      sipIncomingAudioRtcpPort
-      ] = await reservePorts({count: 2, type: 'udp'});
-    const sipAudioSSRC = this.hap.CameraController.generateSynchronisationSource(); // The current implementation just seems to generate a random number. No additional magic inside. So just use it.
-
-    const [sipLocalAudioPort, sipLocalAudioRtcpPort] = await reservePorts({count: 2, type: 'udp'});
-    
     let sessionInfo: SessionInfo = {
       address: request.targetAddress,
       ipv6: ipv6,
@@ -336,42 +333,52 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       audioCryptoSuite: request.audio.srtpCryptoSuite,
       audioSRTP: Buffer.concat([request.audio.srtp_key, request.audio.srtp_salt]),
       audioSSRC: audioSSRC,
-
-      sipRtpOptions: {
-        audio: {
-          port: sipIncomingAudioPort,
-          rtcpPort: sipIncomingAudioRtcpPort,
-          ssrc: sipAudioSSRC
-        }
-      },
-
-      rtpLocalAudioPort: sipLocalAudioPort,
-      rtpLocalAudioPortRtcp: sipLocalAudioRtcpPort
     };
+ 
+    if (this.sipConfig && this.sipCall) {
+      const [
+        sipIncomingAudioPort,
+        sipIncomingAudioRtcpPort
+        ] = await reservePorts({count: 2, type: 'udp'});
+      const sipAudioSSRC = this.hap.CameraController.generateSynchronisationSource(); // The current implementation just seems to generate a random number. No additional magic inside. So just use it.
+  
+      const [sipLocalAudioPort, sipLocalAudioRtcpPort] = await reservePorts({count: 2, type: 'udp'});
+  
+      sessionInfo = {...sessionInfo, ...{
+          sipRtpOptions: {
+            audio: {
+              port: sipIncomingAudioPort,
+              rtcpPort: sipIncomingAudioRtcpPort,
+              ssrc: sipAudioSSRC
+            }
+          },
+          rtpLocalAudioPort: sipLocalAudioPort,
+          rtpLocalAudioPortRtcp: sipLocalAudioRtcpPort
+        }
+      };
 
-    let sipRemoteRtpDescription: RtpDescription;
-    try {
-      sipRemoteRtpDescription = await this.sipCall.invite({
-        audio: {
-          port: sipIncomingAudioPort,
-          rtcpPort: sipIncomingAudioRtcpPort,
-          ssrc: sipAudioSSRC
-        }});
-        
-      sessionInfo.sipRemoteRtpDescription = sipRemoteRtpDescription;
-      sessionInfo.rtpHelper = new RtpHelper(this.log, this.cameraName, "ipv4",
-                                               sipIncomingAudioPort,
-                                               sipIncomingAudioRtcpPort,
-                                               sipLocalAudioPort,
-                                               sipLocalAudioRtcpPort,
-                                               sipRemoteRtpDescription.address,
-                                               sipRemoteRtpDescription.audio.port,
-                                               sipRemoteRtpDescription.audio.rtcpPort);
+      try {
+        const sipRemoteRtpDescription = await this.sipCall?.invite({
+          audio: {
+            port: sipIncomingAudioPort,
+            rtcpPort: sipIncomingAudioRtcpPort,
+            ssrc: sipAudioSSRC
+          }});
+          
+        sessionInfo.sipRemoteRtpDescription = sipRemoteRtpDescription;
+        sessionInfo.rtpHelper = new RtpHelper(this.log, this.cameraName, "ipv4",
+                                                sipIncomingAudioPort,
+                                                sipIncomingAudioRtcpPort,
+                                                sipLocalAudioPort,
+                                                sipLocalAudioRtcpPort,
+                                                sipRemoteRtpDescription.address,
+                                                sipRemoteRtpDescription.audio.port,
+                                                sipRemoteRtpDescription.audio.rtcpPort);
 
-    } catch(err) {
-      this.log.error('SIP INVITE failed: ' + err, this.cameraName);
+      } catch(err) {
+        this.log.error('SIP INVITE failed: ' + err, this.cameraName);
+      }
     }
-
     const response: PrepareStreamResponse = {
       video: {
         port: videoReturnPort,
@@ -429,12 +436,14 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
       let ffmpegArgs = this.videoConfig.source!;
 
-      ffmpegArgs += // SIP audio via RTP
-      '-hide_banner' +
-      ' -protocol_whitelist pipe,udp,rtp,file,crypto' +
-      ' -f sdp' +
-      ' -c:a pcm_mulaw' +
-      ' -i pipe:';
+      if (this.sipConfig) {
+        ffmpegArgs += // SIP audio via RTP
+        '-hide_banner' +
+        ' -protocol_whitelist pipe,udp,rtp,file,crypto' +
+        ' -f sdp' +
+        ' -c:a pcm_mulaw' +
+        ' -i pipe:';
+      }
 
       ffmpegArgs += // Video
         (this.videoConfig.mapvideo ? ' -map ' + this.videoConfig.mapvideo : ' -an -sn -dn') +
@@ -506,8 +515,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       });
       activeSession.socket.bind(sessionInfo.videoReturnPort);
 
-      if (sessionInfo.sipRemoteRtpDescription)
+      if (this.sipConfig && sessionInfo.sipRemoteRtpDescription && sessionInfo.sipRtpOptions)
       {
+        // If we use SIP we setup the returnAudioTarget ourselves
         this.videoConfig.returnAudioTarget = 
           ' -acodec pcm_mulaw' +
           ' -ac 1' +
@@ -518,17 +528,21 @@ export class StreamingDelegate implements CameraStreamingDelegate {
           ' rtp://127.0.0.1:' + sessionInfo.sipRtpOptions.audio.port + '?rtcpport=' + sessionInfo.sipRtpOptions.audio.rtcpPort;
       }
 
-      const sdpAudio =
-      'v=0\r\n' +
-      'o=- 0 0 IN IP4 127.0.0.1\r\n' +
-      's=Talk\r\n' +
-      'c=IN IP4 127.0.0.1\r\n' +
-      't=0 0\r\n' +
-      'm=audio ' + sessionInfo.rtpLocalAudioPort + ' RTP/AVP 0\r\n' +
-      'a=rtpmap:0 PCMU/8000\r\n';
       activeSession.mainProcess = new FfmpegProcess(this.cameraName, request.sessionID, this.videoProcessor,
         ffmpegArgs, this.log, this.videoConfig.debug, this, callback);
-      activeSession.mainProcess.stdin.end(sdpAudio);
+
+      if (this.sipConfig) {
+        const sdpAudio =
+        'v=0\r\n' +
+        'o=- 0 0 IN IP4 127.0.0.1\r\n' +
+        's=Talk\r\n' +
+        'c=IN IP4 127.0.0.1\r\n' +
+        't=0 0\r\n' +
+        'm=audio ' + sessionInfo.rtpLocalAudioPort + ' RTP/AVP 0\r\n' +
+        'a=rtpmap:0 PCMU/8000\r\n';
+
+        activeSession.mainProcess.stdin.end(sdpAudio);
+      }
 
       if (this.videoConfig.returnAudioTarget) {
         const ffmpegReturnArgs =
@@ -610,14 +624,15 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         this.log.error('Error occurred terminating two-way FFmpeg process: ' + err, this.cameraName);
       }
 
-      try {
-        this.log.debug('Sending SIP BYE to ' + this.cameraName);
-        this.sipCall.sendBye();
-      } catch(err) {
-        this.log.error('SIP BYE failed: ' + err, this.cameraName);
+      if (this.sipConfig) {
+        try {
+          this.log.debug('Sending SIP BYE to ' + this.cameraName);
+          this.sipCall?.sendBye();
+        } catch(err) {
+          this.log.error('SIP BYE failed: ' + err, this.cameraName);
+        }
+        session.rtpHelper?.close();
       }
-
-      session.rtpHelper?.close();
     }
     this.ongoingSessions.delete(sessionId);
     this.log.info('Stopped video stream.', this.cameraName);
