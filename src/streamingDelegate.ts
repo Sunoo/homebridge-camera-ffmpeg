@@ -332,7 +332,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
       audioReturnPort: audioReturnPort,
       audioCryptoSuite: request.audio.srtpCryptoSuite,
       audioSRTP: Buffer.concat([request.audio.srtp_key, request.audio.srtp_salt]),
-      audioSSRC: audioSSRC,
+      audioSSRC: audioSSRC
     };
  
     if (this.sipConfig && this.sipCall) {
@@ -340,7 +340,9 @@ export class StreamingDelegate implements CameraStreamingDelegate {
         sipIncomingAudioPort,
         sipIncomingAudioRtcpPort
         ] = await reservePorts({count: 2, type: 'udp'});
-      const sipAudioSSRC = this.hap.CameraController.generateSynchronisationSource(); // The current implementation just seems to generate a random number. No additional magic inside. So just use it.
+      // The current implementation of generateSynchronisationSource() just seems to generate a random number.
+      // No additional magic inside. So just use it for our SIP signaling too.
+      const sipAudioSSRC = this.hap.CameraController.generateSynchronisationSource(); 
   
       const [sipLocalAudioPort, sipLocalAudioRtcpPort] = await reservePorts({count: 2, type: 'udp'});
   
