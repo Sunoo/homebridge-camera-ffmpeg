@@ -151,12 +151,8 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
     if (this.sipConfig) {
       this.sipCall = new SipCall(this.log, {
-          //to: "sip:11@10.10.10.80",
-          //to: "sip:11@10.10.10.22",
-          //from: "sip:user1@10.10.10.126",
           from: this.sipConfig.from,
           to: this.sipConfig.to
-          //localIp: "10.10.10.126",
       });
     }
 
