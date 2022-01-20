@@ -21,7 +21,6 @@ export interface RtpDescription {
 export interface SipOptions {
   to: string
   from: string
-  //localIp: string
 }
 
 interface UriOptions {
@@ -125,14 +124,15 @@ export class SipCall {
     this.log = log;
     const fromUri = sip.parseUri(this.sipOptions.from);
     const host = fromUri.host;
+    const port = fromUri.port;
 
     const { from } = this.sipOptions
-            //host = this.sipOptions.localIp
     this.sipStack = {
       makeResponse: sip.makeResponse, 
       ...sip.create({
         host,
         hostname: host,
+        port: port,
         udp: true,
         tcp: false,
         tls: false,
@@ -253,7 +253,6 @@ export class SipCall {
     const host = fromUri.host;    
     const { audio } = rtpOptions,
           { from } = this.sipOptions
-            //host = this.sipOptions.localIp;
 
     const sdp = ([
       'v=0',
