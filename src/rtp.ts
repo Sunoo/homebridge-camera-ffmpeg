@@ -4,8 +4,6 @@ import { createSocket, RemoteInfo, Socket } from "dgram";
 export class RtpHelper {
   private readonly logPrefix: string;
   private readonly log: Logger;
-  private heartbeatTimer!: NodeJS.Timeout;
-  private heartbeatMsg!: Buffer;
   private inputPort: number;
   private inputRtcpPort: number;
   public readonly rtpSocket: Socket;
@@ -50,19 +48,7 @@ export class RtpHelper {
         this.rtpSocket.send(msg, rtpPort);
 
       } else {
-
-        // Save this RTCP message for heartbeat purposes for the RTP port. This works because RTCP packets will be ignored
-        // by ffmpeg on the RTP port, effectively providing a heartbeat to ensure FFmpeg doesn't timeout if there's an
-        // extended delay between data transmission.
-        //this.heartbeatMsg = Buffer.from(msg);
-
-        // Clear the old heartbeat timer.
-        //clearTimeout(this.heartbeatTimer);
-        //this.heartbeat(rtpPort);
-
-        // RTCP control packets should go to the RTCP port.
         this.rtpSocket.send(msg, rtcpPort);
-
       }
     });
 
@@ -78,21 +64,8 @@ export class RtpHelper {
     
         // Send RTP packets to the RTP port.
         if(this.isRtpMessage(msg)) {
-    
             this.rtcpSocket?.send(msg, rtpPort);
-    
         } else {
-    
-            // Save this RTCP message for heartbeat purposes for the RTP port. This works because RTCP packets will be ignored
-            // by ffmpeg on the RTP port, effectively providing a heartbeat to ensure FFmpeg doesn't timeout if there's an
-            // extended delay between data transmission.
-            //this.heartbeatMsg = Buffer.from(msg);
-    
-            // Clear the old heartbeat timer.
-            //clearTimeout(this.heartbeatTimer);
-            //this.heartbeat(rtpPort);
-    
-            // RTCP control packets should go to the RTCP port.
             this.rtcpSocket?.send(msg, rtcpPort);
     
         }
@@ -105,30 +78,10 @@ export class RtpHelper {
     this.rtcpSocket?.bind(this.inputRtcpPort);
   }
 
-  // Send a regular heartbeat to FFmpeg to ensure the pipe remains open and the process alive.
-  private heartbeat(port: number): void {
-
-    // Clear the old heartbeat timer.
-    clearTimeout(this.heartbeatTimer);
-
-    // Send a heartbeat to FFmpeg every few seconds to keep things open. FFmpeg has a five-second timeout
-    // in reading input, and we want to be comfortably within the margin for error to ensure the process
-    // continues to run.
-    this.heartbeatTimer = setTimeout(() => {
-
-      this.log.debug("Sending ffmpeg a heartbeat.", this.logPrefix);
-
-      this.rtpSocket.send(this.heartbeatMsg, port);
-      this.heartbeat(port);
-
-    }, 3.5 * 1000);
-  }
-
   // Close the socket and cleanup.
   public close(): void {
     this.log.debug("Closing RtpHelper instance on port: " + this.inputPort, this.logPrefix);
 
-    //clearTimeout(this.heartbeatTimer);
     this.rtpSocket.close();
     this.rtcpSocket?.close();
   }
