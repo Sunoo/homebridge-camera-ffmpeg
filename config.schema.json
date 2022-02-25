@@ -197,7 +197,7 @@
                 "typeahead": {
                   "source": [
                     "libx264",
-                    "h264_omx",
+                    "h264_v4l2m2m",
                     "h264_videotoolbox",
                     "copy"
                   ]
