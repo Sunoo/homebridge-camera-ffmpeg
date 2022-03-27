@@ -12,11 +12,7 @@ Keep in mind that many configs on this site were written for older versions of t
 Users have submitted {{ site.configs | size }} configurations:
 
 {% assign collection = site.configs | sort_natural:"title" %}
-<ul>
+
 {% for config in collection %}
-  <li>
-    <a href="{{ site.baseurl }}{{ config.url }}">{{ config.title }}</a>
-    {% if config.comment %}<p class="post-meta" style="display: inline">{{ config.comment }}</p>{% endif %}
-  </li>
-{% endfor %}
-</ul>
++ [{{ config.title }}]({{ site.baseurl }}{{ config.url }}){% if config.comment %}
+*{{ config.comment }}*{% endif %}{% endfor %}

@@ -1,5 +1,5 @@
 ---
-title: Wyze Cam v2/v3/pan/doorbell/outdoor
+title: Wyze Cam v2 / v3 / Pan / Doorbell / Outdoor
 comment: on docker-wyze-bridge
 author: mrlt8
 date: 2021-09-29
