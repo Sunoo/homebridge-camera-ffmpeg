@@ -1,5 +1,5 @@
 ---
-title: TP Link Tapo C200
+title: TP-Link Tapo C200
 comment: with motion detection
 author: mihailescu2m
 date: 2021-10-10
