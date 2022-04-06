@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Tested Configurations
+title: Configurations
 permalink: /configs/
 ---
 iSpyConnect [maintains a large database](https://www.ispyconnect.com/sources.aspx) of camera manufacturers, supported methods (MJPEG, FFMPEG, RTSP), and the necessary URLs for accessing video, audio, and stills. If you don’t know that information, iSpyConnect is a great place to start.
