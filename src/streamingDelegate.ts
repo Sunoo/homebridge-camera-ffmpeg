@@ -436,7 +436,7 @@ export class StreamingDelegate implements CameraStreamingDelegate {
 
       if (this.sipConfig) {
         ffmpegArgs += // SIP audio via RTP
-        '-hide_banner' +
+        ' -hide_banner' +
         ' -protocol_whitelist pipe,udp,rtp,file,crypto' +
         ' -f sdp' +
         ' -c:a pcm_mulaw' +
