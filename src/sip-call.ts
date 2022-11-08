@@ -178,7 +178,7 @@ export class SipCall {
             to: {
               name: '"SIP doorbell client"',
               uri: this.sipOptions.to,
-              params: this.toParams,
+              params: this.toParams.tag ? this.toParams : undefined,
             },
             from: {
               uri: this.sipOptions.from,
