@@ -69,8 +69,11 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
+    "@homebridge/camera-utils": "^2.0.4",
     "ffmpeg-for-homebridge": "^0.0.9",
     "mqtt": "4.2.8",
-    "pick-port": "^1.0.0"
+    "pick-port": "^1.0.0",
+    "sdp": "3.0.3",
+    "sip": "0.0.6"
   }
 }
