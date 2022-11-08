@@ -199,12 +199,12 @@ export class SipCall {
           if (response.status >= 300) {
             if (response.status !== 408 || method !== 'BYE') {
               this.log.error(
-                `sip ${method} request failed with status ` + response.status
+                `sip ${method} request failed with status ${response.status} and reason ${response.reason}`
               )
             }
             reject(
               new Error(
-                `sip ${method} request failed with status ` + response.status
+                `sip ${method} request failed with status ${response.status} and reason ${response.reason}`
               )
             )
           } else if (response.status < 200) {
