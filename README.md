@@ -135,11 +135,14 @@ Other users have been sharing configurations that work for them on our GitHub si
 ### Camera MQTT Parameters
 
 - `motionTopic`: The MQTT topic to watch for motion alerts.
-- `motionMessage`: The message to watch for to trigger motion alerts. Will use the name of the camera if blank.
+- `motionMessage`: The message to watch for to trigger motion alerts. Will use the name of the camera if both `motionMessage` and `motionMessageRegExp` are blank.
+- `motionMessageRegExp`: A RegExp string to match messages on the motion mqtt topic and trigger motion alerts. Ex: '".*"' will match any message.
 - `motionResetTopic`: The MQTT topic to watch for motion resets.
-- `motionResetMessage`: The message to watch for to trigger motion resets. Will use the name of the camera if blank.
+- `motionResetMessage`: The message to watch for to trigger motion resets. Will use the name of the camera if both `motionResetMessage` and `motionResetMessageRegExp` are blank.
+- `motionResetMessageRegExp`: A RegExp string to match messages on the motionReset mqtt topic and trigger motion alerts. Ex: '"/.*/"' will match any message.
 - `doorbellTopic`: The MQTT topic to watch for doorbell alerts.
-- `doorbellMessage`: The message to watch for to trigger doorbell alerts. Will use the name of the camera if blank.
+- `doorbellMessage`: The message to watch for to trigger doorbell alerts. Will use the name of the camera if both `doorbellMessage` and `doorbellMessageRegExp` are blank.
+- `doorbellMessageRegExp`: A RegExp string to match messages on the doorbell mqtt topic and trigger motion alerts. Ex: '".*"' will match any message.
 
 #### Camera MQTT Example
 
@@ -159,6 +162,30 @@ Other users have been sharing configurations that work for them on our GitHub si
         "motionResetMessage": "OFF",
         "doorbellTopic": "home/doobell",
         "doorbellMessage": "ON"
+      }
+    }
+  ]
+}
+```
+
+#### Camera MQTT Example with RegExp Message Matching
+
+```json
+{
+  "platform": "Camera-ffmpeg",
+  "cameras": [
+    {
+      "name": "Camera Name",
+      "videoConfig": {
+        "source": "-i rtsp://myfancy_rtsp_stream"
+      },
+      "mqtt": {
+        "motionTopic": "home/camera",
+        "motionMessageRegExp": "ON", // will match any message that contains "ON"
+        "motionResetTopic": "home/camera",
+        "motionResetMessageRegExp": "OFF", // will match any message that contains "OFF"
+        "doorbellTopic": "home/doobell",
+        "doorbellMessageRegExp": ".*" // will match all messages
       }
     }
   ]

@@ -11,12 +11,14 @@ import {
   PlatformAccessoryEvent,
   PlatformConfig
 } from 'homebridge';
-import http from 'http';
-import mqtt from 'mqtt';
-import { AutomationReturn } from './autoTypes';
 import { CameraConfig, FfmpegPlatformConfig } from './configTypes';
+
+import { AutomationReturn } from './autoTypes';
 import { Logger } from './logger';
 import { StreamingDelegate } from './streamingDelegate';
+import http from 'http';
+import mqtt from 'mqtt';
+
 const version = require('../package.json').version; // eslint-disable-line @typescript-eslint/no-var-requires
 
 let hap: HAP;
@@ -40,7 +42,10 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
   private readonly accessories: Array<PlatformAccessory> = [];
   private readonly motionTimers: Map<string, NodeJS.Timeout> = new Map();
   private readonly doorbellTimers: Map<string, NodeJS.Timeout> = new Map();
-  private readonly mqttActions: Map<string, Map<string, Array<MqttAction>>> = new Map();
+  private readonly mqttActions: Map<string, {
+    messageMap: Map<string, Array<MqttAction>> | undefined,
+    reMap: Map<RegExp, Array<MqttAction>> | undefined,
+  }> = new Map();
 
   constructor(log: Logging, config: PlatformConfig, api: API) {
     this.log = new Logger(log);
@@ -92,12 +97,22 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     api.on(APIEvent.DID_FINISH_LAUNCHING, this.didFinishLaunching.bind(this));
   }
 
-  addMqttAction(topic: string, message: string, details: MqttAction): void {
-    const messageMap = this.mqttActions.get(topic) || new Map();
-    const actionArray = messageMap.get(message) || [];
-    actionArray.push(details);
-    messageMap.set(message, actionArray);
-    this.mqttActions.set(topic, messageMap);
+  addMqttAction(topic: string, message: string | RegExp, details: MqttAction): void {
+    let { messageMap, reMap } = this.mqttActions.get(topic) || { messageMap: undefined, reMap: undefined };
+    let actionArray
+
+    if (typeof message === 'string') {
+      actionArray = messageMap?.get(message) || []
+      messageMap = messageMap || new Map()
+      actionArray.push(details);
+      messageMap.set(message, actionArray);
+    } else { // RegExp
+      actionArray = reMap?.get(message) || []
+      reMap = reMap || new Map()
+      actionArray.push(details);
+      reMap.set(message, actionArray)
+    }
+    this.mqttActions.set(topic, {messageMap, reMap});
   }
 
   setupAccessory(accessory: PlatformAccessory, cameraConfig: CameraConfig): void {
@@ -171,16 +186,32 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
     if (this.config.mqtt) {
       if (cameraConfig.mqtt) {
         if (cameraConfig.mqtt.motionTopic) {
-          this.addMqttAction(cameraConfig.mqtt.motionTopic, cameraConfig.mqtt.motionMessage || cameraConfig.name!,
-            {accessory: accessory, active: true, doorbell: false});
+          if (cameraConfig.mqtt.motionMessageRegExp) {
+            this.addMqttAction(cameraConfig.mqtt.motionTopic, new RegExp(cameraConfig.mqtt.motionMessageRegExp),
+              {accessory: accessory, active: true, doorbell: false});
+          } else {
+            this.addMqttAction(cameraConfig.mqtt.motionTopic, cameraConfig.mqtt.motionMessage || cameraConfig.name!,
+              {accessory: accessory, active: true, doorbell: false});
+          }
         }
         if (cameraConfig.mqtt.motionResetTopic) {
-          this.addMqttAction(cameraConfig.mqtt.motionResetTopic, cameraConfig.mqtt.motionResetMessage || cameraConfig.name!,
-            {accessory: accessory, active: false, doorbell: false});
+          if (cameraConfig.mqtt.motionResetMessageRegExp) {
+            this.addMqttAction(cameraConfig.mqtt.motionResetTopic, new RegExp(cameraConfig.mqtt.motionResetMessageRegExp),
+              {accessory: accessory, active: false, doorbell: false});
+          } else {
+            this.addMqttAction(cameraConfig.mqtt.motionResetTopic, cameraConfig.mqtt.motionResetMessage || cameraConfig.name!,
+              {accessory: accessory, active: false, doorbell: false});
+          }
+
         }
         if (cameraConfig.mqtt.doorbellTopic) {
-          this.addMqttAction(cameraConfig.mqtt.doorbellTopic, cameraConfig.mqtt.doorbellMessage || cameraConfig.name!,
-            {accessory: accessory, active: true, doorbell: true});
+          if (cameraConfig.mqtt.doorbellMessageRegExp) {
+            this.addMqttAction(cameraConfig.mqtt.doorbellTopic, new RegExp(cameraConfig.mqtt.doorbellMessageRegExp),
+              {accessory: accessory, active: true, doorbell: true});
+          } else {
+            this.addMqttAction(cameraConfig.mqtt.doorbellTopic, cameraConfig.mqtt.doorbellMessage || cameraConfig.name!,
+              {accessory: accessory, active: true, doorbell: true});
+          }
         }
       }
     }
@@ -367,7 +398,7 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
         }
       });
       client.on('message', (topic: string, message: Buffer) => {
-        const messageMap = this.mqttActions.get(topic);
+        const { messageMap, reMap } = this.mqttActions.get(topic) || { messageMap: undefined, reMap: undefined };
         if (messageMap) {
           const actionArray = messageMap.get(message.toString());
           if (actionArray) {
@@ -376,6 +407,19 @@ class FfmpegPlatform implements DynamicPlatformPlugin {
                 this.doorbellHandler(action.accessory, action.active);
               } else {
                 this.motionHandler(action.accessory, action.active);
+              }
+            }
+          }
+        }
+        if (reMap) {
+          for (const [re, actionArray] of reMap) {
+            if (re.test(message.toString())) {
+              for (const action of actionArray) {
+                if (action.doorbell) {
+                  this.doorbellHandler(action.accessory, action.active);
+                } else {
+                  this.motionHandler(action.accessory, action.active);
+                }
               }
             }
           }
