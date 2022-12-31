@@ -54,8 +54,11 @@ export type VideoConfig = {
 export type MqttCameraConfig = {
   motionTopic?: string;
   motionMessage?: string;
+  motionMessageRegExp?: string;
   motionResetTopic?: string;
   motionResetMessage?: string;
+  motionResetMessageRegExp?: string;
   doorbellTopic?: string;
   doorbellMessage?: string;
+  doorbellMessageRegExp?: string;
 };
